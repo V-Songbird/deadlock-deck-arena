@@ -139,24 +139,13 @@
   window.addEventListener('resize', updateTray);
 
   /* ------------------------------------------------------- hash targets */
-  /* A link to #prompt should show the prompt, not a collapsed summary. */
+  /* A link to #prompt should show the prompt, not a collapsed summary. The
+     browser has already scrolled to it, so this only opens it; scrolling again
+     on top of that jump races it and leaves the page half-painted. */
   function openHashTarget() {
     var id = location.hash.slice(1);
     var el = id && document.getElementById(id);
-    if (!el || el.tagName !== 'DETAILS' || el.open) return;
-    el.open = true;
-    // Deferred, because scrolling in the same frame as the browser's own jump
-    // to the fragment races it and leaves the page showing a stale frame. Once
-    // that jump has landed, only a target still out of easy reach needs moving.
-    requestAnimationFrame(function () {
-      var top = el.getBoundingClientRect().top;
-      // 'instant': the page has only just loaded, so there is no reading
-      // position to preserve, and an animated scroll here can land the
-      // first paint on a half-drawn frame.
-      if (top < 0 || top > window.innerHeight * 0.5) {
-        el.scrollIntoView({ behavior: 'instant', block: 'start' });
-      }
-    });
+    if (el && el.tagName === 'DETAILS') el.open = true;
   }
   window.addEventListener('hashchange', openHashTarget);
 
