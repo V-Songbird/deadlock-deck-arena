@@ -109,8 +109,12 @@ record.
 ## 5. The prompt
 
 Reproduced verbatim on the hub, inside the **Read the full prompt** panel on
-[index.html](../index.html). It is kept in the original Spanish because it is the experiment's
-evidence; translating it would change the input being tested.
+[index.html](../index.html), in whichever language the page is set to.
+
+The Spanish text is the evidence: it is what the five agents actually received, and it is what the
+Spanish side of the panel shows, unedited. The English side is a reading translation, labelled as
+one, with a link back to the original. The two are never presented as interchangeable, because the
+prompt is the experiment's input and a translated input would be a different experiment.
 
 ## 6. Hub design
 

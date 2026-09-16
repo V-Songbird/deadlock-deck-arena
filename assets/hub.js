@@ -22,6 +22,7 @@
       if (a.dataset.href === undefined) {
         var raw = a.getAttribute('href');
         if (!raw || /^[a-z]+:/i.test(raw) || raw.charAt(0) === '#' || raw.charAt(0) === '/') continue;
+        if (a.hasAttribute('data-keep-lang')) continue;   // the link's whole point is the other language
         a.dataset.href = raw;
       }
       var base = a.dataset.href.split('#');
@@ -137,5 +138,18 @@
   }
   window.addEventListener('resize', updateTray);
 
+  /* ------------------------------------------------------- hash targets */
+  /* A link to #prompt should show the prompt, not a collapsed summary. */
+  function openHashTarget() {
+    var id = location.hash.slice(1);
+    var el = id && document.getElementById(id);
+    if (el && el.tagName === 'DETAILS' && !el.open) {
+      el.open = true;
+      el.scrollIntoView();
+    }
+  }
+  window.addEventListener('hashchange', openHashTarget);
+
   setLang(currentLang());
+  openHashTarget();
 })();

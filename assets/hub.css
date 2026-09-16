@@ -26,7 +26,12 @@
 html {
   background: var(--void);
   scrollbar-color: var(--iron-2) var(--void);
+  scroll-behavior: smooth;
 }
+
+/* An in-page jump must clear the sticky HUD, or the target lands underneath it
+   and the page looks like it went to the wrong place. */
+#method, #prompt, #builds { scroll-margin-top: 64px; }
 
 body {
   margin: 0;
@@ -269,7 +274,13 @@ a:hover { color: var(--bone); border-bottom-color: var(--bone); }
   color: var(--bone-dim);
 }
 
-.prompt-note { margin: 8px 0 0; }
+/* A sentence, not a label: no uppercase, or it stops being readable. */
+.prompt-note {
+  max-width: 76ch;
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: var(--bone-dim);
+}
 
 /* --------------------------------------------------------------- panels */
 
@@ -679,6 +690,7 @@ body.player {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
   *, *::before, *::after {
     animation-duration: .001ms !important;
     transition-duration: .001ms !important;
