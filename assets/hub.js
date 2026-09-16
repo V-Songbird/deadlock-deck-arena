@@ -145,10 +145,13 @@
     var el = id && document.getElementById(id);
     if (!el || el.tagName !== 'DETAILS' || el.open) return;
     el.open = true;
-    // The browser has usually scrolled here already; scrolling again on top of
-    // its own jump races it and leaves the page half-painted.
-    var top = el.getBoundingClientRect().top;
-    if (top < 0 || top > window.innerHeight) el.scrollIntoView();
+    // Deferred, because scrolling in the same frame as the browser's own jump
+    // to the fragment races it and leaves the page showing a stale frame. Once
+    // that jump has landed, only a target still out of easy reach needs moving.
+    requestAnimationFrame(function () {
+      var top = el.getBoundingClientRect().top;
+      if (top < 0 || top > window.innerHeight * 0.5) el.scrollIntoView();
+    });
   }
   window.addEventListener('hashchange', openHashTarget);
 
