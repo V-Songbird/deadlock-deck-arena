@@ -477,6 +477,13 @@ details.prompt pre {
   gap: 10px;
   font-size: 11px;
 }
+/* WCAG 2.2 SC 2.5.8: these sit on their own row, not inline in a sentence,
+   so they need the full 24px target height. */
+.build-links a {
+  display: inline-block;
+  min-height: 24px;
+  line-height: 24px;
+}
 
 /* ---------------------------------------------------------- compare tray */
 
@@ -536,6 +543,9 @@ details.prompt pre {
   text-overflow: ellipsis;
 }
 .slot a {
+  display: block;
+  min-height: 24px;
+  line-height: 24px;
   font-size: 11px;
   color: var(--bone);
   border: 0;
