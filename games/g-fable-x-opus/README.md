@@ -9,9 +9,11 @@ Abre `index.html` en un navegador moderno (doble clic funciona; también sirve c
 - **Teclado**: flechas o WASD para moverte, `1`–`9` para jugar cartas, `E`/Enter para terminar el turno, Enter para los botones principales, Esc para salir de Planos/Tienda.
 - **Táctil**: desliza o toca el mapa para moverte, toca las cartas y los botones. Mejor en horizontal.
 - El sonido se activa con la primera pulsación o toque.
+- **Idioma**: botón `ES`/`EN` en el título y en las pantallas de victoria y muerte; también `?lang=en` / `?lang=es` en la URL. La elección se guarda en `localStorage` (`dd-lang`). Sin parámetro ni elección guardada, el juego sale en español.
 
 ## Estructura
 
+- `js/i18n.js` capa de texto español/inglés (diccionario, `?lang=`, `localStorage`).
 - `js/core.js` lienzo, entrada, interfaz inmediata, guardado.
 - `js/sprites.js` todo el pixel art definido a mano.
 - `js/data.js` planos anatómicos, cartas, enemigos, recursos, trampas, cosméticos.

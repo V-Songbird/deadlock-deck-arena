@@ -197,6 +197,8 @@ Each build got the shape that fitted it, not one shared module:
 | C | [js/i18n.js](../games/c-fable-x-deepseek-opus/js/i18n.js) | 303 entries | two `.btn.small` buttons in the footer row |
 | D | [src/lang.js](../games/d-opus-x-opus/src/lang.js) | 409 entries | two canvas cells on the title and the slab |
 | E | [src/i18n.js](../games/e-astra/src/i18n.js) | 519 entries | two header buttons, mirrored in the intro modal |
+| F | [src/i18n.js](../games/f-fable-x-fable/src/i18n.js) | 319 entries | a canvas button beside the sound toggle |
+| G | [js/i18n.js](../games/g-fable-x-opus/js/i18n.js) | 281 entries | a canvas button on the title, victory and death screens |
 
 Three decisions are worth recording because they are not obvious:
 
@@ -208,6 +210,11 @@ Three decisions are worth recording because they are not obvious:
   has no lowercase and a short punctuation set. English wordings were checked against each font's
   glyph table so nothing renders as `?`; build B's audit covered the 52 strings that can reach its
   renderer.
+- **Builds F and G needed a width audit instead.** Both hard-wrap to fixed boxes, and F silently
+  drops a card name that runs past two lines. Every English string was measured against its own box
+  before being chosen, which is why F says `Plans` rather than `Blueprints` and G says `Transfuse`
+  rather than `Transfusion`. G's harness reports zero overflows in English and nine in Spanish,
+  all of them pre-existing and left as shipped.
 - **Build E ships the game twice.** `Deadlock-Deck.html` turned out to be a byte-identical
   concatenation of `src/*.js`, so the single-file copy was regenerated from the modular one and
   each block compared back.
@@ -224,6 +231,8 @@ at all:
 | C | intro, button, stats and key hints in English | Spanish, unchanged |
 | D | title plate, intro panel and control list in English | Spanish, unchanged |
 | E | header, anatomy panel, tower panel and intro modal in English | Spanish, unchanged |
+| F | title, how-to panel, buttons and stats line in English | Spanish, unchanged |
+| G | title, buttons, sound prompt and stats line in English | Spanish, unchanged |
 
 No console errors in any build, in either language.
 

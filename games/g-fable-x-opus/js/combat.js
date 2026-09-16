@@ -2,7 +2,7 @@
 window.Combat = (function () {
   'use strict';
 
-  var PAL = Core.PAL;
+  var PAL = Core.PAL, T = I18N.t;
 
   // ------------------------------------------------------------------ layout
   var HAND_X = 8, HAND_Y = 186, CARD_W = 88, CARD_H = 78, CARD_STEP = 92, MAX_HAND = 8;
@@ -87,7 +87,7 @@ window.Combat = (function () {
       player.limbs[slot] = null;
       removeSlotCards(slot);
       st.discard.push(makeCard(Data.STUMP_CARD, slot, true));
-      log('¡Se rompe: ' + Data.SLOT_NAMES[slot] + ' (' + def.name + ')!');
+      log(T('¡Se rompe: {0} ({1})!', [Data.SLOT_NAMES[slot], def.name]));
       sfx('break');
       Core.shake(4, 0.4);
       return true;
@@ -112,14 +112,14 @@ window.Combat = (function () {
     if (result || player.hp > 0) return false;
     player.hp = 0;
     result = 'lose';
-    log('Tu cuerpo se desploma.');
+    log(T('Tu cuerpo se desploma.'));
     sfx('death');
     return true;
   }
 
   function enemyDies() {
     if (result || winDelay > 0) return;
-    log('¡' + st.enemy.def.name + ' cae!');
+    log(T('¡{0} cae!', st.enemy.def.name));
     sfx('death');
     Core.shake(3, 0.3);
     winDelay = 0.4;                                 // rule 3: win lands ~0.4 s later
@@ -182,7 +182,7 @@ window.Combat = (function () {
         break;
       case 'flee':
         result = 'fled';
-        log('¡Huyes del combate!');
+        log(T('¡Huyes del combate!'));
         sfx('flee');
         break;
       case 'selfDamage':
@@ -204,7 +204,7 @@ window.Combat = (function () {
 
     st.energy -= card.def.cost;
     st.hand.splice(index, 1);
-    log('Juegas ' + card.def.name + '.');
+    log(T('Juegas {0}.', card.def.name));
     sfx('card');
 
     var fx = card.def.effects || [];
@@ -241,32 +241,32 @@ window.Combat = (function () {
       }
       flashP = 0.1;
       if (dmg >= 8) Core.shake(2, 0.15);
-      if (total > 0) { sfx('hit'); log(e.def.name + ' te golpea ' + total + '.'); }
-      else { sfx('block'); log('Tu bloqueo aguanta el golpe.'); }
+      if (total > 0) { sfx('hit'); log(T('{0} te golpea {1}.', [e.def.name, total])); }
+      else { sfx('block'); log(T('Tu bloqueo aguanta el golpe.')); }
       checkLose();
     } else if (it.kind === 'block') {
       e.block += v;
       sfx('block');
-      log(e.def.name + ' se cubre ' + v + '.');
+      log(T('{0} se cubre {1}.', [e.def.name, v]));
     } else if (it.kind === 'heat') {
       var open = [];
       for (i = 0; i < Data.SLOTS.length; i++) if (player.limbs[Data.SLOTS[i]]) open.push(Data.SLOTS[i]);
       if (open.length) {
         var slot = open[Math.floor(rnd() * open.length)];
-        log('Calor +' + v + ' en ' + Data.SLOT_NAMES[slot]);
+        log(T('Calor +{0} en {1}', [v, Data.SLOT_NAMES[slot]]));
         sfx('overheat');
         addHeat(slot, v);
       } else {
-        log('No queda miembro que calentar.');
+        log(T('No queda miembro que calentar.'));
       }
     } else if (it.kind === 'poison') {
       player.poison += v;
       sfx('poison');
-      log(e.def.name + ' te envenena ' + v + '.');
+      log(T('{0} te envenena {1}.', [e.def.name, v]));
     } else if (it.kind === 'heal') {
       e.hp = Math.min(e.maxHp, e.hp + v);
       sfx('heal');
-      log(e.def.name + ' se cura ' + v + '.');
+      log(T('{0} se cura {1}.', [e.def.name, v]));
     }
   }
 
@@ -275,14 +275,14 @@ window.Combat = (function () {
     e.block = 0;
     if (e.poison > 0) {
       e.hp -= e.poison;
-      log('El veneno hace ' + e.poison + ' a ' + e.def.name + '.');
+      log(T('El veneno hace {0} a {1}.', [e.poison, e.def.name]));
       e.poison--;
       flashE = 0.1;
       if (e.hp <= 0) { enemyDies(); return; }
     }
     if (e.stunned) {
       e.stunned = false;
-      log(e.def.name + ' está aturdido.');
+      log(T('{0} está aturdido.', e.def.name));
     } else if (e.def.intents && e.def.intents.length) {
       var intent = e.def.intents[e.intentIndex % e.def.intents.length];
       e.intentIndex = (e.intentIndex + 1) % e.def.intents.length;
@@ -297,7 +297,7 @@ window.Combat = (function () {
     player.block = 0;
     if (player.poison > 0) {
       player.hp -= player.poison;
-      log('El veneno te hace ' + player.poison + '.');
+      log(T('El veneno te hace {0}.', player.poison));
       player.poison--;
       flashP = 0.1;
       if (checkLose()) return;
@@ -423,10 +423,10 @@ window.Combat = (function () {
 
   function enemyTags() {
     var e = st.enemy, t = [];
-    if (e.block > 0) t.push('Bloq ' + e.block);
-    if (e.poison > 0) t.push('Ven ' + e.poison);
-    if (e.weak > 0) t.push('Déb ' + e.weak);
-    if (e.stunned) t.push('Aturd.');
+    if (e.block > 0) t.push(T('Bloq {0}', e.block));
+    if (e.poison > 0) t.push(T('Ven {0}', e.poison));
+    if (e.weak > 0) t.push(T('Déb {0}', e.weak));
+    if (e.stunned) t.push(T('Aturd.'));
     return t.join(' ');
   }
 
@@ -448,8 +448,8 @@ window.Combat = (function () {
     var g = Core.gfx;
     g.bar(8, 16, 104, 6, player.hp / player.maxHp, PAL.hp, PAL.ink);
     g.text(Math.max(0, player.hp) + '/' + player.maxHp, 8, 26, { color: PAL.bone });
-    if (player.block > 0) g.text('Bloq ' + player.block, 128, 26, { color: PAL.brass, align: 'right' });
-    if (player.poison > 0) g.text('Veneno ' + player.poison, 8, 36, { color: PAL.poison });
+    if (player.block > 0) g.text(T('Bloq {0}', player.block), 128, 26, { color: PAL.brass, align: 'right' });
+    if (player.poison > 0) g.text(T('Veneno {0}', player.poison), 8, 36, { color: PAL.poison });
     var fams = {};
     for (var i = 0; i < Data.SLOTS.length; i++) fams[Data.SLOTS[i]] = familyOfSlot(Data.SLOTS[i]);
     if (window.Sprites) {
@@ -462,13 +462,13 @@ window.Combat = (function () {
 
   function drawHeatBars() {
     var g = Core.gfx;
-    g.text('Calor', HEAT_X, 28, { color: PAL.dim });
+    g.text(T('Calor'), HEAT_X, 28, { color: PAL.dim });
     for (var i = 0; i < Data.SLOTS.length; i++) {
       var slot = Data.SLOTS[i], y = HEAT_Y + i * HEAT_STEP;
       var inst = player.limbs[slot], def = limbDef(slot);
       g.text(Data.SLOT_NAMES[slot], HEAT_X, y, { color: PAL.dim });
       if (!inst || !def) {
-        g.text('muñón', HEAT_BAR_X, y, { color: PAL.blood });
+        g.text(T('muñón'), HEAT_BAR_X, y, { color: PAL.blood });
       } else {
         var ratio = inst.heat / def.maxHeat;
         g.bar(HEAT_BAR_X, y, HEAT_W, 6, ratio, heatColor(ratio), PAL.ink);
@@ -529,7 +529,7 @@ window.Combat = (function () {
     drawHeatBars();
     drawLog();
     drawEnergy();
-    Core.ui.button(BTN_X, BTN_Y, BTN_W, BTN_H, 'Fin turno [E]', { key: 'e', disabled: st.busy });
+    Core.ui.button(BTN_X, BTN_Y, BTN_W, BTN_H, T('Fin turno [E]'), { key: 'e', disabled: st.busy });
     drawHand(ctx);
   }
 
@@ -570,7 +570,7 @@ window.Combat = (function () {
     var deck = Core.shuffle(buildDeck(), rnd);
     for (var i = 0; i < deck.length; i++) st.drawPile.push(deck[i]);
     drawFromPile(Data.CONFIG.handSize);
-    log('Te enfrentas a ' + enemyDef.name + '.');
+    log(T('Te enfrentas a {0}.', enemyDef.name));
     if (window.Sound && Sound.music) Sound.music('combat');
     sfx('growl');
   }

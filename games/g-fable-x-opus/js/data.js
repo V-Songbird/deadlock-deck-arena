@@ -2,6 +2,8 @@
 window.Data = (function () {
   'use strict';
 
+  var T = I18N.t;   // names and texts are translated once, while the tables are built
+
   var CONFIG = {
     startTime: 360,
     floors: 3,
@@ -16,14 +18,15 @@ window.Data = (function () {
 
   // ---------------------------------------------------------------- families
 
+  // `desc` is never drawn on any screen (only `name` reaches the codex), so it stays as authored.
   var FAMILIES = [
-    { id: 'base', name: 'Cuerpo base', kind: 'base', desc: 'Carne de cadáver remendada: cartas genéricas, débiles y sin sorpresas.' },
-    { id: 'homunculo', name: 'Homúnculo', kind: 'monstruosidad', desc: 'Criatura menuda y frenética: cartas baratas, golpes múltiples y mucho robo.' },
-    { id: 'ghoul', name: 'Ghoul de laboratorio', kind: 'monstruosidad', desc: 'Bruto putrefacto: daño brutal y carne que rebrota, pero se recalienta enseguida.' },
-    { id: 'alquimista', name: 'Alquimista corrupto', kind: 'cientifico', desc: 'Científico podrido: veneno en cada frasco y vapores que enfrían tus miembros.' },
-    { id: 'automata', name: 'Autómata de latón', kind: 'monstruosidad', desc: 'Relojería de caldera: bloqueo pesadísimo y una sobrecarga que solo su chasis aguanta.' },
-    { id: 'cirujano', name: 'Cirujano hereje', kind: 'cientifico', desc: 'Carnicero de precisión: cortes exactos, transfusiones y energía o cartas de más.' },
-    { id: 'quimera', name: 'Quimera', kind: 'monstruosidad', desc: 'Guardiana de la salida: las cartas más fuertes de la torre, con aturdimiento y curación.' }
+    { id: 'base', name: T('Cuerpo base'), kind: 'base', desc: 'Carne de cadáver remendada: cartas genéricas, débiles y sin sorpresas.' },
+    { id: 'homunculo', name: T('Homúnculo'), kind: 'monstruosidad', desc: 'Criatura menuda y frenética: cartas baratas, golpes múltiples y mucho robo.' },
+    { id: 'ghoul', name: T('Ghoul de laboratorio'), kind: 'monstruosidad', desc: 'Bruto putrefacto: daño brutal y carne que rebrota, pero se recalienta enseguida.' },
+    { id: 'alquimista', name: T('Alquimista corrupto'), kind: 'cientifico', desc: 'Científico podrido: veneno en cada frasco y vapores que enfrían tus miembros.' },
+    { id: 'automata', name: T('Autómata de latón'), kind: 'monstruosidad', desc: 'Relojería de caldera: bloqueo pesadísimo y una sobrecarga que solo su chasis aguanta.' },
+    { id: 'cirujano', name: T('Cirujano hereje'), kind: 'cientifico', desc: 'Carnicero de precisión: cortes exactos, transfusiones y energía o cartas de más.' },
+    { id: 'quimera', name: T('Quimera'), kind: 'monstruosidad', desc: 'Guardiana de la salida: las cartas más fuertes de la torre, con aturdimiento y curación.' }
   ];
 
   // ------------------------------------------------------------------- slots
@@ -31,12 +34,12 @@ window.Data = (function () {
   var SLOTS = ['head', 'torso', 'armL', 'armR', 'legL', 'legR'];
 
   var SLOT_NAMES = {
-    head: 'Cabeza',
-    torso: 'Torso',
-    armL: 'Brazo izq.',
-    armR: 'Brazo der.',
-    legL: 'Pierna izq.',
-    legR: 'Pierna der.'
+    head: T('Cabeza'),
+    torso: T('Torso'),
+    armL: T('Brazo izq.'),
+    armR: T('Brazo der.'),
+    legL: T('Pierna izq.'),
+    legR: T('Pierna der.')
   };
 
   // 'armL'/'armR' -> 'arm', 'legL'/'legR' -> 'leg', head/torso unchanged.
@@ -59,11 +62,11 @@ window.Data = (function () {
   function card(id, name, cost, heat, type, text, effects, exhaust) {
     CARDS[id] = {
       id: id,
-      name: name,
+      name: T(name),
       cost: cost,
       heat: heat,
       type: type,
-      text: text,
+      text: T(text),
       exhaust: exhaust === true,
       effects: effects
     };
@@ -150,11 +153,11 @@ window.Data = (function () {
 
   var STUMP_CARD = {
     id: 'stump',
-    name: 'Muñonazo',
+    name: T('Muñonazo'),
     cost: 1,
     heat: 0,
     type: 'attack',
-    text: '3 de daño. Golpe torpe de muñón.',
+    text: T('3 de daño. Golpe torpe de muñón.'),
     exhaust: false,
     effects: [{ kind: 'damage', value: 3 }]
   };
@@ -163,12 +166,14 @@ window.Data = (function () {
 
   var LIMBS = {};
 
+  // `desc` is never drawn on any screen (codex, table and harvest all show `name`), so it
+  // stays as authored.
   function limb(id, family, slot, name, desc, maxHeat, cool, hp, cards) {
     LIMBS[id] = {
       id: id,
       family: family,
       slot: slot,
-      name: name,
+      name: T(name),
       desc: desc,
       maxHeat: maxHeat,
       cool: cool,
@@ -265,7 +270,7 @@ window.Data = (function () {
 
   var ENEMIES = {
     homunculo: {
-      id: 'homunculo', family: 'homunculo', name: 'Homúnculo', kind: 'monstruosidad', hp: 12, ichor: 5,
+      id: 'homunculo', family: 'homunculo', name: T('Homúnculo'), kind: 'monstruosidad', hp: 12, ichor: 5,
       intents: [
         { kind: 'attack', value: 3 },
         { kind: 'attack', value: 2, times: 2 },
@@ -275,7 +280,7 @@ window.Data = (function () {
       drops: ['homunculo_head', 'homunculo_torso', 'homunculo_arm', 'homunculo_leg']
     },
     alquimista: {
-      id: 'alquimista', family: 'alquimista', name: 'Alquimista corrupto', kind: 'cientifico', hp: 16, ichor: 7,
+      id: 'alquimista', family: 'alquimista', name: T('Alquimista corrupto'), kind: 'cientifico', hp: 16, ichor: 7,
       intents: [
         { kind: 'poison', value: 3 },
         { kind: 'attack', value: 4 },
@@ -285,7 +290,7 @@ window.Data = (function () {
       drops: ['alquimista_head', 'alquimista_torso', 'alquimista_arm', 'alquimista_leg']
     },
     ghoul: {
-      id: 'ghoul', family: 'ghoul', name: 'Ghoul de laboratorio', kind: 'monstruosidad', hp: 24, ichor: 10,
+      id: 'ghoul', family: 'ghoul', name: T('Ghoul de laboratorio'), kind: 'monstruosidad', hp: 24, ichor: 10,
       intents: [
         { kind: 'attack', value: 7 },
         { kind: 'attack', value: 4, times: 2 },
@@ -295,7 +300,7 @@ window.Data = (function () {
       drops: ['ghoul_head', 'ghoul_torso', 'ghoul_arm', 'ghoul_leg']
     },
     automata: {
-      id: 'automata', family: 'automata', name: 'Autómata de latón', kind: 'monstruosidad', hp: 26, ichor: 12,
+      id: 'automata', family: 'automata', name: T('Autómata de latón'), kind: 'monstruosidad', hp: 26, ichor: 12,
       intents: [
         { kind: 'block', value: 8 },
         { kind: 'attack', value: 7 },
@@ -306,7 +311,7 @@ window.Data = (function () {
       drops: ['automata_head', 'automata_torso', 'automata_arm', 'automata_leg']
     },
     cirujano: {
-      id: 'cirujano', family: 'cirujano', name: 'Cirujano hereje', kind: 'cientifico', hp: 20, ichor: 10,
+      id: 'cirujano', family: 'cirujano', name: T('Cirujano hereje'), kind: 'cientifico', hp: 20, ichor: 10,
       intents: [
         { kind: 'attack', value: 7 },
         { kind: 'heal', value: 6 },
@@ -316,7 +321,7 @@ window.Data = (function () {
       drops: ['cirujano_head', 'cirujano_torso', 'cirujano_arm', 'cirujano_leg']
     },
     quimera: {
-      id: 'quimera', family: 'quimera', name: 'Quimera', kind: 'monstruosidad', hp: 42, ichor: 15,
+      id: 'quimera', family: 'quimera', name: T('Quimera'), kind: 'monstruosidad', hp: 42, ichor: 15,
       intents: [
         { kind: 'attack', value: 9 },
         { kind: 'attack', value: 8 },
@@ -345,30 +350,30 @@ window.Data = (function () {
   // ---------------------------------------------- resources, traps, cosmetics
 
   var RESOURCES = {
-    coolant: { id: 'coolant', name: 'Vial de refrigerante', desc: 'Enfría 6 todos los miembros.', tile: 'coolant', effect: { kind: 'coolAll', value: 6 } },
-    suture: { id: 'suture', name: 'Suturas', desc: 'Recuperas 12 de vida.', tile: 'suture', effect: { kind: 'heal', value: 12 } },
-    clockwork: { id: 'clockwork', name: 'Engranaje de reloj', desc: 'Ganas 20 segundos de reloj.', tile: 'clockwork', effect: { kind: 'time', value: 20 } },
-    ichor: { id: 'ichor', name: 'Icor', desc: 'Ganas 8 de icor.', tile: 'ichor', effect: { kind: 'ichor', value: 8 } }
+    coolant: { id: 'coolant', name: T('Vial de refrigerante'), desc: T('Enfría 6 todos los miembros.'), tile: 'coolant', effect: { kind: 'coolAll', value: 6 } },
+    suture: { id: 'suture', name: T('Suturas'), desc: T('Recuperas 12 de vida.'), tile: 'suture', effect: { kind: 'heal', value: 12 } },
+    clockwork: { id: 'clockwork', name: T('Engranaje de reloj'), desc: T('Ganas 20 segundos de reloj.'), tile: 'clockwork', effect: { kind: 'time', value: 20 } },
+    ichor: { id: 'ichor', name: T('Icor'), desc: T('Ganas 8 de icor.'), tile: 'ichor', effect: { kind: 'ichor', value: 8 } }
   };
 
   var TRAPS = {
-    spikes: { id: 'spikes', name: 'Púas', desc: 'Pierdes 6 de vida; el bloqueo no protege.', tile: 'spikes', effect: { kind: 'damage', value: 6 } },
-    acid: { id: 'acid', name: 'Ácido alquímico', desc: 'Añade 5 de calor a un miembro al azar; puede romperlo.', tile: 'acid', effect: { kind: 'heat', value: 5 } }
+    spikes: { id: 'spikes', name: T('Púas'), desc: T('Pierdes 6 de vida; el bloqueo no protege.'), tile: 'spikes', effect: { kind: 'damage', value: 6 } },
+    acid: { id: 'acid', name: T('Ácido alquímico'), desc: T('Añade 5 de calor a un miembro al azar; puede romperlo.'), tile: 'acid', effect: { kind: 'heat', value: 5 } }
   };
 
   // Tint keys are the literal Core.PAL hex values from spec 5.1 (no load-order dependency).
   var COSMETICS = [
-    { id: 'skin_default', name: 'Piel cadavérica', desc: 'La carne gris verdosa de siempre, con sus costuras a la vista.', price: 0, tint: {} },
-    { id: 'skin_brass', name: 'Suturas de latón', desc: 'Las costuras brillan como alambre de latón pulido.', price: 20, tint: { '#d9c9a5': '#b08d57' } },
-    { id: 'skin_ichor', name: 'Suturas de icor', desc: 'Las costuras rezuman icor verde y luminoso.', price: 20, tint: { '#d9c9a5': '#6fbf3f' } },
-    { id: 'skin_crimson', name: 'Carne carmesí', desc: 'Carne recién sangrada y costuras de hueso pálido.', price: 35, tint: { '#9aa77a': '#7a1f2b', '#5f6b4a': '#4a1219', '#d9c9a5': '#e8dcc8' } }
+    { id: 'skin_default', name: T('Piel cadavérica'), desc: T('La carne gris verdosa de siempre, con sus costuras a la vista.'), price: 0, tint: {} },
+    { id: 'skin_brass', name: T('Suturas de latón'), desc: T('Las costuras brillan como alambre de latón pulido.'), price: 20, tint: { '#d9c9a5': '#b08d57' } },
+    { id: 'skin_ichor', name: T('Suturas de icor'), desc: T('Las costuras rezuman icor verde y luminoso.'), price: 20, tint: { '#d9c9a5': '#6fbf3f' } },
+    { id: 'skin_crimson', name: T('Carne carmesí'), desc: T('Carne recién sangrada y costuras de hueso pálido.'), price: 35, tint: { '#9aa77a': '#7a1f2b', '#5f6b4a': '#4a1219', '#d9c9a5': '#e8dcc8' } }
   ];
 
   var PACKS = [
     {
       id: 'pack_quimera',
-      name: 'Planos de la Quimera',
-      desc: 'Desbloquea los cuatro planos de la Quimera en la mesa.',
+      name: T('Planos de la Quimera'),
+      desc: T('Desbloquea los cuatro planos de la Quimera en la mesa.'),
       price: 60,
       blueprints: ['quimera_head', 'quimera_torso', 'quimera_arm', 'quimera_leg']
     }

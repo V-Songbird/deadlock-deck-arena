@@ -2,14 +2,16 @@
 window.Game = (function () {
   'use strict';
 
-  var G = Core.gfx, UI = Core.ui, PAL = Core.PAL;
+  var G = Core.gfx, UI = Core.ui, PAL = Core.PAL, T = I18N.t;
   var CFG = Data.CONFIG, TT = Tower.T;
   var W = Core.W, H = Core.H;
   var TILE = 16, MAPW = Tower.W * TILE, MAPH = Tower.H * TILE;
   var META_KEY = 'deadlock_meta';
 
   var PART_W = { head: 12, torso: 16, arm: 8, leg: 8 };   // part sprite widths, for centring
-  var HEAT_LABEL = { head: 'Cab', torso: 'Tor', armL: 'B.I', armR: 'B.D', legL: 'P.I', legR: 'P.D' };
+  var HEAT_LABEL = {
+    head: T('Cab'), torso: T('Tor'), armL: T('B.I'), armR: T('B.D'), legL: T('P.I'), legR: T('P.D')
+  };
   var FLOOR_TILES = ['floor', 'floor2', 'floor3'];
 
   var state = 'title';
@@ -76,7 +78,7 @@ window.Game = (function () {
     return out;
   }
 
-  function limbName(inst) { return (inst && Data.LIMBS[inst.id]) ? Data.LIMBS[inst.id].name : 'muñón'; }
+  function limbName(inst) { return (inst && Data.LIMBS[inst.id]) ? Data.LIMBS[inst.id].name : T('muñón'); }
 
   function cardSummary(limbId) {
     var L = Data.LIMBS[limbId], out = [];
@@ -106,6 +108,12 @@ window.Game = (function () {
     var hit = btn(x, y, 20, 20, '');
     G.icon(Sound.muted ? 'mute' : 'sound', x + 6, y + 6);
     if (hit) Sound.toggleMute();
+  }
+
+  // Shows the language it switches to; setting it stores the choice and reloads.
+  function langButton(x, y) {
+    var other = I18N.lang() === 'es' ? 'en' : 'es';
+    if (btn(x, y, 24, 20, other.toUpperCase())) I18N.set(other);
   }
 
   function setState(s) {
@@ -165,8 +173,8 @@ window.Game = (function () {
     var def = Data.LIMBS[inst.id];
     if (!def || inst.heat < def.maxHeat) return false;
     p.limbs[slot] = null;
-    log('¡Se rompe: ' + Data.SLOT_NAMES[slot] + ' (' + def.name + ')!');
-    Core.toast('¡Se rompe: ' + Data.SLOT_NAMES[slot] + '!');
+    log(T('¡Se rompe: {0} ({1})!', [Data.SLOT_NAMES[slot], def.name]));
+    Core.toast(T('¡Se rompe: {0}!', Data.SLOT_NAMES[slot]));
     Sound.sfx('break');
     Core.shake(4, 0.4);
     p.maxHp = Data.maxHp(p.limbs);
@@ -252,8 +260,8 @@ window.Game = (function () {
     var guard = guardianEnt(f);
     if (!guard) { nextFloor(); return; }
     run.pos = { x: run.prevPos.x, y: run.prevPos.y };   // barred: the player never enters the exit tile
-    log('¡La Quimera bloquea la salida!');
-    Core.toast('¡La Quimera bloquea la salida!');
+    log(T('¡La Quimera bloquea la salida!'));
+    Core.toast(T('¡La Quimera bloquea la salida!'));
     Sound.sfx('growl');
     fight(guard);
   }
@@ -270,9 +278,9 @@ window.Game = (function () {
     if (run.floorIndex < CFG.floors - 1) {
       run.floorIndex++;
       newFloor();
-      Core.toast('Subes al piso ' + (run.floorIndex + 1));
-      log('Subes al piso ' + (run.floorIndex + 1));
-      if (run.floorIndex === CFG.floors - 1) Core.toast('La Quimera guarda la salida', 3);
+      Core.toast(T('Subes al piso {0}', run.floorIndex + 1));
+      log(T('Subes al piso {0}', run.floorIndex + 1));
+      if (run.floorIndex === CFG.floors - 1) Core.toast(T('La Quimera guarda la salida'), 3);
       Sound.sfx('step');
     } else {
       victory();
@@ -317,14 +325,14 @@ window.Game = (function () {
       }
       if (run.enemyEnt) Tower.removeEntity(run.floor, run.enemyEnt);
       run.player.ichor += run.enemyDef.ichor;
-      log('Cae: ' + run.enemyDef.name + ' (+' + run.enemyDef.ichor + ' icor)');
+      log(T('Cae: {0} (+{1} icor)', [run.enemyDef.name, run.enemyDef.ichor]));
       run.harvest = { def: run.enemyDef, offers: makeOffers(run.enemyDef) };
       setState('harvest');
     } else if (r === 'lose') {
       death('killed');
     } else {
       run.pos = { x: run.prevPos.x, y: run.prevPos.y };
-      log('Huyes de ' + run.enemyDef.name + '.');
+      log(T('Huyes de {0}.', run.enemyDef.name));
       setState('explore');
     }
   }
@@ -347,7 +355,7 @@ window.Game = (function () {
     if (!L || L.family === 'base' || meta.blueprints.indexOf(id) >= 0) return;
     meta.blueprints.push(id);
     saveMeta();
-    Core.toast('¡Nuevo plano anatómico: ' + L.name + '!');
+    Core.toast(T('¡Nuevo plano anatómico: {0}!', L.name));
     Sound.sfx('unlock');
   }
 
@@ -357,7 +365,7 @@ window.Game = (function () {
     p.maxHp = Data.maxHp(p.limbs);
     if (p.hp > p.maxHp) p.hp = p.maxHp;
     Sound.sfx('graft');
-    log('Injertas: ' + Data.LIMBS[id].name + ' (' + Data.SLOT_NAMES[slot] + ')');
+    log(T('Injertas: {0} ({1})', [Data.LIMBS[id].name, Data.SLOT_NAMES[slot]]));
     discover(id);
   }
 
@@ -383,8 +391,8 @@ window.Game = (function () {
         run.mutateTimer = 0;
         Tower.mutate(run.floor, run.rnd, run.pos);
         Tower.reveal(run.floor, run.pos.x, run.pos.y, CFG.fogRadius);
-        Core.toast('El laboratorio se reconfigura…');
-        log('El laboratorio se reconfigura…');
+        Core.toast(T('El laboratorio se reconfigura…'));
+        log(T('El laboratorio se reconfigura…'));
         Sound.sfx('shift');
         Core.shake(3, 0.5);
       }
@@ -418,20 +426,21 @@ window.Game = (function () {
   function titleScreen() {
     G.clear(PAL.bg);
     Sprites.logo(240, 30);
-    G.text('El Reloj Anatómico', 240, 60, { align: 'center', color: PAL.dim });
+    G.text(T('El Reloj Anatómico'), 240, 60, { align: 'center', color: PAL.dim });
     Sprites.drawBody(famsOf(previewLimbs), 200, 72, {
       scale: 2, tint: tint(), bob: Math.round(Math.sin(Core.time * 3))
     });
-    if (UI.button(160, 150, 160, 22, 'Despertar [Enter]', { key: 'Enter' })) toTable();
-    if (UI.button(160, 178, 76, 20, 'Planos')) setState('codex');
-    if (UI.button(244, 178, 76, 20, 'Tienda')) setState('shop');
+    if (UI.button(160, 150, 160, 22, T('Despertar [Enter]'), { key: 'Enter' })) toTable();
+    if (UI.button(160, 178, 76, 20, T('Planos'))) setState('codex');
+    if (UI.button(244, 178, 76, 20, T('Tienda'))) setState('shop');
+    langButton(428, 246);
     muteButton(456, 246);
 
     if (!firstInput) {
-      G.text('Toca o pulsa una tecla para activar el sonido', 240, 216, { align: 'center', color: PAL.dim });
+      G.text(T('Toca o pulsa una tecla para activar el sonido'), 240, 216, { align: 'center', color: PAL.dim });
     }
     var best = meta.bestTime === null ? '—' : fmtTime(meta.bestTime);
-    G.text('Huidas: ' + meta.escapes + ' · Bucles: ' + meta.loops + ' · Mejor: ' + best,
+    G.text(T('Huidas: {0} · Bucles: {1} · Mejor: {2}', [meta.escapes, meta.loops, best]),
       240, 236, { align: 'center', color: PAL.bone });
     Sprites.fireOverlay(0.15, Core.time);
 
@@ -445,22 +454,22 @@ window.Game = (function () {
     if (!run) newRun();
     modal = !!sidePrompt;
     G.clear(PAL.bg);
-    G.text('Mesa de disección', 8, 6, { size: 16, color: PAL.bone });
-    G.wrap('Despiertas sobre una mesa de disección. Nuevo cuerpo. Mismo reloj.', 8, 30, 160, { color: PAL.dim });
+    G.text(T('Mesa de disección'), 8, 6, { size: 16, color: PAL.bone });
+    G.wrap(T('Despiertas sobre una mesa de disección. Nuevo cuerpo. Mismo reloj.'), 8, 30, 160, { color: PAL.dim });
 
     for (var t = 0; t < 4; t++) G.sprite(Sprites.tiles.table, 68 + t * 16, 166, {});
     Sprites.drawBody(famsOf(run.player.limbs), 60, 86, { scale: 2, tint: tint() });
-    G.text('PV ' + run.player.hp + '/' + run.player.maxHp, 8, 186, { color: PAL.hp });
+    G.text(T('PV {0}/{1}', [run.player.hp, run.player.maxHp]), 8, 186, { color: PAL.hp });
 
     // six slots with their card summary
     for (var i = 0; i < Data.SLOTS.length; i++) {
       var slot = Data.SLOTS[i], inst = run.player.limbs[slot], y = 26 + i * 20;
       G.text(Data.SLOT_NAMES[slot] + ': ' + clip(limbName(inst), 24), 176, y, { color: PAL.text });
-      G.text(clip(inst ? cardSummary(inst.id) : 'Muñonazo ×1', 37), 176, y + 9, { color: PAL.dim });
+      G.text(clip(inst ? cardSummary(inst.id) : T('Muñonazo ×1'), 37), 176, y + 9, { color: PAL.dim });
     }
 
     tableGraftPanel();
-    if (btn(24, 240, 148, 22, 'Levántate [Enter]', { key: 'Enter' })) startRun();
+    if (btn(24, 240, 148, 22, T('Levántate [Enter]'), { key: 'Enter' })) startRun();
     if (sidePrompt) sidePromptPanel();
   }
 
@@ -477,7 +486,7 @@ window.Game = (function () {
     var list = graftList();
     if (!list.length) return;
     G.panel(176, 148, 296, 94, {});
-    G.text('Injerto inicial', 180, 152, { color: PAL.bone });
+    G.text(T('Injerto inicial'), 180, 152, { color: PAL.bone });
     var pages = Math.ceil(list.length / 6);
     if (graftPage >= pages) graftPage = 0;
     if (pages > 1) {
@@ -486,7 +495,7 @@ window.Game = (function () {
       if (btn(444, 150, 24, 12, '>')) graftPage = (graftPage + 1) % pages;
     }
     if (run.initialGraftUsed) {
-      G.text('Ya has usado el injerto de este bucle.', 180, 172, { color: PAL.dim });
+      G.text(T('Ya has usado el injerto de este bucle.'), 180, 172, { color: PAL.dim });
       return;
     }
     for (var i = 0; i < 6; i++) {
@@ -494,7 +503,7 @@ window.Game = (function () {
       if (!L) break;
       var cx = 180 + (i % 2) * 146, cy = 168 + Math.floor(i / 2) * 24;
       G.text(clip(L.name, 17), cx, cy, { color: PAL.text });
-      if (btn(cx, cy + 10, 76, 14, 'Injertar')) {
+      if (btn(cx, cy + 10, 76, 14, T('Injertar'))) {
         if (L.slot === 'arm' || L.slot === 'leg') sidePrompt = { id: L.id };
         else { graft(L.id, L.slot); run.initialGraftUsed = true; }
       }
@@ -506,12 +515,12 @@ window.Game = (function () {
     var isArm = L.slot === 'arm';
     var slotL = isArm ? 'armL' : 'legL', slotR = isArm ? 'armR' : 'legR';
     G.panel(160, 96, 160, 62, {});
-    G.text(isArm ? '¿Qué brazo?' : '¿Qué pierna?', 240, 100, { align: 'center', color: PAL.bone });
+    G.text(isArm ? T('¿Qué brazo?') : T('¿Qué pierna?'), 240, 100, { align: 'center', color: PAL.bone });
     var taken = false;
-    if (UI.button(168, 112, 68, 18, 'Izq.')) { graft(L.id, slotL); taken = true; }
-    if (UI.button(244, 112, 68, 18, 'Der.')) { graft(L.id, slotR); taken = true; }
+    if (UI.button(168, 112, 68, 18, T('Izq.'))) { graft(L.id, slotL); taken = true; }
+    if (UI.button(244, 112, 68, 18, T('Der.'))) { graft(L.id, slotR); taken = true; }
     if (taken) { run.initialGraftUsed = true; sidePrompt = null; return; }
-    if (UI.button(168, 134, 144, 18, 'Cancelar')) sidePrompt = null;
+    if (UI.button(168, 134, 144, 18, T('Cancelar'))) sidePrompt = null;
   }
 
   // ----------------------------------------------------------------- explore
@@ -596,8 +605,8 @@ window.Game = (function () {
 
   function drawSidebar() {
     var p = run.player;
-    G.text('Piso ' + (run.floorIndex + 1) + '/' + CFG.floors, 388, 24, { color: PAL.bone });
-    G.text('PV ' + p.hp + '/' + p.maxHp, 388, 36, { color: PAL.hp });
+    G.text(T('Piso {0}/{1}', [run.floorIndex + 1, CFG.floors]), 388, 24, { color: PAL.bone });
+    G.text(T('PV {0}/{1}', [p.hp, p.maxHp]), 388, 36, { color: PAL.hp });
     G.bar(388, 46, 84, 6, p.hp / p.maxHp, PAL.hp, PAL.ink);
     Sprites.drawBody(famsOf(p.limbs), 412, 88, { scale: 1, tint: tint() });
     for (var i = 0; i < Data.SLOTS.length; i++) {
@@ -624,7 +633,7 @@ window.Game = (function () {
     var n = run.log.length;
     if (n > 1) G.text(clip(run.log[n - 2], 46), 4, 228, { color: PAL.dim });
     if (n > 0) G.text(clip(run.log[n - 1], 46), 4, 240, { color: PAL.text });
-    G.text('Flechas/WASD o desliza · Llega a la salida', 4, 254, { color: PAL.dim });
+    G.text(T('Flechas/WASD o desliza · Llega a la salida'), 4, 254, { color: PAL.dim });
     drawHud();
     exploreInput(dt);
   }
@@ -642,16 +651,16 @@ window.Game = (function () {
     var py = 64, pw = 228, cardsEnd = py + 118;
     G.panel(px, py, pw, 168, {});
     if (!offer || offer.gone) {
-      G.text(offer ? 'Descartado' : '—', px + 8, py + 76, { color: PAL.dim });
+      G.text(offer ? T('Descartado') : '—', px + 8, py + 76, { color: PAL.dim });
       return;
     }
     var L = Data.LIMBS[offer.id], type = L.slot;
     Sprites.drawPart(L.family, type, px + 8 + (40 - PART_W[type] * 2) / 2, py + 6, { scale: 2 });
     G.wrap(clip(L.name, 21), px + 52, py + 6, 168, { color: PAL.bone });
-    G.text(type === 'head' ? 'Cabeza' : type === 'torso' ? 'Torso' : type === 'arm' ? 'Brazo' : 'Pierna',
+    G.text(type === 'head' ? T('Cabeza') : type === 'torso' ? T('Torso') : type === 'arm' ? T('Brazo') : T('Pierna'),
       px + 52, py + 28, { color: PAL.dim });
-    if (L.hp > 0) G.text('+' + L.hp + ' PV', px + 52, py + 40, { color: PAL.sick });
-    G.text('Calor máx. ' + L.maxHeat + ' · Enfría ' + L.cool, px + 8, py + 52, { color: PAL.dim });
+    if (L.hp > 0) G.text(T('+{0} PV', L.hp), px + 52, py + 40, { color: PAL.sick });
+    G.text(T('Calor máx. {0} · Enfría {1}', [L.maxHeat, L.cool]), px + 8, py + 52, { color: PAL.dim });
     var cy = py + 64;
     for (var i = 0; i < L.cards.length; i++) {
       var c = L.cards[i], def = Data.CARDS[c.id];
@@ -667,25 +676,25 @@ window.Game = (function () {
     var isSide = type === 'arm' || type === 'leg';
     var slotL = type === 'arm' ? 'armL' : 'legL', slotR = type === 'arm' ? 'armR' : 'legR';
     if (isSide) {
-      G.text(clip('I:' + limbName(run.player.limbs[slotL]) + ' D:' + limbName(run.player.limbs[slotR]), 26),
+      G.text(clip(T('I:{0} D:{1}', [limbName(run.player.limbs[slotL]), limbName(run.player.limbs[slotR])]), 26),
         px + 8, py + 124, { color: PAL.dim });
       // short labels: "Brazo izq. (muñón)" does not fit a 104 px button
       var lab = function (slot, side) {
-        return run.player.limbs[slot] ? Data.SLOT_NAMES[slot] : side + ' (muñón)';
+        return run.player.limbs[slot] ? Data.SLOT_NAMES[slot] : T('{0} (muñón)', T(side));
       };
       if (btn(px + 8, py + 134, 104, 16, lab(slotL, 'Izq.'))) { graft(offer.id, slotL); offer.gone = true; }
       if (btn(px + 116, py + 134, 104, 16, lab(slotR, 'Der.'))) { graft(offer.id, slotR); offer.gone = true; }
     } else {
-      G.text(clip('Actual: ' + limbName(run.player.limbs[type]), 26), px + 8, py + 124, { color: PAL.dim });
-      if (btn(px + 8, py + 134, 212, 16, 'Injertar')) { graft(offer.id, type); offer.gone = true; }
+      G.text(clip(T('Actual: {0}', limbName(run.player.limbs[type])), 26), px + 8, py + 124, { color: PAL.dim });
+      if (btn(px + 8, py + 134, 212, 16, T('Injertar'))) { graft(offer.id, type); offer.gone = true; }
     }
-    if (btn(px + 8, py + 152, 212, 15, 'Descartar')) offer.gone = true;
+    if (btn(px + 8, py + 152, 212, 15, T('Descartar'))) offer.gone = true;
   }
 
   function harvestScreen() {
     var ctx = Core.ctx, h = run.harvest, def = h.def;
     G.clear(PAL.bg);
-    G.text('Cosecha: ' + def.name, 8, 8, { color: PAL.bone });
+    G.text(T('Cosecha: {0}', def.name), 8, 8, { color: PAL.bone });
     var fams = {};
     for (var i = 0; i < Data.SLOTS.length; i++) fams[Data.SLOTS[i]] = def.family;
     Sprites.drawBody(fams, 16, 20, { scale: 1 });
@@ -693,12 +702,12 @@ window.Game = (function () {
     ctx.globalAlpha = 0.45;                      // dead body: darkened
     G.rect(16, 20, 40, 48, PAL.ink);
     ctx.restore();
-    G.text('Arranca un miembro del cadáver.', 64, 32, { color: PAL.dim });
-    G.text('Injertar repara un muñón.', 64, 44, { color: PAL.dim });
+    G.text(T('Arranca un miembro del cadáver.'), 64, 32, { color: PAL.dim });
+    G.text(T('Injertar repara un muñón.'), 64, 44, { color: PAL.dim });
 
     offerPanel(h.offers[0], 8);
     offerPanel(h.offers[1], 244);
-    if (UI.button(168, 240, 144, 22, 'Continuar [Enter]', { key: 'Enter' })) setState('explore');
+    if (UI.button(168, 240, 144, 22, T('Continuar [Enter]'), { key: 'Enter' })) setState('explore');
     drawHud();
   }
 
@@ -707,31 +716,33 @@ window.Game = (function () {
   function victoryScreen() {
     var s = run.summary;
     G.clear(PAL.bg);
-    G.text('Has escapado', 240, 24, { size: 16, align: 'center', color: PAL.bone });
-    G.text('de la torre', 240, 44, { size: 16, align: 'center', color: PAL.bone });
+    G.text(T('Has escapado'), 240, 24, { size: 16, align: 'center', color: PAL.bone });
+    G.text(T('de la torre'), 240, 44, { size: 16, align: 'center', color: PAL.bone });
     Sprites.drawBody(famsOf(run.player.limbs), 220, 70, {
       scale: 2, tint: tint(), bob: Math.round(Math.sin(Core.time * 3))
     });
-    G.text('Tiempo restante: ' + fmtTime(s.time), 240, 176, { align: 'center', color: PAL.fire3 });
-    G.text('Bajas: ' + s.kills, 240, 190, { align: 'center', color: PAL.dim });
-    G.text('Icor: ' + s.ichor + ' (+' + s.bonus + ' de bonus)', 240, 204, { align: 'center', color: PAL.sick });
+    G.text(T('Tiempo restante: {0}', fmtTime(s.time)), 240, 176, { align: 'center', color: PAL.fire3 });
+    G.text(T('Bajas: {0}', s.kills), 240, 190, { align: 'center', color: PAL.dim });
+    G.text(T('Icor: {0} (+{1} de bonus)', [s.ichor, s.bonus]), 240, 204, { align: 'center', color: PAL.sick });
     Sprites.fireOverlay(0.2, Core.time);
-    if (UI.button(200, 232, 80, 22, 'Volver', { key: 'Enter' })) setState('title');
+    langButton(448, 232);
+    if (UI.button(200, 232, 80, 22, T('Volver'), { key: 'Enter' })) setState('title');
   }
 
   function deathScreen() {
     G.clear(PAL.bg);
-    G.text('Has muerto', 240, 20, { size: 16, align: 'center', color: PAL.blood });
+    G.text(T('Has muerto'), 240, 20, { size: 16, align: 'center', color: PAL.blood });
     var reason = run.deathReason === 'time'
-      ? 'El reloj marcó las seis. La torre se derrumba sobre ti.'
-      : 'Tu cuerpo cae. La torre sigue ardiendo.';
+      ? T('El reloj marcó las seis. La torre se derrumba sobre ti.')
+      : T('Tu cuerpo cae. La torre sigue ardiendo.');
     G.wrap(reason, 240, 56, 360, { color: PAL.text, lineHeight: 12, align: 'center' });
-    G.wrap('Tu espíritu se transporta a una nueva mesa de disección. La torre se regenera. Conservas tus planos.',
+    G.wrap(T('Tu espíritu se transporta a una nueva mesa de disección. La torre se regenera. Conservas tus planos.'),
       240, 104, 360, { color: PAL.dim, lineHeight: 12, align: 'center' });
-    G.text('Bajas: ' + run.kills + ' · Icor: ' + run.player.ichor + ' · Bucles: ' + meta.loops,
+    G.text(T('Bajas: {0} · Icor: {1} · Bucles: {2}', [run.kills, run.player.ichor, meta.loops]),
       240, 184, { align: 'center', color: PAL.dim });
     Sprites.fireOverlay(0.5, Core.time);
-    if (UI.button(160, 240, 160, 22, 'Nueva mesa [Enter]', { key: 'Enter' })) toTable();
+    langButton(448, 240);
+    if (UI.button(160, 240, 160, 22, T('Nueva mesa [Enter]'), { key: 'Enter' })) toTable();
   }
 
   // ------------------------------------------------------------------- codex
@@ -778,15 +789,15 @@ window.Game = (function () {
     G.clear(PAL.bg);
     var total = 0, found = 0;
     for (var id in Data.LIMBS) { total++; if (known(id)) found++; }
-    G.text('Planos anatómicos', 8, 6, { color: PAL.bone });
-    G.text('Planos: ' + found + '/' + total, 472, 6, { align: 'right', color: PAL.sick });
+    G.text(T('Planos anatómicos'), 8, 6, { color: PAL.bone });
+    G.text(T('Planos: {0}/{1}', [found, total]), 472, 6, { align: 'right', color: PAL.sick });
     var types = ['head', 'torso', 'arm', 'leg'];
     for (var i = 0; i < Data.FAMILIES.length; i++) {
       var fam = Data.FAMILIES[i], cx = 8 + i * 66;
       G.text(clip(fam.name, 7), cx, 26, { color: PAL.brass });
       for (var r = 0; r < types.length; r++) codexCell(cx, 42 + r * 44, fam.id, types[r]);
     }
-    if (UI.button(184, 240, 112, 22, 'Volver [Esc]', { key: 'Escape' })) setState('title');
+    if (UI.button(184, 240, 112, 22, T('Volver [Esc]'), { key: 'Escape' })) setState('title');
   }
 
   // -------------------------------------------------------------------- shop
@@ -802,16 +813,16 @@ window.Game = (function () {
     G.wrap(c.desc, 58, y + 17, 270, { color: PAL.dim, lineHeight: 9 });
     var owned = meta.cosmetics.indexOf(c.id) >= 0;
     if (meta.skin === c.id) {
-      UI.button(336, y + 10, 136, 18, 'Equipado', { disabled: true, active: true });
+      UI.button(336, y + 10, 136, 18, T('Equipado'), { disabled: true, active: true });
     } else if (owned) {
-      if (UI.button(336, y + 10, 136, 18, 'Equipar')) { meta.skin = c.id; saveMeta(); }
-    } else if (UI.button(336, y + 10, 136, 18, 'Comprar (' + c.price + ')', { disabled: meta.ichor < c.price })) {
+      if (UI.button(336, y + 10, 136, 18, T('Equipar'))) { meta.skin = c.id; saveMeta(); }
+    } else if (UI.button(336, y + 10, 136, 18, T('Comprar ({0})', c.price), { disabled: meta.ichor < c.price })) {
       meta.ichor -= c.price;
       meta.cosmetics.push(c.id);
       meta.skin = c.id;
       saveMeta();
       Sound.sfx('unlock');
-      Core.toast('Comprado: ' + c.name);
+      Core.toast(T('Comprado: {0}', c.name));
     }
   }
 
@@ -821,8 +832,8 @@ window.Game = (function () {
     G.text(p.name, 58, y + 5, { color: PAL.bone });
     G.wrap(p.desc, 58, y + 17, 270, { color: PAL.dim, lineHeight: 9 });
     if (meta.packs.indexOf(p.id) >= 0) {
-      UI.button(336, y + 10, 136, 18, 'Desbloqueado', { disabled: true, active: true });
-    } else if (UI.button(336, y + 10, 136, 18, 'Desbloquear (' + p.price + ')', { disabled: meta.ichor < p.price })) {
+      UI.button(336, y + 10, 136, 18, T('Desbloqueado'), { disabled: true, active: true });
+    } else if (UI.button(336, y + 10, 136, 18, T('Desbloquear ({0})', p.price), { disabled: meta.ichor < p.price })) {
       meta.ichor -= p.price;
       meta.packs.push(p.id);
       for (var i = 0; i < p.blueprints.length; i++) {
@@ -830,17 +841,17 @@ window.Game = (function () {
       }
       saveMeta();
       Sound.sfx('unlock');
-      Core.toast('Desbloqueado: ' + p.name);
+      Core.toast(T('Desbloqueado: {0}', p.name));
     }
   }
 
   function shopScreen() {
     G.clear(PAL.bg);
-    G.text('Tienda', 8, 4, { size: 16, color: PAL.bone });
-    if (UI.button(366, 4, 108, 18, 'Volver [Esc]', { key: 'Escape' })) setState('title');
-    G.text('Demo gratuita: sin pagos reales. El Icor se gana jugando.', 8, 26, { color: PAL.dim });
+    G.text(T('Tienda'), 8, 4, { size: 16, color: PAL.bone });
+    if (UI.button(366, 4, 108, 18, T('Volver [Esc]'), { key: 'Escape' })) setState('title');
+    G.text(T('Demo gratuita: sin pagos reales. El Icor se gana jugando.'), 8, 26, { color: PAL.dim });
     G.icon('ichor', 8, 38);
-    G.text('Icor: ' + meta.ichor, 20, 38, { color: PAL.sick });
+    G.text(T('Icor: {0}', meta.ichor), 20, 38, { color: PAL.sick });
     for (var i = 0; i < Data.COSMETICS.length; i++) shopRowCosmetic(Data.COSMETICS[i], 50 + i * 42);
     for (var j = 0; j < Data.PACKS.length; j++) shopRowPack(Data.PACKS[j], 50 + (Data.COSMETICS.length + j) * 42);
   }
