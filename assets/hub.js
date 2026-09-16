@@ -150,7 +150,12 @@
     // that jump has landed, only a target still out of easy reach needs moving.
     requestAnimationFrame(function () {
       var top = el.getBoundingClientRect().top;
-      if (top < 0 || top > window.innerHeight * 0.5) el.scrollIntoView();
+      // 'instant': the page has only just loaded, so there is no reading
+      // position to preserve, and an animated scroll here can land the
+      // first paint on a half-drawn frame.
+      if (top < 0 || top > window.innerHeight * 0.5) {
+        el.scrollIntoView({ behavior: 'instant', block: 'start' });
+      }
     });
   }
   window.addEventListener('hashchange', openHashTarget);
