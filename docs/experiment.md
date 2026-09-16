@@ -1,15 +1,15 @@
 # Deadlock Deck Arena — method, measurements and hub design
 
-What was investigated: how five orchestrator/worker agent pairings differ when they are given one
-identical game brief, and how to present the five results so a visitor can compare them.
+What was investigated: how seven orchestrator/worker agent pairings differ when they are given one
+identical game brief, and how to present the seven results so a visitor can compare them.
 
 Everything below is recorded from the repository itself. Commands are reproducible from the
 repository root.
 
 ## 1. The experiment
 
-Five runs of the same prompt, each producing a complete browser game. The only variable was the
-model pairing.
+Seven runs of the same prompt, each producing a complete browser game. The only variable was the
+model pairing. Builds A to E were run first; F and G were added afterwards.
 
 | Build | Orchestrator | Worker | Folder |
 |---|---|---|---|
@@ -18,8 +18,10 @@ model pairing.
 | C | Fable 5.1 | DeepSeek + Opus 5 | `games/c-fable-x-deepseek-opus/` |
 | D | Opus 5 | Opus 5 | `games/d-opus-x-opus/` |
 | E | Astra | Astra | `games/e-astra/` |
+| F | Fable 5.1 | Fable 5.1 | `games/f-fable-x-fable/` |
+| G | Fable 5.1 | Opus 5 | `games/g-fable-x-opus/` |
 
-Constant across all five runs:
+Constant across all seven runs:
 
 - the same prompt, word for word (reproduced in §5);
 - the orchestrator at maximum reasoning effort — `xhigh`, or DeepSeek's own ceiling;
@@ -29,7 +31,11 @@ Constant across all five runs:
 ### What this does not establish
 
 One run per pairing. No repeats, no controlled scoring, no held-out rubric. The measurements below
-describe five artefacts; they do not rank five models.
+describe seven artefacts; they do not rank seven models.
+
+One pair does isolate a single variable. F and G share the Fable 5.1 orchestrator and differ only
+in the worker, so the gap between those two is the closest this set comes to a controlled
+comparison — still one run each.
 
 ## 2. Measurements
 
@@ -53,12 +59,15 @@ Result, 16 September 2026:
 | C | 14 | 10 | 3 964 |
 | D | 17 | 13 | 5 206 |
 | E | 10 | 7 | 2 978 |
+| F | 17 | 14 | 3 524 |
+| G | 13 | 9 | 4 466 |
 
 Build E's single-file bundle `Deadlock-Deck.html` is excluded from the line count because it
 duplicates the rest of that folder.
 
 The spread is the most visible result: build A is about 3.7× the size of build E for the same
-brief.
+brief. F and G share an orchestrator and still diverge: F spreads the job over 14 code files and
+3 524 lines, G over 9 files and 4 466 lines.
 
 ## 3. Structural differences
 
@@ -71,6 +80,8 @@ Verified by reading the entry points.
 | C | [index.html:11](../games/c-fable-x-deepseek-opus/index.html), [js/sprites.js:28](../games/c-fable-x-deepseek-opus/js/sprites.js) | A 320×180 canvas for the scene, DOM for the rest; sprites are generated into offscreen canvases at boot. |
 | D | [index.html:38](../games/d-opus-x-opus/index.html), [server.mjs:1](../games/d-opus-x-opus/server.mjs) | The only build on ES modules (`<script type="module">`), and the only one shipping its own static server. |
 | E | [src/art.js:11](../games/e-astra/src/art.js) | No `<canvas>` in the page at all; sprites are built offscreen and the interface is a dark serif layout, not pixel art. |
+| F | [index.html:14](../games/f-fable-x-fable/index.html), [src/core.js:3](../games/f-fable-x-fable/src/core.js) | One 640×360 canvas, 13 classic scripts on a single `window.DD` namespace, styles inline in the page. |
+| G | [index.html](../games/g-fable-x-opus/index.html), [js/core.js:2](../games/g-fable-x-opus/js/core.js) | One 480×270 canvas, 7 scripts each exposing its own global: `Core`, `Sprites`, `Data`, `Sound`, `Tower`, `Combat`, `Game`. |
 
 Build E is the only one that did not follow the prompt's "Pixel Art" instruction at the page level.
 
@@ -111,7 +122,7 @@ record.
 Reproduced verbatim on the hub, inside the **Read the full prompt** panel on
 [index.html](../index.html), in whichever language the page is set to.
 
-The Spanish text is the evidence: it is what the five agents actually received, and it is what the
+The Spanish text is the evidence: it is what the seven agents actually received, and it is what the
 Spanish side of the panel shows, unedited. The English side is a reading translation, labelled as
 one, with a link back to the original. The two are never presented as interchangeable, because the
 prompt is the experiment's input and a translated input would be a different experiment.
@@ -125,7 +136,7 @@ Nothing is stored in a custom history stack, so browser back, forward and a copi
 correctly, and a specific comparison is shareable. An overlay on the hub was rejected because it
 would need manual history handling and could not be linked.
 
-**Static HTML first.** The five cards, their play links and the five-way compare link are plain
+**Static HTML first.** The seven cards, their play links and the all-builds compare link are plain
 markup. Scripting adds the compare tray, the language switch and the pixel headline; with
 scripting off the page still reads and every game is still one click away.
 
@@ -141,7 +152,7 @@ page would manufacture urgency with no task behind it. The real clock starts ins
 **The footer's six limb slots carry real links** — repository, prompt, conditions, method, as-built
 tag, licence — so the chrome that echoes the game's anatomy bar is also the site's navigation.
 
-**Unique accessible names.** Five cards each with a control named "Play" is a screen-reader
+**Unique accessible names.** Seven cards each with a control named "Play" is a screen-reader
 problem, so every card control carries a visually hidden build letter: "Play build A", "Compare
 build A", "Source of build A".
 
@@ -161,7 +172,7 @@ Checked against a local `python -m http.server` in a Chromium browser:
 | The language switch rewrites internal links so a copied URL keeps the language | verified — links read `play.html?g=a&lang=en` after switching |
 | Ticking two cards shows the tray with the right target | verified — `play.html?g=a,b&lang=es`, label "ABRIR 2 LADO A LADO" |
 | Each card's compare control has a unique accessible name | verified — label text reads "Comparar la construcción A" |
-| All five games load and run at once in `play.html?g=a,b,c,d,e` | verified at 1440×860, 3+2 grid |
+| All seven games load and run at once in `play.html?g=a,b,c,d,e,f,g` | verified, 4+3 grid |
 | No console errors on the hub or the player | verified |
 | Mobile layout at 375×812 | verified — cards stack, health bar hides, targets stay ≥44 px |
 
@@ -171,7 +182,7 @@ is.
 
 ## 7. Bilingual games
 
-The five games shipped Spanish-only. A language layer was added afterwards, one agent per build, so
+The seven games shipped Spanish-only. A language layer was added afterwards, one agent per build, so
 each game resolves its language from `?lang=`, then `localStorage['dd-lang']`, then falls back to
 Spanish, and exposes its own ES/EN control. The hub passes the visitor's choice into the game it
 launches. This is the only change made to the delivered code, and it sits in commits after the

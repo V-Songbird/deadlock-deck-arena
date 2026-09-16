@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#0d0b12">
-<meta name="description" content="Five browser games built from one identical prompt by five different AI orchestrator/worker pairings. Play any of them, or open several side by side.">
-<title>Deadlock Deck Arena — cinco agentes, un prompt</title>
+<meta name="description" content="Seven browser games built from one identical prompt by seven different AI orchestrator/worker pairings. Play any of them, or open several side by side.">
+<title>Deadlock Deck Arena — siete agentes, un prompt</title>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Deadlock Deck Arena">
-<meta property="og:description" content="Five browser games built from one identical prompt by five different AI orchestrator/worker pairings. Play any of them, or run several side by side.">
+<meta property="og:description" content="Seven browser games built from one identical prompt by seven different AI orchestrator/worker pairings. Play any of them, or run several side by side.">
 <meta property="og:url" content="https://v-songbird.github.io/deadlock-deck-arena/">
 <meta property="og:image" content="https://v-songbird.github.io/deadlock-deck-arena/assets/og.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -37,7 +37,7 @@
   <span class="sr-only" lang="es">Cada partida dura seis minutos.</span>
   <span class="sr-only" lang="en">Every run lasts six minutes.</span>
   <div class="hud-bar" aria-hidden="true">
-    <span class="hud-bar-text">1 PROMPT · 5 BUILDS</span>
+    <span class="hud-bar-text">1 PROMPT · 7 BUILDS</span>
   </div>
   <div class="lang" role="group" aria-label="Idioma / Language">
     <button type="button" data-lang="es" aria-pressed="true">ES</button>
@@ -54,20 +54,20 @@
       <span class="title-fallback">DEADLOCK DECK ARENA</span>
     </h1>
     <p class="hero-kicker">
-      <span lang="es">Un prompt · Cinco parejas de agentes · Cinco juegos</span>
-      <span lang="en">One prompt · Five agent pairings · Five games</span>
+      <span lang="es">Un prompt · Siete parejas de agentes · Siete juegos</span>
+      <span lang="en">One prompt · Seven agent pairings · Seven games</span>
     </p>
     <p class="hero-lede">
-      <span lang="es">El mismo concepto de juego se entregó cinco veces, palabra por palabra, a cinco
+      <span lang="es">El mismo concepto de juego se entregó siete veces, palabra por palabra, a siete
       combinaciones distintas de modelo orquestador y modelo trabajador. Nadie intervino durante
       la construcción. Esto es lo que devolvió cada una.</span>
-      <span lang="en">The same game concept was handed over five times, word for word, to five different
+      <span lang="en">The same game concept was handed over seven times, word for word, to seven different
       combinations of orchestrator model and worker model. Nobody stepped in while they built.
       This is what each one handed back.</span>
     </p>
     <p class="hero-actions">
-      <a class="btn btn-primary" href="play.html?g=a,b,c,d,e">
-        <span lang="es">Comparar las cinco</span><span lang="en">Compare all five</span>
+      <a class="btn btn-primary" href="play.html?g=a,b,c,d,e,f,g">
+        <span lang="es">Comparar las siete</span><span lang="en">Compare all seven</span>
       </a>
       <a class="btn" href="#method">
         <span lang="es">Cómo se hizo</span><span lang="en">How it was run</span>
@@ -82,8 +82,8 @@
     <ul class="conditions">
       <li>
         <strong><span lang="es">El mismo prompt</span><span lang="en">The same prompt</span></strong>
-        <span lang="es">Sin una coma de diferencia entre las cinco tiradas.</span>
-        <span lang="en">Not one comma differed between the five runs.</span>
+        <span lang="es">Sin una coma de diferencia entre las siete tiradas.</span>
+        <span lang="en">Not one comma differed between the seven runs.</span>
       </li>
       <li>
         <strong><span lang="es">Esfuerzo máximo</span><span lang="en">Maximum effort</span></strong>
@@ -102,8 +102,8 @@
       </li>
       <li>
         <strong><span lang="es">Sin dependencias</span><span lang="en">No dependencies</span></strong>
-        <span lang="es">Los cinco salieron como HTML, CSS y JavaScript sin compilar.</span>
-        <span lang="en">All five came out as plain HTML, CSS and JavaScript, no build step.</span>
+        <span lang="es">Los siete salieron como HTML, CSS y JavaScript sin compilar.</span>
+        <span lang="en">All seven came out as plain HTML, CSS and JavaScript, no build step.</span>
       </li>
     </ul>
 
@@ -112,10 +112,10 @@
         <span lang="es">Leer el prompt completo</span><span lang="en">Read the full prompt</span>
       </summary>
       <p class="prompt-note">
-        <span lang="es">Texto original en español, tal como lo recibieron los cinco agentes. Es la
+        <span lang="es">Texto original en español, tal como lo recibieron los siete agentes. Es la
         evidencia del experimento. <a href="?lang=en#prompt" data-keep-lang>Leer la traducción al
         inglés</a>.</span>
-        <span lang="en">English translation, for reading only. The five agents were given this brief in
+        <span lang="en">English translation, for reading only. The seven agents were given this brief in
         Spanish, and that original is the experiment's evidence:
         <a href="?lang=es#prompt" data-keep-lang>read the Spanish original</a>.</span>
       </p>
@@ -237,7 +237,7 @@ Take the role of a freshly reanimated abomination in an alchemical laboratory on
   </section>
 
   <h2 class="hero-kicker section-head" id="builds">
-    <span lang="es">Las cinco construcciones</span><span lang="en">The five builds</span>
+    <span lang="es">Las siete construcciones</span><span lang="en">The seven builds</span>
   </h2>
 
   <ul class="grid">
@@ -252,10 +252,10 @@ Take the role of a freshly reanimated abomination in an alchemical laboratory on
         <p class="build-role"><span lang="es">Orquestador → Trabajador</span><span lang="en">Orchestrator → Worker</span></p>
         <p class="build-pairing"><b>DeepSeek</b> <span class="arrow">→</span> <b>Opus 5</b></p>
         <p class="build-note">
-          <span lang="es">La más grande de las cinco: 39 archivos de código y casi 11 000 líneas. Un solo
+          <span lang="es">La más grande de todas: 39 archivos de código y casi 11 000 líneas. Un solo
           canvas de 640×360 lleva todo el juego, con tienda de cosméticos, códex de planos y un aviso de
           contenido antes de empezar.</span>
-          <span lang="en">The largest of the five: 39 code files and nearly 11,000 lines. A single 640×360
+          <span lang="en">The largest of them all: 39 code files and nearly 11,000 lines. A single 640×360
           canvas carries the whole game, plus a cosmetics shop, a blueprint codex and a content warning
           before the run starts.</span>
         </p>
@@ -414,6 +414,78 @@ Take the role of a freshly reanimated abomination in an alchemical laboratory on
         <p class="build-links">
           <a href="games/e-astra/index.html"><span lang="es">Abrir sola<span class="sr-only"> la construcción E</span></span><span lang="en">Open alone<span class="sr-only"> build E</span></span></a>
           <a href="https://github.com/V-Songbird/deadlock-deck-arena/tree/main/games/e-astra"><span lang="es">Código<span class="sr-only"> de la construcción E</span></span><span lang="en">Source<span class="sr-only"> of build E</span></span></a>
+        </p>
+      </div>
+    </li>
+
+    <li class="build">
+      <div class="build-shot">
+        <img src="assets/shots/f.png" width="800" height="450" loading="lazy" decoding="async"
+             alt="Construcción F: pantalla de título en pixel art con una ciudad en llamas al fondo y una abominación de pie.">
+        <span class="build-letter" aria-hidden="true">F</span>
+      </div>
+      <div class="build-body">
+        <p class="build-role"><span lang="es">Orquestador → Trabajador</span><span lang="en">Orchestrator → Worker</span></p>
+        <p class="build-pairing"><b>Fable 5.1</b> <span class="arrow">→</span> <b>Fable 5.1</b></p>
+        <p class="build-note">
+          <span lang="es">Fable a los dos lados. Trece scripts colgados de un único espacio de nombres
+          global dibujan un canvas de 640×360, y la pantalla de título ya trae el panel de cómo jugar,
+          el archivo de planos y la tienda de cosméticos.</span>
+          <span lang="en">Fable on both sides. Thirteen scripts hanging off a single global namespace
+          drive a 640×360 canvas, and the title screen already carries the how-to-play panel, the
+          blueprint archive and the cosmetics shop.</span>
+        </p>
+        <ul class="stats">
+          <li>17 <span lang="es">archivos</span><span lang="en">files</span></li>
+          <li>3 524 <span lang="es">líneas</span><span lang="en">lines</span></li>
+          <li>canvas 640×360</li>
+        </ul>
+        <div class="build-actions">
+          <a class="btn btn-primary" href="play.html?g=f"><span lang="es">Jugar<span class="sr-only"> la construcción F</span></span><span lang="en">Play<span class="sr-only"> build F</span></span></a>
+          <label class="pick">
+            <input type="checkbox" value="f">
+            <span lang="es">Comparar<span class="sr-only"> la construcción F</span></span><span lang="en">Compare<span class="sr-only"> build F</span></span>
+          </label>
+        </div>
+        <p class="build-links">
+          <a href="games/f-fable-x-fable/index.html"><span lang="es">Abrir sola<span class="sr-only"> la construcción F</span></span><span lang="en">Open alone<span class="sr-only"> build F</span></span></a>
+          <a href="https://github.com/V-Songbird/deadlock-deck-arena/tree/main/games/f-fable-x-fable"><span lang="es">Código<span class="sr-only"> de la construcción F</span></span><span lang="en">Source<span class="sr-only"> of build F</span></span></a>
+        </p>
+      </div>
+    </li>
+
+    <li class="build">
+      <div class="build-shot">
+        <img src="assets/shots/g.png" width="800" height="450" loading="lazy" decoding="async"
+             alt="Construcción G: título rojo sobre fondo negro, una abominación verde y una fila de llamas al pie.">
+        <span class="build-letter" aria-hidden="true">G</span>
+      </div>
+      <div class="build-body">
+        <p class="build-role"><span lang="es">Orquestador → Trabajador</span><span lang="en">Orchestrator → Worker</span></p>
+        <p class="build-pairing"><b>Fable 5.1</b> <span class="arrow">→</span> <b>Opus 5</b></p>
+        <p class="build-note">
+          <span lang="es">El mismo orquestador que la F, con otro trabajador. Siete archivos, un global
+          por archivo, y un canvas de 480×270 que lleva todo el juego. Comparadas una al lado de otra,
+          estas dos muestran cuánto cambia el trabajador.</span>
+          <span lang="en">The same orchestrator as F, with a different worker. Seven files, one global
+          each, and a 480×270 canvas carrying the whole game. Put side by side, these two show how much
+          the worker changes.</span>
+        </p>
+        <ul class="stats">
+          <li>13 <span lang="es">archivos</span><span lang="en">files</span></li>
+          <li>4 466 <span lang="es">líneas</span><span lang="en">lines</span></li>
+          <li>canvas 480×270</li>
+        </ul>
+        <div class="build-actions">
+          <a class="btn btn-primary" href="play.html?g=g"><span lang="es">Jugar<span class="sr-only"> la construcción G</span></span><span lang="en">Play<span class="sr-only"> build G</span></span></a>
+          <label class="pick">
+            <input type="checkbox" value="g">
+            <span lang="es">Comparar<span class="sr-only"> la construcción G</span></span><span lang="en">Compare<span class="sr-only"> build G</span></span>
+          </label>
+        </div>
+        <p class="build-links">
+          <a href="games/g-fable-x-opus/index.html"><span lang="es">Abrir sola<span class="sr-only"> la construcción G</span></span><span lang="en">Open alone<span class="sr-only"> build G</span></span></a>
+          <a href="https://github.com/V-Songbird/deadlock-deck-arena/tree/main/games/g-fable-x-opus"><span lang="es">Código<span class="sr-only"> de la construcción G</span></span><span lang="en">Source<span class="sr-only"> of build G</span></span></a>
         </p>
       </div>
     </li>
