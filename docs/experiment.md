@@ -164,10 +164,3 @@ Checked against a local `python -m http.server` in a Chromium browser:
 Not verified: behaviour with a real screen reader, and behaviour on iOS Safari. The games
 themselves are canvas-driven and are not keyboard- or screen-reader-accessible; the hub around them
 is.
-
-## 7. Bilingual games
-
-The five games shipped Spanish-only. A language layer was added afterwards so each game reads
-`?lang=`, falls back to stored preference and then to the browser language, and exposes its own
-ES/EN control. This is the only change made to the delivered code, and it sits in commits after the
-`as-built-2026-09` tag so the raw output stays recoverable.
