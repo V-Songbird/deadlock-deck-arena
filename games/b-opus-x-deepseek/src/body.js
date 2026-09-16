@@ -6,20 +6,22 @@ window.DD = window.DD || {};
 (function () {
   'use strict';
 
-  const STUMP_NAME = 'muñón';
+  const DD = window.DD;
+
+  const STUMP_NAME = DD.T('muñón');
 
   // Plural forms for the names that can appear twice (both arms or both legs).
   // Any other limb falls back to pluralizing its first word.
   const PLURALS = {
-    arm_withered: 'Brazos Marchitos',
-    arm_cleaver: 'Brazos Cuchilla',
-    arm_bellows: 'Brazos Fuelle',
-    arm_needle: 'Brazos Aguja',
-    arm_gauntlet: 'Guanteletes de Latón',
-    leg_limping: 'Piernas Renqueantes',
-    leg_hound: 'Zancas de Sabueso',
-    leg_piston: 'Piernas de Pistón',
-    leg_root: 'Piernas Raíz'
+    arm_withered: DD.T('Brazos Marchitos'),
+    arm_cleaver: DD.T('Brazos Cuchilla'),
+    arm_bellows: DD.T('Brazos Fuelle'),
+    arm_needle: DD.T('Brazos Aguja'),
+    arm_gauntlet: DD.T('Guanteletes de Latón'),
+    leg_limping: DD.T('Piernas Renqueantes'),
+    leg_hound: DD.T('Zancas de Sabueso'),
+    leg_piston: DD.T('Piernas de Pistón'),
+    leg_root: DD.T('Piernas Raíz')
   };
 
   const data = () => window.DD.DATA || {};
@@ -151,17 +153,17 @@ window.DD = window.DD || {};
       if (last && last.name === name) last.count += 1;
       else grouped.push({ name: name, count: 1, id: limb ? limb.id : null });
     });
-    if (!grouped.length) return 'Cuerpo vacío';
+    if (!grouped.length) return DD.T('Cuerpo vacío');
     return grouped
       .map(function (g) {
-        return g.count > 1 ? 'dos ' + pluralOf(g) : g.name;
+        return g.count > 1 ? DD.T('dos {0}', pluralOf(g)) : g.name;
       })
       .join(', ');
   }
 
   function pluralOf(group) {
     if (group.id && PLURALS[group.id]) return PLURALS[group.id];
-    if (group.name === STUMP_NAME) return 'muñones';
+    if (group.name === STUMP_NAME) return DD.T('muñones');
     const words = group.name.split(' ');
     words[0] = /[aeiouáéíóú]$/i.test(words[0]) ? words[0] + 's' : words[0] + 'es';
     return words.join(' ');

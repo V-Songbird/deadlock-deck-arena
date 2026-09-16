@@ -22,14 +22,15 @@ window.DD = window.DD || {};
   // Spanish flavour names, one pool per room type. Picked per seed so two towers read
   // differently even when their layout matches.
   const LABELS = {
-    slab: ['Mesa de disección'],
-    exit: ['Portón en llamas'],
-    combat: ['Pasillo de jaulas', 'Sala de vivisección', 'Galería de tarros',
-             'Alcoba de cobayas', 'Depósito de cadáveres', 'Taller de prótesis'],
-    elite: ['Armería de latón', 'Cámara del guardia'],
-    cache: ['Alacena de injertos', 'Armario de reactivos', 'Estante de frascos'],
-    trap: ['Corredor de sierras', 'Foso de ácido', 'Trampa de vapor'],
-    empty: ['Pasillo desierto', 'Hueco de escaleras', 'Celda saqueada', 'Rincón de ceniza']
+    slab: [DD.T('Mesa de disección')],
+    exit: [DD.T('Portón en llamas')],
+    combat: [DD.T('Pasillo de jaulas'), DD.T('Sala de vivisección'), DD.T('Galería de tarros'),
+             DD.T('Alcoba de cobayas'), DD.T('Depósito de cadáveres'), DD.T('Taller de prótesis')],
+    elite: [DD.T('Armería de latón'), DD.T('Cámara del guardia')],
+    cache: [DD.T('Alacena de injertos'), DD.T('Armario de reactivos'), DD.T('Estante de frascos')],
+    trap: [DD.T('Corredor de sierras'), DD.T('Foso de ácido'), DD.T('Trampa de vapor')],
+    empty: [DD.T('Pasillo desierto'), DD.T('Hueco de escaleras'), DD.T('Celda saqueada'),
+            DD.T('Rincón de ceniza')]
   };
 
   // ---------------------------------------------------------------- helpers

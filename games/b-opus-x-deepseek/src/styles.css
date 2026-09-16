@@ -163,6 +163,20 @@ button { font-family: inherit; touch-action: manipulation; }
 }
 #btn-sound { position: relative; }
 
+/* Same brass plate as the sound button, one notch narrower: it carries two letters. */
+#btn-lang {
+  flex: 0 0 auto;
+  width: var(--tap);
+  height: var(--tap);
+  font-size: 13px;
+  letter-spacing: .08em;
+  color: var(--brass-lit);
+  background: linear-gradient(#2a2334, #181320);
+  border: 1px solid var(--iron-2);
+  border-bottom-width: 3px;
+  cursor: pointer;
+}
+
 /* ----------------------------------------------------------------- stage */
 
 #stage {

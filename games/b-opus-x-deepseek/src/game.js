@@ -11,18 +11,19 @@ window.DD = window.DD || {};
   const COOL_ALL = 99;       // "a large amount" for the slab and the cool cache
   const SAVE_KEY = 'dd_save';
 
-  // Spanish slot names for the dialogs. Code and comments stay English.
+  // Spanish slot names for the dialogs, translated through DD.T. Code stays English.
   const SLOT_ES = {
-    head: 'la cabeza', torso: 'el torso', armL: 'el brazo izquierdo',
-    armR: 'el brazo derecho', legL: 'la pierna izquierda', legR: 'la pierna derecha'
+    head: DD.T('la cabeza'), torso: DD.T('el torso'), armL: DD.T('el brazo izquierdo'),
+    armR: DD.T('el brazo derecho'), legL: DD.T('la pierna izquierda'),
+    legR: DD.T('la pierna derecha')
   };
   const MOVE_KEYS = {
     arrowup: 'n', w: 'n', arrowdown: 's', s: 's',
     arrowleft: 'w', a: 'w', arrowright: 'e', d: 'e'
   };
   const STATUS_SFX = { bleed: 'hurt', stun: 'heavy', weak: 'ui', vulnerable: 'ui' };
-  const DEATH_HP = 'Tus costuras ceden y el cuerpo se desarma.';
-  const DEATH_CLOCK = 'El reloj anatómico llega a 0:00 y tu carne se deshace.';
+  const DEATH_HP = DD.T('Tus costuras ceden y el cuerpo se desarma.');
+  const DEATH_CLOCK = DD.T('El reloj anatómico llega a 0:00 y tu carne se deshace.');
 
   // ------------------------------------------------------------------ state (§4)
 
@@ -89,7 +90,7 @@ window.DD = window.DD || {};
   function listEs(items) {
     if (!items.length) return '';
     if (items.length === 1) return items[0];
-    return items.slice(0, -1).join(', ') + ' y ' + items[items.length - 1];
+    return items.slice(0, -1).join(', ') + DD.T(' y ') + items[items.length - 1];
   }
 
   function countsDown() {
@@ -136,7 +137,7 @@ window.DD = window.DD || {};
     state.posId = state.tower.startId;
     state.combat = null;
     state.timeLeft = runSeconds();
-    state.message = 'La mesa de disección te recibe.';
+    state.message = DD.T('La mesa de disección te recibe.');
     uiHide();
     if (DD.Audio && DD.Audio.startMusic) DD.Audio.startMusic();
     if (state.blueprints.length) openSlabDialog();
@@ -182,7 +183,7 @@ window.DD = window.DD || {};
     state.combat = null;
     state.stats.escapes = (state.stats.escapes | 0) + 1;
     if (state.timeLeft > (state.stats.bestTimeLeft || 0)) state.stats.bestTimeLeft = state.timeLeft;
-    state.message = 'Escapas con: ' + DD.Body.describe(state.body) + '.';
+    state.message = DD.T('Escapas con: {0}.', DD.Body.describe(state.body));
     uiHide();
     saveGame();
     sfx('escape');
@@ -222,7 +223,7 @@ window.DD = window.DD || {};
       if (hot) {
         sfx('steam');
         spark('steam');
-        uiToast('La mesa de disección enfría tu carne.');
+        uiToast(DD.T('La mesa de disección enfría tu carne.'));
       }
       return;
     }
@@ -247,10 +248,10 @@ window.DD = window.DD || {};
     shake(5);
     if (loot.kind === 'hp') {
       state.body.hp = Math.max(0, state.body.hp + (loot.amount || 0));
-      uiToast('¡Trampa! Pierdes ' + Math.abs(loot.amount || 0) + ' PV.');
+      uiToast(DD.T('¡Trampa! Pierdes {0} PV.', Math.abs(loot.amount || 0)));
     } else {
       state.timeLeft = Math.max(0, state.timeLeft + (loot.amount || 0));
-      uiToast('¡Trampa! El reloj pierde ' + Math.abs(loot.amount || 0) + ' s.');
+      uiToast(DD.T('¡Trampa! El reloj pierde {0} s.', Math.abs(loot.amount || 0)));
     }
     checkDeath();
   }
@@ -264,7 +265,7 @@ window.DD = window.DD || {};
       state.body.hp = Math.min(DD.Body.maxHp(state.body), state.body.hp + (loot.amount || 0));
       sfx('heal');
       spark('heal');
-      uiToast('Alacena: te coses ' + (state.body.hp - before) + ' PV.');
+      uiToast(DD.T('Alacena: te coses {0} PV.', state.body.hp - before));
       return;
     }
 
@@ -272,15 +273,15 @@ window.DD = window.DD || {};
 
     if (loot.kind === 'blueprint') {
       const limbId = loot.limbId;
-      if (!limbId || !DD.DATA.LIMBS[limbId]) { uiToast('La alacena está vacía.'); return; }
+      if (!limbId || !DD.DATA.LIMBS[limbId]) { uiToast(DD.T('La alacena está vacía.')); return; }
       addBlueprint(limbId);        // a discovered blueprint is kept even if not grafted
       saveGame();
       sfx('harvest');
       spark('harvest');
-      state.message = 'Plano anatómico: ' + limbName(limbId);
-      uiToast('Plano anatómico: ' + limbName(limbId) + '.');
-      openGraftDialog([limbId], 'Plano anatómico',
-        'Un injerto entero, todavía tibio. Puedes cosértelo aquí mismo.', false);
+      state.message = DD.T('Plano anatómico: {0}', limbName(limbId));
+      uiToast(DD.T('Plano anatómico: {0}.', limbName(limbId)));
+      openGraftDialog([limbId], DD.T('Plano anatómico'),
+        DD.T('Un injerto entero, todavía tibio. Puedes cosértelo aquí mismo.'), false);
       return;
     }
   }
@@ -299,8 +300,8 @@ window.DD = window.DD || {};
     sfx('steam');
     spark('steam');
     uiToast(fixed
-      ? 'La alacena enfría tus injertos y repara ' + SLOT_ES[fixed] + '.'
-      : 'La alacena enfría todos tus injertos.');
+      ? DD.T('La alacena enfría tus injertos y repara {0}.', SLOT_ES[fixed])
+      : DD.T('La alacena enfría todos tus injertos.'));
   }
 
   // ------------------------------------------------------------------ combat
@@ -401,15 +402,15 @@ window.DD = window.DD || {};
         seen[value] = true;
         options.push({
           value: value,
-          label: 'Injertar en ' + SLOT_ES[slot],
+          label: DD.T('Injertar en {0}', SLOT_ES[slot]),
           sub: limb.name + '. ' + (limb.desc || '')
         });
       });
     });
     options.push({
       value: 'close',
-      label: 'Dejar',
-      sub: 'Te lo piensas y sigues tu camino.'
+      label: DD.T('Dejar'),
+      sub: DD.T('Te lo piensas y sigues tu camino.')
     });
     return options;
   }
@@ -426,9 +427,9 @@ window.DD = window.DD || {};
   function openSlabDialog() {
     const n = state.blueprints.length;
     const body = n === 1
-      ? 'Recuerdas un plano anatómico. La mesa puede cosértelo gratis antes de que salgas.'
-      : 'Recuerdas ' + n + ' planos anatómicos. La mesa puede coserte uno gratis antes de que salgas.';
-    if (!openGraftDialog(state.blueprints, 'Mesa de disección', body, true)) {
+      ? DD.T('Recuerdas un plano anatómico. La mesa puede cosértelo gratis antes de que salgas.')
+      : DD.T('Recuerdas {0} planos anatómicos. La mesa puede coserte uno gratis antes de que salgas.', n);
+    if (!openGraftDialog(state.blueprints, DD.T('Mesa de disección'), body, true)) {
       state.phase = 'explore';
     }
   }
@@ -436,11 +437,11 @@ window.DD = window.DD || {};
   function openHarvest(combat) {
     const limbs = harvestLimbs(combat);
     if (!limbs.length) return false;
-    const body = 'Arrancas ' + listEs(limbs.map(limbName)) +
-      ' del cadáver. Coserte algo cuesta ' + GRAFT_SECONDS + ' s de reloj.';
+    const body = DD.T('Arrancas {0} del cadáver. Coserte algo cuesta {1} s de reloj.',
+      [listEs(limbs.map(limbName)), GRAFT_SECONDS]);
     dialogFree = false;
     if (!uiShow({
-      title: 'Cosecha: ' + combat.enemy.name,
+      title: DD.T('Cosecha: {0}', combat.enemy.name),
       body: body,
       options: graftOptions(limbs),
       cancel: 'close'
@@ -467,8 +468,10 @@ window.DD = window.DD || {};
     saveGame();
     sfx('harvest');
     spark('harvest');
-    const text = 'Injertas ' + limbName(limbId) + ' en ' + SLOT_ES[slotKey] +
-      (free ? '. La mesa no te cobra reloj.' : '. -' + GRAFT_SECONDS + ' s de reloj.');
+    const text = free
+      ? DD.T('Injertas {0} en {1}. La mesa no te cobra reloj.', [limbName(limbId), SLOT_ES[slotKey]])
+      : DD.T('Injertas {0} en {1}. -{2} s de reloj.',
+        [limbName(limbId), SLOT_ES[slotKey], GRAFT_SECONDS]);
     state.message = text;
     uiToast(text);
     checkDeath();
@@ -543,7 +546,7 @@ window.DD = window.DD || {};
   function toggleSound() {
     if (!DD.Audio || !DD.Audio.setEnabled) return;
     DD.Audio.setEnabled(!DD.Audio.isEnabled());
-    uiToast(DD.Audio.isEnabled() ? 'Sonido activado.' : 'Sonido silenciado.');
+    uiToast(DD.Audio.isEnabled() ? DD.T('Sonido activado.') : DD.T('Sonido silenciado.'));
     lastSig = null;   // repaint the sound button right away
   }
 

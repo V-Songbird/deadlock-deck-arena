@@ -7,12 +7,13 @@ window.DD = window.DD || {};
 (function (DD) {
   'use strict';
 
-  // Player-facing Spanish. Code and comments stay English.
+  // Player-facing Spanish, translated through DD.T. Code and comments stay English.
   const SLOT_LABEL = {
-    head: 'Cabeza', torso: 'Torso', armL: 'Brazo izq.', armR: 'Brazo der.',
-    legL: 'Pierna izq.', legR: 'Pierna der.'
+    head: DD.T('Cabeza'), torso: DD.T('Torso'),
+    armL: DD.T('Brazo izq.'), armR: DD.T('Brazo der.'),
+    legL: DD.T('Pierna izq.'), legR: DD.T('Pierna der.')
   };
-  const STUMP_NAME = 'Muñón';
+  const STUMP_NAME = DD.T('Muñón');
   const HOT_RATIO = 0.7;   // from here up a card warns that its limb is about to break
   const LOG_LINES = 3;     // combat log lines kept visible
   const TOAST_MS = 2400;
@@ -138,7 +139,7 @@ window.DD = window.DD || {};
     const text = hp + '/' + max;
     if (el.hpText.textContent !== text) el.hpText.textContent = text;
     el.hpBar.classList.toggle('low', hp / max <= 0.3);
-    const cycle = 'Ciclo ' + (state.runIndex || 1);
+    const cycle = DD.T('Ciclo {0}', state.runIndex || 1);
     if (el.cycle.textContent !== cycle) el.cycle.textContent = cycle;
   }
 
@@ -146,7 +147,7 @@ window.DD = window.DD || {};
     const on = !(DD.Audio && typeof DD.Audio.isEnabled === 'function') || DD.Audio.isEnabled();
     el.sound.classList.toggle('off', !on);
     el.sound.setAttribute('aria-pressed', on ? 'true' : 'false');
-    el.sound.title = on ? 'Sonido activado (M)' : 'Sonido silenciado (M)';
+    el.sound.title = on ? DD.T('Sonido activado (M)') : DD.T('Sonido silenciado (M)');
   }
 
   // The thermal readout: it must stay legible while fighting, so it is one line of
@@ -171,7 +172,7 @@ window.DD = window.DD || {};
       view.root.title = (SLOT_LABEL[key] || key) + ': ' + (limb ? limb.name : STUMP_NAME);
 
       let mark = '';
-      if (stump) mark = slot.broken ? 'ROTA' : 'VACÍA';
+      if (stump) mark = slot.broken ? DD.T('ROTA') : DD.T('VACÍA');
       view.mark.hidden = !mark;
       if (mark) view.mark.textContent = mark;
     });
@@ -211,7 +212,8 @@ window.DD = window.DD || {};
       btn.setAttribute('data-index', String(i));
       btn.disabled = !ok;
       if (hot) btn.classList.add('warn');
-      const label = card.name + '. Coste ' + cost + '. Calor ' + heat + '. ' + (card.text || '');
+      const label = DD.T('{0}. Coste {1}. Calor {2}. {3}',
+        [card.name, cost, heat, card.text || '']);
       btn.setAttribute('aria-label', label);
       btn.title = label;
 
@@ -239,7 +241,7 @@ window.DD = window.DD || {};
       }
       return;
     }
-    const energy = 'Energía ' + (combat.energy || 0) + '/' + (combat.maxEnergy || 0);
+    const energy = DD.T('Energía {0}/{1}', [combat.energy || 0, combat.maxEnergy || 0]);
     if (el.energy.textContent !== energy) el.energy.textContent = energy;
 
     const sig = handSignature(state, combat);

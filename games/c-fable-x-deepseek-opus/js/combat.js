@@ -21,13 +21,13 @@ const Combat = {
     return arr;
   },
 
-  /** private: push a Spanish line, keeping the last 8. */
+  /** private: push a log line, keeping the last 8. */
   _say(C, line) {
     C.log.push(line);
     if (C.log.length > 8) C.log.shift();
   },
 
-  /** private: Spanish name of a slot, for the log. */
+  /** private: translated name of a slot, for the log. */
   _slotName(slot) {
     return String(((DATA.SLOT_NAMES || {})[slot] || slot)).toLowerCase();
   },
@@ -68,14 +68,14 @@ const Combat = {
       C.loot = DATA.SLOTS.map((s) => limbs[s]).filter((id) => !!id);
       C.essence = (DATA.enemies[C.enemy.id] || {}).essence || 0;
       events.push({ type: 'won' });
-      Combat._say(C, `¡${C.enemy.name} cae!`);
+      Combat._say(C, I18N.t('¡{0} cae!', C.enemy.name));
       return true;
     }
     if (C.body.hp <= 0) {
       C.body.hp = 0;
       C.phase = 'lost';
       events.push({ type: 'lost' });
-      Combat._say(C, 'Tu cuerpo se desmorona.');
+      Combat._say(C, I18N.t('Tu cuerpo se desmorona.'));
       return true;
     }
     return false;
@@ -93,7 +93,7 @@ const Combat = {
       body,
       enemy: {
         id: e.id || enemyId,
-        name: e.name || 'Algo',
+        name: e.name || I18N.t('Algo'),
         hp: e.hp || 0,
         maxHp: e.hp || 0,
         block: 0,
@@ -113,7 +113,7 @@ const Combat = {
       log: [],
     };
     C.deck = Combat._shuffle(Body.cardsOf(body).map((c) => Combat._entry(c.cardId, c.slot)));
-    Combat._say(C, `Te enfrentas a ${C.enemy.name}.`);
+    Combat._say(C, I18N.t('Te enfrentas a {0}.', C.enemy.name));
     Combat._drawCards(C, DATA.HAND_SIZE);
     return C;
   },
@@ -140,7 +140,7 @@ const Combat = {
     C.player.energy -= card.cost || 0;
     C.discard.push(entry);
     events.push({ type: 'play', cardId: entry.cardId, slot: entry.slot });
-    Combat._say(C, `Juegas ${card.name}.`);
+    Combat._say(C, I18N.t('Juegas {0}.', card.name));
 
     if (fx.dmg) {
       let total = 0;
@@ -149,7 +149,7 @@ const Combat = {
         total += n;
         events.push({ type: 'hit', target: 'enemy', amount: n });
       }
-      Combat._say(C, `${C.enemy.name} recibe ${total} de daño.`);
+      Combat._say(C, I18N.t('{0} recibe {1} de daño.', C.enemy.name, total));
     }
     if (fx.block) {
       C.player.block += fx.block;
@@ -160,7 +160,7 @@ const Combat = {
       C.body.hp = Math.min(C.body.maxHp, C.body.hp + fx.heal);
       const gained = C.body.hp - before;
       events.push({ type: 'heal', amount: gained });
-      Combat._say(C, `Recuperas ${gained} PV.`);
+      Combat._say(C, I18N.t('Recuperas {0} PV.', gained));
     }
     if (fx.draw) Combat._drawCards(C, fx.draw);
     if (fx.energy) C.player.energy += fx.energy;
@@ -175,7 +175,7 @@ const Combat = {
     if (fx.selfDmg) {
       C.body.hp -= fx.selfDmg;
       events.push({ type: 'hit', target: 'player', amount: fx.selfDmg });
-      Combat._say(C, `Te cuesta ${fx.selfDmg} PV.`);
+      Combat._say(C, I18N.t('Te cuesta {0} PV.', fx.selfDmg));
     }
 
     const heat = Body.addHeat(C.body, entry.slot, card.heat || 0);
@@ -188,7 +188,7 @@ const Combat = {
       C.discard = C.discard.filter(other);
       C.discard.push(Combat._entry(DATA.STUMP_CARD, entry.slot));
       events.push({ type: 'break', slot: entry.slot, limbId });
-      Combat._say(C, `¡Tu ${Combat._slotName(entry.slot)} se parte!`);
+      Combat._say(C, I18N.t('¡Tu {0} se parte!', Combat._slotName(entry.slot)));
     }
 
     Combat._resolve(C, events);
@@ -210,14 +210,14 @@ const Combat = {
     if (en.status.poison > 0) {
       en.hp -= en.status.poison;
       events.push({ type: 'hit', target: 'enemy', amount: en.status.poison });
-      Combat._say(C, `El veneno consume a ${en.name} (${en.status.poison}).`);
+      Combat._say(C, I18N.t('El veneno consume a {0} ({1}).', en.name, en.status.poison));
       en.status.poison -= 1;
     }
     if (Combat._resolve(C, events)) return events;
 
     if (en.status.stun > 0) {
       en.status.stun -= 1;
-      Combat._say(C, `${en.name} está aturdido.`);
+      Combat._say(C, I18N.t('{0} está aturdido.', en.name));
     } else {
       const it = Combat.intent(C);
       events.push({ type: 'enemyAct', kind: it.kind, value: it.value });
@@ -228,22 +228,22 @@ const Combat = {
           total += n;
           events.push({ type: 'hit', target: 'player', amount: n });
         }
-        Combat._say(C, `${en.name} te golpea por ${total}.`);
+        Combat._say(C, I18N.t('{0} te golpea por {1}.', en.name, total));
       } else if (it.kind === 'block') {
         en.block += it.value;
         events.push({ type: 'block', target: 'enemy' });
-        Combat._say(C, `${en.name} se protege.`);
+        Combat._say(C, I18N.t('{0} se protege.', en.name));
       } else if (it.kind === 'heal') {
         const before = en.hp;
         en.hp = Math.min(en.maxHp, en.hp + it.value);
         events.push({ type: 'heal', amount: en.hp - before });
-        Combat._say(C, `${en.name} se cose las heridas.`);
+        Combat._say(C, I18N.t('{0} se cose las heridas.', en.name));
       } else if (it.kind === 'poison') {
         C.player.status.poison += it.value;
-        Combat._say(C, `${en.name} te envenena (${it.value}).`);
+        Combat._say(C, I18N.t('{0} te envenena ({1}).', en.name, it.value));
       } else if (it.kind === 'weak') {
         C.player.status.weak += it.value;
-        Combat._say(C, `${en.name} te debilita.`);
+        Combat._say(C, I18N.t('{0} te debilita.', en.name));
       }
       if (en.intents.length) en.step = (en.step + 1) % en.intents.length;
     }
@@ -256,7 +256,7 @@ const Combat = {
     if (C.player.status.poison > 0) {
       C.body.hp -= C.player.status.poison;
       events.push({ type: 'hit', target: 'player', amount: C.player.status.poison });
-      Combat._say(C, `El veneno te consume (${C.player.status.poison}).`);
+      Combat._say(C, I18N.t('El veneno te consume ({0}).', C.player.status.poison));
       C.player.status.poison -= 1;
       if (Combat._resolve(C, events)) return events;
     }
@@ -269,7 +269,7 @@ const Combat = {
     return events;
   },
 
-  /** @returns {{kind:string, value:number, hits:number, text:string}} the enemy's current intent with Spanish text */
+  /** @returns {{kind:string, value:number, hits:number, text:string}} the enemy's current intent with translated text */
   intent(C) {
     const list = (C && C.enemy && C.enemy.intents) || [];
     const it = list.length ? list[C.enemy.step % list.length] : null;
@@ -277,11 +277,11 @@ const Combat = {
     const value = it.value || 0;
     const hits = it.hits || 1;
     let text = '';
-    if (it.kind === 'attack') text = hits > 1 ? `Ataca ${value}×${hits}` : `Ataca ${value}`;
-    else if (it.kind === 'block') text = `Se protege ${value}`;
-    else if (it.kind === 'heal') text = `Se cose ${value}`;
-    else if (it.kind === 'poison') text = `Envenena ${value}`;
-    else if (it.kind === 'weak') text = `Debilita ${value}`;
+    if (it.kind === 'attack') text = hits > 1 ? I18N.t('Ataca {0}×{1}', value, hits) : I18N.t('Ataca {0}', value);
+    else if (it.kind === 'block') text = I18N.t('Se protege {0}', value);
+    else if (it.kind === 'heal') text = I18N.t('Se cose {0}', value);
+    else if (it.kind === 'poison') text = I18N.t('Envenena {0}', value);
+    else if (it.kind === 'weak') text = I18N.t('Debilita {0}', value);
     return { kind: it.kind, value, hits, text };
   },
 

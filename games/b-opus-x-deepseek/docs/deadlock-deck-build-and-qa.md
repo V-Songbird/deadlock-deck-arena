@@ -97,3 +97,46 @@ longer flashes `0:00` before the first render.
 
 Worker self-verification is thorough inside a file and blind across files. Budget one read-only
 review run per project; it cost 173 s and found the only defect that reached the player.
+
+## Spanish/English language layer
+
+Added after the build as `src/i18n.js`, a ninth classic script loaded **before** `src/data.js`
+so the data tables translate their own names while they are being constructed. It exposes
+`DD.I18N.lang()`, `DD.I18N.t(spanish, args)` and `DD.I18N.set('es'|'en')`, plus the call-site
+shorthand `DD.T`. Dictionary keys are the exact Spanish strings as written in the code;
+`{0}`/`{1}` placeholders keep numbers and names out of the translated text, and an unknown key
+passes through unchanged, so Spanish needs no entries of its own.
+
+Resolution at load: `?lang=` → `localStorage['dd-lang']` → `navigator.language` starting with
+`es` → `es`. Spanish is both the shipped language and the fallback, so an untouched URL renders
+byte-identically to the pre-i18n build. `document.documentElement.lang` is set from the same
+value. `set()` stores the choice and reloads; when a `?lang=` is present it rewrites that
+parameter instead, because the URL outranks storage and the click is the newer choice.
+
+The ES/EN control is `#btn-lang` in `index.html`, next to `#btn-sound`, styled with the same
+brass-plate rule in `src/styles.css`. It shows the language it switches *to* and is present on
+every screen, before and during a run.
+
+### Pixel-font constraint
+
+`src/render.js` draws with a 5x5 font whose `GLYPHS` table (line 106) covers `A-Z`, `0-9` and
+`: . , ! - / + ?` only; anything else renders as `?`. Every English string that can reach the
+canvas — the title/death/escape screens, enemy names, the death messages and everything
+`DD.Body.describe()` assembles — was checked against that table. Widest English canvas line is
+`THE ANATOMICAL CLOCK HITS 0:00 AND YOUR FLESH FALLS APART.` at 58 chars = 347 px on a 384 px
+screen. Apostrophes are avoided throughout (`Scholar Skull`, not `Scholar's Skull`).
+
+### Verification
+
+`node --check` passes on all nine files. 261 dictionary entries; 232 `DD.T(` call sites
+(data 124, combat 32, game 30, render 14, body 13, tower 9, ui 9). Driven in a browser over a
+throwaway static server: a full run in `?lang=en` produced `Ash Hound blocks your way!` /
+`You play Dry Blow.` / `5 damage to the enemy.` in the log, `Harvest: Ash Hound` with
+`Graft onto the head` options, the toast `You graft Hound Head onto the head. -4 s of clock.`,
+and the death screen `YOU HAVE DIED` with no missing glyphs. Toggling back restored Spanish and
+left `dd-lang=es` in storage.
+
+Known gap: `DD.Body.pluralOf()` still falls back to the Spanish `-s`/`-es` rule for a limb with
+no entry in `PLURALS`. Unreachable with the shipped data — only arms and legs can repeat in
+adjacent slots and all of them are listed, and the stump case returns before it — so it was left
+alone rather than guarded.

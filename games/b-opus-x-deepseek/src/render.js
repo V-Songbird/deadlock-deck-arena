@@ -800,13 +800,13 @@ window.DD = window.DD || {};
     drawMotes(1);
     vignette(1.35);
     text('DEADLOCK DECK', 192, 40, 4, P.bone, 'center', P.void);
-    text('EL RELOJ ANATÓMICO', 192, 74, 2, P.brass, 'center', P.void);
-    text('SEIS MINUTOS. UN CUERPO PRESTADO.', 192, 96, 1, shade(P.bone, -0.32), 'center', P.void);
-    if (blink(1.4)) text('PULSA O TOCA PARA EMPEZAR', 192, 176, 2, P.bone, 'center', P.void);
+    text(DD.T('EL RELOJ ANATÓMICO'), 192, 74, 2, P.brass, 'center', P.void);
+    text(DD.T('SEIS MINUTOS. UN CUERPO PRESTADO.'), 192, 96, 1, shade(P.bone, -0.32), 'center', P.void);
+    if (blink(1.4)) text(DD.T('PULSA O TOCA PARA EMPEZAR'), 192, 176, 2, P.bone, 'center', P.void);
     // §5.8: the escape screen reports it; the title is where the player looks for a target.
     var best = state && state.stats ? Math.floor(state.stats.bestTimeLeft || 0) : 0;
-    if (best > 0) text('MEJOR ESCAPE: ' + fmt(best), 192, 190, 1, P.verd, 'center', P.void);
-    if (state && state.runIndex > 1) text('CICLO ' + state.runIndex, 192, 202, 1, P.ash, 'center', P.void);
+    if (best > 0) text(DD.T('MEJOR ESCAPE: {0}', fmt(best)), 192, 190, 1, P.verd, 'center', P.void);
+    if (state && state.runIndex > 1) text(DD.T('CICLO {0}', state.runIndex), 192, 202, 1, P.ash, 'center', P.void);
     hitA = { x: 192, y: 140 }; bodyA = { x: 192, y: 156 };
   }
   function drawDead(state) {
@@ -826,11 +826,11 @@ window.DD = window.DD || {};
     glow(192, 118, 116, P.ember, 0.07 * (1 - clamp(T * 0.08, 0, 0.6)) * lamp(0));
     drawMotes(0.5);
     vignette(1.9);
-    text('HAS MUERTO', 192, 40, 3, shade(P.blood, 0.38), 'center', P.void);
+    text(DD.T('HAS MUERTO'), 192, 40, 3, shade(P.blood, 0.38), 'center', P.void);
     if (state && state.message) text(state.message, 192, 76, 1, shade(P.bone, -0.15), 'center', P.void);
-    text('EL RELOJ ANATÓMICO TE VUELVE A MONTAR', 192, 90, 1, shade(P.bone, -0.38), 'center', P.void);
-    text('CICLO ' + ((state && state.runIndex) || 1), 192, 106, 1, P.ash, 'center', P.void);
-    if (blink(1.3)) text('PULSA O TOCA PARA RENACER', 192, 190, 2, P.bone, 'center', P.void);
+    text(DD.T('EL RELOJ ANATÓMICO TE VUELVE A MONTAR'), 192, 90, 1, shade(P.bone, -0.38), 'center', P.void);
+    text(DD.T('CICLO {0}', (state && state.runIndex) || 1), 192, 106, 1, P.ash, 'center', P.void);
+    if (blink(1.3)) text(DD.T('PULSA O TOCA PARA RENACER'), 192, 190, 2, P.bone, 'center', P.void);
     hitA = { x: 192, y: 130 }; bodyA = { x: 192, y: 130 };
   }
   function drawEscaped(state) {
@@ -856,13 +856,13 @@ window.DD = window.DD || {};
     rect(198, 82, 3, 3, P.ember);
     drawMotes(0.8);
     vignette(1.6);
-    text('HAS ESCAPADO', 192, 24, 3, P.bone, 'center', P.void);
-    text('TIEMPO RESTANTE ' + fmt(state && state.timeLeft), 192, 56, 1, P.brass, 'center', P.void);
-    text('PLANOS ANATÓMICOS ' + bp.length, 192, 68, 1, P.verd, 'center', P.void);
-    text('BAJAS ' + (st.kills | 0) + ' - CICLO ' + ((state && state.runIndex) || 1), 192, 80, 1, P.ash, 'center', P.void);
+    text(DD.T('HAS ESCAPADO'), 192, 24, 3, P.bone, 'center', P.void);
+    text(DD.T('TIEMPO RESTANTE {0}', fmt(state && state.timeLeft)), 192, 56, 1, P.brass, 'center', P.void);
+    text(DD.T('PLANOS ANATÓMICOS {0}', bp.length), 192, 68, 1, P.verd, 'center', P.void);
+    text(DD.T('BAJAS {0} - CICLO {1}', [st.kills | 0, (state && state.runIndex) || 1]), 192, 80, 1, P.ash, 'center', P.void);
     // §5.8 wants the body that escaped named here: the toast that carried it is long gone.
     if (state && state.message) wrapText(state.message, 192, 148, 1, P.bone, 340);
-    if (blink(1.4)) text('PULSA O TOCA PARA UN NUEVO CICLO', 192, 194, 2, P.bone, 'center', P.void);
+    if (blink(1.4)) text(DD.T('PULSA O TOCA PARA UN NUEVO CICLO'), 192, 194, 2, P.bone, 'center', P.void);
     hitA = { x: 196, y: 108 }; bodyA = { x: 196, y: 108 };
   }
 

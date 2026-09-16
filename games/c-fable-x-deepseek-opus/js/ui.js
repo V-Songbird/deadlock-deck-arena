@@ -261,14 +261,14 @@ const UI = {
     this._txt(this._mmss(timeLeft), cx, cy + r + 4, danger ? this.COL.red : this.COL.boneL, 11, 'center');
   },
 
-  /** Spanish one-liner for a status block, '' when clean. */
+  /** One-line summary of a status block, '' when clean. */
   _statusText(st) {
     if (!st) return '';
     const out = [];
-    if (st.vuln > 0) out.push('Vuln ' + st.vuln);
-    if (st.weak > 0) out.push('Débil ' + st.weak);
-    if (st.poison > 0) out.push('Veneno ' + st.poison);
-    if (st.stun > 0) out.push('Aturd ' + st.stun);
+    if (st.vuln > 0) out.push(I18N.t('Vuln {0}', st.vuln));
+    if (st.weak > 0) out.push(I18N.t('Débil {0}', st.weak));
+    if (st.poison > 0) out.push(I18N.t('Veneno {0}', st.poison));
+    if (st.stun > 0) out.push(I18N.t('Aturd {0}', st.stun));
     return out.join('  ');
   },
 
@@ -301,7 +301,7 @@ const UI = {
       ctx.fillRect(0, y, 320, 4);
     }
     this._txt('DEADLOCK DECK', 160, 10, this.COL.boneL, 22, 'center');
-    this._txt('El Reloj Anatómico', 160, 38, this.COL.verdL, 11, 'center');
+    this._txt(I18N.t('El Reloj Anatómico'), 160, 38, this.COL.verdL, 11, 'center');
     const cre = Sprites.creature(this._titleSlots(), G.meta && G.meta.tint);
     ctx.save();
     ctx.translate(160, 93);
@@ -315,7 +315,7 @@ const UI = {
 
   _sceneTable(G) {
     const t = G.table;
-    this._txt('LA MESA DE DISECCIÓN', 160, 10, this.COL.boneL, 12, 'center');
+    this._txt(I18N.t('LA MESA DE DISECCIÓN'), 160, 10, this.COL.boneL, 12, 'center');
     const slots = t ? t.slots : {};
     const cre = Sprites.creature(slots, G.meta && G.meta.tint);
     this.ctx.drawImage(cre, 128, 32, 64, 80);
@@ -325,12 +325,12 @@ const UI = {
   },
 
   _sceneShop(G) {
-    this._txt('TIENDA DE LA TORRE', 160, 10, this.COL.boneL, 12, 'center');
-    this._txt('Compras simuladas: sin dinero real.', 160, 28, this.COL.grey, 8, 'center');
+    this._txt(I18N.t('TIENDA DE LA TORRE'), 160, 10, this.COL.boneL, 12, 'center');
+    this._txt(I18N.t('Compras simuladas: sin dinero real.'), 160, 28, this.COL.grey, 8, 'center');
     const slots = G.table ? G.table.slots : this._titleSlots();
     this.ctx.drawImage(Sprites.creature(slots, G.meta && G.meta.tint), 144, 52, 64, 80);
     this._tile('esencia', 128, 140);
-    this._txt((G.meta ? G.meta.essence : 0) + ' de esencia', 148, 146, this.COL.verdL, 10, 'left');
+    this._txt(I18N.t('{0} de esencia', G.meta ? G.meta.essence : 0), 148, 146, this.COL.verdL, 10, 'left');
   },
 
   _sceneExplore(G) {
@@ -381,7 +381,7 @@ const UI = {
 
     const cx = Math.round((mx + F.w * 16 + 8 + 312) / 2);
     const danger = G.timeLeft < 30;
-    this._txt('Piso ' + (G.floor + 1) + '/' + DATA.FLOORS, cx, 12, this.COL.brassL, 10, 'center');
+    this._txt(I18N.t('Piso {0}/{1}', G.floor + 1, DATA.FLOORS), cx, 12, this.COL.brassL, 10, 'center');
     this._clock(cx, 72, 30, G.timeLeft, danger);
     this._tile('heart', cx - 30, 122);
     this._txt(G.body.hp + '/' + G.body.maxHp, cx - 10, 128, this.COL.boneL, 10, 'left');
@@ -395,13 +395,13 @@ const UI = {
     if (!C) return;
     const ctx = this.ctx;
     const danger = G.timeLeft < 30;
-    this._txt('Turno ' + C.turn, 10, 8, this.COL.grey, 9, 'left');
+    this._txt(I18N.t('Turno {0}', C.turn), 10, 8, this.COL.grey, 9, 'left');
 
     const cre = Sprites.creature(Body.spriteSlots(C.body), G.meta && G.meta.tint);
     ctx.drawImage(cre, 24, 62, 64, 80);
-    this._txt('Tú', 56, 18, this.COL.boneL, 10, 'center');
-    this._txt(C.body.hp + '/' + C.body.maxHp + ' PV', 56, 32, this.COL.red, 9, 'center');
-    if (C.player.block > 0) this._txt('Bloqueo ' + C.player.block, 56, 44, this.COL.verdL, 9, 'center');
+    this._txt(I18N.t('Tú'), 56, 18, this.COL.boneL, 10, 'center');
+    this._txt(I18N.t('{0}/{1} PV', C.body.hp, C.body.maxHp), 56, 32, this.COL.red, 9, 'center');
+    if (C.player.block > 0) this._txt(I18N.t('Bloqueo {0}', C.player.block), 56, 44, this.COL.verdL, 9, 'center');
     this._txt(this._statusText(C.player.status), 56, 148, this.COL.acid, 8, 'center');
 
     const foe = Sprites.creature(C.enemy.limbs, 'default');
@@ -411,13 +411,13 @@ const UI = {
     ctx.drawImage(foe, 0, 0, 64, 80);
     ctx.restore();
     this._txt(C.enemy.name, 264, 18, this.COL.boneL, 9, 'center');
-    this._txt(C.enemy.hp + '/' + C.enemy.maxHp + ' PV', 264, 32, this.COL.red, 9, 'center');
-    if (C.enemy.block > 0) this._txt('Bloqueo ' + C.enemy.block, 264, 44, this.COL.verdL, 9, 'center');
+    this._txt(I18N.t('{0}/{1} PV', C.enemy.hp, C.enemy.maxHp), 264, 32, this.COL.red, 9, 'center');
+    if (C.enemy.block > 0) this._txt(I18N.t('Bloqueo {0}', C.enemy.block), 264, 44, this.COL.verdL, 9, 'center');
     this._txt(this._statusText(C.enemy.status), 264, 148, this.COL.acid, 8, 'center');
 
     this._clock(160, 62, 22, G.timeLeft, danger);
     const intent = Combat.intent(C);
-    this._txt('Intención', 160, 106, this.COL.grey, 8, 'center');
+    this._txt(I18N.t('Intención'), 160, 106, this.COL.grey, 8, 'center');
     this._txt(intent && intent.text ? intent.text : '—', 160, 118, this.COL.brassL, 10, 'center');
     if (danger) this._frame(1, true);
   },
@@ -426,8 +426,8 @@ const UI = {
     const h = G.harvest;
     if (!h) return;
     const ctx = this.ctx;
-    this._txt('COSECHA', 160, 10, this.COL.boneL, 14, 'center');
-    this._txt('de ' + h.enemyName, 160, 30, this.COL.blood, 10, 'center');
+    this._txt(I18N.t('COSECHA'), 160, 10, this.COL.boneL, 14, 'center');
+    this._txt(I18N.t('de {0}', h.enemyName), 160, 30, this.COL.blood, 10, 'center');
     const ids = h.limbs || [];
     const total = ids.length * 40;
     let x = Math.round(160 - total / 2);
@@ -437,15 +437,15 @@ const UI = {
       if (lim) ctx.drawImage(Sprites.limb(lim.sprite), x + 2, 52, 32, 32);
       x += 40;
     }
-    this._txt('+' + (h.essence || 0) + ' de esencia', 160, 94, this.COL.verdL, 9, 'center');
+    this._txt(I18N.t('+{0} de esencia', h.essence || 0), 160, 94, this.COL.verdL, 9, 'center');
     this._clock(160, 128, 22, G.timeLeft, G.timeLeft < 30);
   },
 
   _sceneDeath(G) {
     const ctx = this.ctx;
     ctx.drawImage(Sprites.get('skull'), 128, 34, 64, 64);
-    const timeOut = G.run && G.run.cause === 'el reloj';
-    this._txt(timeOut ? 'EL RELOJ LLEGÓ A CERO' : 'HAS MUERTO', 160, 108, this.COL.red, timeOut ? 13 : 18, 'center');
+    const timeOut = G.run && G.run.cause === I18N.t('el reloj');
+    this._txt(timeOut ? I18N.t('EL RELOJ LLEGÓ A CERO') : I18N.t('HAS MUERTO'), 160, 108, this.COL.red, timeOut ? 13 : 18, 'center');
     if (!timeOut) this._txt(G.run ? String(G.run.cause || '') : '', 160, 132, this.COL.bone, 10, 'center');
     this._flames(158, 1, 16);
     this._frame(1, true);
@@ -455,8 +455,8 @@ const UI = {
     const ctx = this.ctx;
     ctx.drawImage(Sprites.get('exit'), 112, 40, 64, 64);
     ctx.drawImage(Sprites.creature(Body.spriteSlots(G.body), G.meta && G.meta.tint), 188, 44, 48, 60);
-    this._txt('¡HAS ESCAPADO!', 160, 114, this.COL.verdL, 16, 'center');
-    this._txt('La torre arde a tu espalda.', 160, 138, this.COL.bone, 9, 'center');
+    this._txt(I18N.t('¡HAS ESCAPADO!'), 160, 114, this.COL.verdL, 16, 'center');
+    this._txt(I18N.t('La torre arde a tu espalda.'), 160, 138, this.COL.bone, 9, 'center');
     this._flames(160, 0.8, 24);
   },
 
@@ -566,7 +566,7 @@ const UI = {
       cell.style.borderBottomColor = this.SLOT_COL[slot];
       cell.appendChild(this._icon(stump ? Sprites.get('stump') : Sprites.limb(data.sprite), 2));
       cell.appendChild(this._el('span', 'sn', DATA.SLOT_NAMES[slot]));
-      const name = stump ? 'Muñón' : data.name;
+      const name = stump ? I18N.t('Muñón') : data.name;
       const label = this._el('span', 'sv', name);
       if (stump && data) label.title = data.name;
       cell.appendChild(label);
@@ -576,7 +576,7 @@ const UI = {
       fill.style.width = Math.round(ratio * 100) + '%';
       fill.style.background = ratio >= 0.75 ? this.COL.red : (ratio >= 0.5 ? this.COL.fire : this.COL.brass);
       bar.appendChild(fill);
-      bar.title = stump ? 'Muñón' : ('Calor ' + limb.heat + '/' + data.maxHeat);
+      bar.title = stump ? I18N.t('Muñón') : I18N.t('Calor {0}/{1}', limb.heat, data.maxHeat);
       cell.appendChild(bar);
       wrap.appendChild(cell);
     });
@@ -586,7 +586,14 @@ const UI = {
   /** Mute toggle, present on every screen so touch players always have it. */
   _muteBtn(G) {
     const muted = !!(G.meta && G.meta.muted);
-    return this._btn(muted ? 'Sonido: no' : 'Sonido: sí', () => Game.toggleMute(), { cls: 'small', key: 'mute' });
+    return this._btn(muted ? I18N.t('Sonido: no') : I18N.t('Sonido: sí'), () => Game.toggleMute(), { cls: 'small', key: 'mute' });
+  },
+
+  /** Language switch, next to the mute toggle so it is reachable on every screen. */
+  _langBtn(code, name) {
+    return this._btn(code.toUpperCase(), () => I18N.set(code), {
+      cls: 'small', key: 'lang-' + code, disabled: I18N.lang() === code, title: name,
+    });
   },
 
   /** Replace the panel contents, keeping keyboard focus on the same control when possible. */
@@ -612,6 +619,8 @@ const UI = {
       frag.appendChild(msg);
     }
     const foot = this._el('div', 'row foot');
+    foot.appendChild(this._langBtn('es', 'Español'));
+    foot.appendChild(this._langBtn('en', 'English'));
     foot.appendChild(this._muteBtn(G));
     frag.appendChild(foot);
     this.panel.textContent = '';
@@ -624,61 +633,61 @@ const UI = {
 
   _panelTitle(G, frag) {
     const meta = G.meta || {};
-    frag.appendChild(this._el('p', 'lead', 'Despiertas en la mesa. La torre arde. Tienes seis minutos.'));
+    frag.appendChild(this._el('p', 'lead', I18N.t('Despiertas en la mesa. La torre arde. Tienes seis minutos.')));
     const row = this._el('div', 'row');
-    row.appendChild(this._btn('Despertar', () => Game.newRun(), { primary: true, key: 'wake' }));
+    row.appendChild(this._btn(I18N.t('Despertar'), () => Game.newRun(), { primary: true, key: 'wake' }));
     frag.appendChild(row);
-    frag.appendChild(this._el('p', 'dim', 'Despertares: ' + (meta.runs || 0) + '  ·  Huidas: ' + (meta.escapes || 0)
-      + '  ·  Esencia: ' + (meta.essence || 0)));
-    frag.appendChild(this._el('p', 'dim', 'Teclas: WASD/flechas moverse · 1-5 cartas · E terminar turno · M sonido'));
+    frag.appendChild(this._el('p', 'dim', I18N.t('Despertares: {0}  ·  Huidas: {1}  ·  Esencia: {2}',
+      meta.runs || 0, meta.escapes || 0, meta.essence || 0)));
+    frag.appendChild(this._el('p', 'dim', I18N.t('Teclas: WASD/flechas moverse · 1-5 cartas · E terminar turno · M sonido')));
   },
 
   _panelTable(G, frag) {
     const t = G.table;
     if (!t) return;
-    frag.appendChild(this._el('h1', 'h', 'Mesa de disección'));
-    frag.appendChild(this._el('p', 'dim', 'Cuerpo base: ' + t.baseName));
+    frag.appendChild(this._el('h1', 'h', I18N.t('Mesa de disección')));
+    frag.appendChild(this._el('p', 'dim', I18N.t('Cuerpo base: {0}', t.baseName)));
     const list = this._el('div', 'slots');
     DATA.SLOTS.forEach((slot) => {
       const id = t.slots[slot];
       const limb = DATA.limbs[id];
       const row = this._el('div', 'slotrow');
       row.style.borderLeftColor = this.SLOT_COL[slot];
-      row.appendChild(this._btn('◀', () => Game.tableCycle(slot, -1), { cls: 'cyc', key: slot + '-', title: 'Anterior' }));
+      row.appendChild(this._btn('◀', () => Game.tableCycle(slot, -1), { cls: 'cyc', key: slot + '-', title: I18N.t('Anterior') }));
       const mid = this._el('div', 'mid');
       if (limb) mid.appendChild(this._icon(Sprites.limb(limb.sprite), 2));
       const txt = this._el('div', 'txt');
       txt.appendChild(this._el('span', 'sn', DATA.SLOT_NAMES[slot]));
-      txt.appendChild(this._el('span', 'sv', limb ? limb.name : 'Muñón'));
+      txt.appendChild(this._el('span', 'sv', limb ? limb.name : I18N.t('Muñón')));
       txt.appendChild(this._el('span', 'dim', limb
         ? limb.cards.map((c) => (DATA.cards[c] ? DATA.cards[c].name : c)).join(', ')
-        : 'Golpe de muñón'));
+        : I18N.t('Golpe de muñón')));
       mid.appendChild(txt);
       row.appendChild(mid);
-      row.appendChild(this._btn('▶', () => Game.tableCycle(slot, 1), { cls: 'cyc', key: slot + '+', title: 'Siguiente' }));
+      row.appendChild(this._btn('▶', () => Game.tableCycle(slot, 1), { cls: 'cyc', key: slot + '+', title: I18N.t('Siguiente') }));
       list.appendChild(row);
     });
     frag.appendChild(list);
     const row = this._el('div', 'row');
-    row.appendChild(this._btn('Levantarse', () => Game.rise(), { primary: true, key: 'rise' }));
-    row.appendChild(this._btn('Tienda', () => Game.openShop(), { key: 'shop' }));
+    row.appendChild(this._btn(I18N.t('Levantarse'), () => Game.rise(), { primary: true, key: 'rise' }));
+    row.appendChild(this._btn(I18N.t('Tienda'), () => Game.openShop(), { key: 'shop' }));
     frag.appendChild(row);
   },
 
   _panelShop(G, frag) {
     const meta = G.meta || {};
     const owned = meta.cosmetics || [];
-    frag.appendChild(this._el('h1', 'h', 'Tienda · ' + (meta.essence || 0) + ' de esencia'));
-    frag.appendChild(this._el('p', 'dim', 'Compras simuladas: sin dinero real.'));
+    frag.appendChild(this._el('h1', 'h', I18N.t('Tienda · {0} de esencia', meta.essence || 0)));
+    frag.appendChild(this._el('p', 'dim', I18N.t('Compras simuladas: sin dinero real.')));
     // The free default skin is always owned; offer it so a bought tint can be reverted.
     const base = this._el('div', 'shoprow');
     const baseTxt = this._el('div', 'txt');
-    baseTxt.appendChild(this._el('span', 'sv', 'Piel de cadáver'));
-    baseTxt.appendChild(this._el('span', 'dim', 'El tinte con el que despertaste. Gratis.'));
+    baseTxt.appendChild(this._el('span', 'sv', I18N.t('Piel de cadáver')));
+    baseTxt.appendChild(this._el('span', 'dim', I18N.t('El tinte con el que despertaste. Gratis.')));
     base.appendChild(baseTxt);
     base.appendChild(meta.tint === 'default'
-      ? this._btn('Equipado', () => {}, { key: 'on-default', disabled: true })
-      : this._btn('Equipar', () => Game.equip('default'), { key: 'eq-default' }));
+      ? this._btn(I18N.t('Equipado'), () => {}, { key: 'on-default', disabled: true })
+      : this._btn(I18N.t('Equipar'), () => Game.equip('default'), { key: 'eq-default' }));
     frag.appendChild(base);
     Object.keys(DATA.cosmetics).forEach((id) => {
       const c = DATA.cosmetics[id];
@@ -688,14 +697,14 @@ const UI = {
       const txt = this._el('div', 'txt');
       txt.appendChild(this._el('span', 'sv', c.name));
       txt.appendChild(this._el('span', 'dim', c.desc));
-      txt.appendChild(this._el('span', 'price' + ((meta.essence || 0) < c.price ? ' low' : ''), c.price + ' de esencia'));
+      txt.appendChild(this._el('span', 'price' + ((meta.essence || 0) < c.price ? ' low' : ''), I18N.t('{0} de esencia', c.price)));
       row.appendChild(txt);
       if (!has) {
-        row.appendChild(this._btn('Comprar', () => Game.buy(id), { key: 'buy-' + id }));
+        row.appendChild(this._btn(I18N.t('Comprar'), () => Game.buy(id), { key: 'buy-' + id }));
       } else if (on) {
-        row.appendChild(this._btn('Equipado', () => {}, { key: 'on-' + id, disabled: true }));
+        row.appendChild(this._btn(I18N.t('Equipado'), () => {}, { key: 'on-' + id, disabled: true }));
       } else {
-        row.appendChild(this._btn('Equipar', () => Game.equip(id), { key: 'eq-' + id }));
+        row.appendChild(this._btn(I18N.t('Equipar'), () => Game.equip(id), { key: 'eq-' + id }));
       }
       frag.appendChild(row);
     });
@@ -706,24 +715,24 @@ const UI = {
       const txt = this._el('div', 'txt');
       txt.appendChild(this._el('span', 'sv', u.name));
       txt.appendChild(this._el('span', 'dim', u.desc));
-      txt.appendChild(this._el('span', 'price' + ((meta.essence || 0) < u.price ? ' low' : ''), u.price + ' de esencia'));
+      txt.appendChild(this._el('span', 'price' + ((meta.essence || 0) < u.price ? ' low' : ''), I18N.t('{0} de esencia', u.price)));
       row.appendChild(txt);
       row.appendChild(has
-        ? this._btn('Desbloqueado', () => {}, { key: 'un-' + id, disabled: true })
-        : this._btn('Comprar', () => Game.buy(id), { key: 'buy-' + id }));
+        ? this._btn(I18N.t('Desbloqueado'), () => {}, { key: 'un-' + id, disabled: true })
+        : this._btn(I18N.t('Comprar'), () => Game.buy(id), { key: 'buy-' + id }));
       frag.appendChild(row);
     });
     const row = this._el('div', 'row');
-    row.appendChild(this._btn('Volver', () => Game.closeShop(), { primary: true, key: 'back' }));
+    row.appendChild(this._btn(I18N.t('Volver'), () => Game.closeShop(), { primary: true, key: 'back' }));
     frag.appendChild(row);
   },
 
   _panelExplore(G, frag) {
     const pad = this._el('div', 'dpad');
-    pad.appendChild(this._btn('▲', () => Game.move('n'), { cls: 'up', key: 'n', title: 'Norte' }));
-    pad.appendChild(this._btn('◀', () => Game.move('w'), { cls: 'lf', key: 'w', title: 'Oeste' }));
-    pad.appendChild(this._btn('▶', () => Game.move('e'), { cls: 'rt', key: 'e', title: 'Este' }));
-    pad.appendChild(this._btn('▼', () => Game.move('s'), { cls: 'dn', key: 's', title: 'Sur' }));
+    pad.appendChild(this._btn('▲', () => Game.move('n'), { cls: 'up', key: 'n', title: I18N.t('Norte') }));
+    pad.appendChild(this._btn('◀', () => Game.move('w'), { cls: 'lf', key: 'w', title: I18N.t('Oeste') }));
+    pad.appendChild(this._btn('▶', () => Game.move('e'), { cls: 'rt', key: 'e', title: I18N.t('Este') }));
+    pad.appendChild(this._btn('▼', () => Game.move('s'), { cls: 'dn', key: 's', title: I18N.t('Sur') }));
     frag.appendChild(pad);
     frag.appendChild(this._strip(G.body));
   },
@@ -732,8 +741,8 @@ const UI = {
     const C = G.combat;
     if (!C) return;
     const head = this._el('div', 'row head');
-    head.appendChild(this._el('span', 'energy', 'Energía ' + C.player.energy + '/' + DATA.ENERGY));
-    head.appendChild(this._btn('Terminar turno', () => Game.endTurn(), {
+    head.appendChild(this._el('span', 'energy', I18N.t('Energía {0}/{1}', C.player.energy, DATA.ENERGY)));
+    head.appendChild(this._btn(I18N.t('Terminar turno'), () => Game.endTurn(), {
       primary: true, key: 'end', disabled: C.phase !== 'player',
     }));
     frag.appendChild(head);
@@ -744,8 +753,8 @@ const UI = {
       face.appendChild(this._el('span', 'ckey', String(i + 1)));
       face.appendChild(this._el('span', 'cname', card.name));
       const stat = this._el('span', 'cstat');
-      stat.appendChild(this._el('b', null, 'Coste ' + card.cost));
-      stat.appendChild(this._el('b', null, 'Calor ' + card.heat));
+      stat.appendChild(this._el('b', null, I18N.t('Coste {0}', card.cost)));
+      stat.appendChild(this._el('b', null, I18N.t('Calor {0}', card.heat)));
       face.appendChild(stat);
       face.appendChild(this._el('span', 'cdesc', card.desc));
       const b = this._btn(face, () => Game.playCard(i), {
@@ -765,7 +774,7 @@ const UI = {
   _panelHarvest(G, frag) {
     const h = G.harvest;
     if (!h) return;
-    frag.appendChild(this._el('h1', 'h', 'Cosecha de ' + h.enemyName));
+    frag.appendChild(this._el('h1', 'h', I18N.t('Cosecha de {0}', h.enemyName)));
     (h.limbs || []).forEach((id) => {
       const lim = DATA.limbs[id];
       if (!lim) return;
@@ -773,49 +782,46 @@ const UI = {
       row.appendChild(this._icon(Sprites.limb(lim.sprite), 2));
       const txt = this._el('div', 'txt');
       txt.appendChild(this._el('span', 'sv', lim.name));
-      txt.appendChild(this._el('span', 'dim', (DATA.TYPE_NAMES[lim.type] || lim.type) + ' · calor máx. ' + lim.maxHeat
-        + (lim.hp ? ' · +' + lim.hp + ' PV' : '')));
+      txt.appendChild(this._el('span', 'dim', I18N.t('{0} · calor máx. {1}', DATA.TYPE_NAMES[lim.type] || lim.type, lim.maxHeat)
+        + (lim.hp ? I18N.t(' · +{0} PV', lim.hp) : '')));
       txt.appendChild(this._el('span', 'dim', lim.cards.map((c) => (DATA.cards[c] ? DATA.cards[c].name : c)).join(', ')));
       row.appendChild(txt);
       const acts = this._el('div', 'acts');
       if (lim.type === 'arm' || lim.type === 'leg') {
         const l = lim.type === 'arm' ? 'armL' : 'legL';
         const r = lim.type === 'arm' ? 'armR' : 'legR';
-        acts.appendChild(this._btn('Izq', () => Game.harvestPick(id, l), { key: 'g-' + id + '-l' }));
-        acts.appendChild(this._btn('Der', () => Game.harvestPick(id, r), { key: 'g-' + id + '-r' }));
+        acts.appendChild(this._btn(I18N.t('Izq'), () => Game.harvestPick(id, l), { key: 'g-' + id + '-l' }));
+        acts.appendChild(this._btn(I18N.t('Der'), () => Game.harvestPick(id, r), { key: 'g-' + id + '-r' }));
       } else {
-        acts.appendChild(this._btn('Injertar', () => Game.harvestPick(id, lim.type), { key: 'g-' + id }));
+        acts.appendChild(this._btn(I18N.t('Injertar'), () => Game.harvestPick(id, lim.type), { key: 'g-' + id }));
       }
       row.appendChild(acts);
       frag.appendChild(row);
     });
     const row = this._el('div', 'row');
-    row.appendChild(this._btn('Seguir sin injertar', () => Game.harvestSkip(), { primary: true, key: 'skip' }));
+    row.appendChild(this._btn(I18N.t('Seguir sin injertar'), () => Game.harvestSkip(), { primary: true, key: 'skip' }));
     frag.appendChild(row);
     frag.appendChild(this._strip(G.body));
   },
 
   _panelDeath(G, frag) {
     const run = G.run || {};
-    const timeOut = run.cause === 'el reloj';
-    frag.appendChild(this._el('h1', 'h dead', timeOut ? 'El reloj llegó a cero' : 'Has muerto: ' + (run.cause || '')));
-    frag.appendChild(this._el('p', 'dim', 'Piso ' + ((G.floor || 0) + 1) + '/' + DATA.FLOORS
-      + '  ·  Enemigos: ' + (run.kills || 0)
-      + '  ·  Injertos: ' + (run.grafts || 0)
-      + '  ·  Esencia: ' + (run.essence || 0)));
+    const timeOut = run.cause === I18N.t('el reloj');
+    frag.appendChild(this._el('h1', 'h dead', timeOut ? I18N.t('El reloj llegó a cero') : I18N.t('Has muerto: {0}', run.cause || '')));
+    frag.appendChild(this._el('p', 'dim', I18N.t('Piso {0}/{1}  ·  Enemigos: {2}  ·  Injertos: {3}  ·  Esencia: {4}',
+      (G.floor || 0) + 1, DATA.FLOORS, run.kills || 0, run.grafts || 0, run.essence || 0)));
     const row = this._el('div', 'row');
-    row.appendChild(this._btn('Volver a la mesa', () => Game.afterEnd(), { primary: true, key: 'again' }));
+    row.appendChild(this._btn(I18N.t('Volver a la mesa'), () => Game.afterEnd(), { primary: true, key: 'again' }));
     frag.appendChild(row);
   },
 
   _panelEscape(G, frag) {
     const run = G.run || {};
-    frag.appendChild(this._el('h1', 'h esc', '¡Has escapado de la torre!'));
-    frag.appendChild(this._el('p', 'dim', 'Tiempo restante: ' + this._mmss(G.timeLeft)
-      + '  ·  Esencia: ' + (run.essence || 0)
-      + '  ·  Huidas: ' + ((G.meta && G.meta.escapes) || 0)));
+    frag.appendChild(this._el('h1', 'h esc', I18N.t('¡Has escapado de la torre!')));
+    frag.appendChild(this._el('p', 'dim', I18N.t('Tiempo restante: {0}  ·  Esencia: {1}  ·  Huidas: {2}',
+      this._mmss(G.timeLeft), run.essence || 0, (G.meta && G.meta.escapes) || 0)));
     const row = this._el('div', 'row');
-    row.appendChild(this._btn('Volver a la mesa', () => Game.afterEnd(), { primary: true, key: 'again' }));
+    row.appendChild(this._btn(I18N.t('Volver a la mesa'), () => Game.afterEnd(), { primary: true, key: 'again' }));
     frag.appendChild(row);
   },
 };

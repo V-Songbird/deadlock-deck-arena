@@ -12,10 +12,12 @@ window.DD = window.DD || {};
   const WEAK_MULT = 0.67;  // weak: -33% damage dealt
 
   const SLOT_ES = {
-    head: 'cabeza', torso: 'torso', armL: 'brazo izquierdo',
-    armR: 'brazo derecho', legL: 'pierna izquierda', legR: 'pierna derecha'
+    head: DD.T('cabeza'), torso: DD.T('torso'), armL: DD.T('brazo izquierdo'),
+    armR: DD.T('brazo derecho'), legL: DD.T('pierna izquierda'), legR: DD.T('pierna derecha')
   };
-  const STATUS_ES = { bleed: 'Sangrado', vulnerable: 'Vulnerable', weak: 'Débil' };
+  const STATUS_ES = {
+    bleed: DD.T('Sangrado'), vulnerable: DD.T('Vulnerable'), weak: DD.T('Débil')
+  };
 
   // start() receives the rng and CombatState has no field for it, so it lives here.
   // Only one combat runs at a time.
@@ -69,7 +71,7 @@ window.DD = window.DD || {};
     }
     if (drawn > 0) {
       events.push({ type: 'draw', amount: drawn });
-      log(state, 'Robas ' + drawn + '.');
+      log(state, DD.T('Robas {0}.', drawn));
     }
     return drawn;
   }
@@ -89,7 +91,7 @@ window.DD = window.DD || {};
     purgeSlot(state, slotKey);
     if (limbId) events.push({ type: 'break', slot: slotKey, limbId: limbId });
     const def = limbId ? DD.DATA.LIMBS[limbId] : null;
-    log(state, (def ? def.name : SLOT_ES[slotKey] || slotKey) + ' se rompe.');
+    log(state, DD.T('{0} se rompe.', def ? def.name : SLOT_ES[slotKey] || slotKey));
   }
 
   function heatSlot(state, body, slotKey, amount, events) {
@@ -98,7 +100,7 @@ window.DD = window.DD || {};
     const limbId = body.slots[slotKey] ? body.slots[slotKey].limbId : null;
     const res = DD.Body.applyHeat(body, slotKey, amount);
     events.push({ type: 'heat', slot: slotKey, amount: amount });
-    log(state, 'Calor +' + amount + ' en ' + (SLOT_ES[slotKey] || slotKey) + '.');
+    log(state, DD.T('Calor +{0} en {1}.', [amount, SLOT_ES[slotKey] || slotKey]));
     if (res && res.broken) breakLimb(state, body, slotKey, limbId, events);
   }
 
@@ -108,7 +110,7 @@ window.DD = window.DD || {};
     state.over = true;
     state.result = result;
     events.push({ type: 'end', result: result });
-    log(state, result === 'win' ? '¡El enemigo cae!' : 'Tu cuerpo se deshace.');
+    log(state, result === 'win' ? DD.T('¡El enemigo cae!') : DD.T('Tu cuerpo se deshace.'));
   }
 
   function hurtEnemy(state, amount, events) {
@@ -124,12 +126,12 @@ window.DD = window.DD || {};
       state.enemy.block -= absorbed;
       dmg -= absorbed;
       events.push({ type: 'block', target: 'enemy', amount: absorbed });
-      log(state, 'El enemigo bloquea ' + absorbed + '.');
+      log(state, DD.T('El enemigo bloquea {0}.', absorbed));
     }
     if (dmg > 0) {
       state.enemy.hp = Math.max(0, state.enemy.hp - dmg);
       events.push({ type: 'damage', target: 'enemy', amount: dmg });
-      log(state, dmg + ' de daño al enemigo.');
+      log(state, DD.T('{0} de daño al enemigo.', dmg));
     }
     if (state.enemy.hp <= 0) finish(state, 'win', events);
   }
@@ -146,12 +148,12 @@ window.DD = window.DD || {};
       state.block -= absorbed;
       dmg -= absorbed;
       events.push({ type: 'block', target: 'player', amount: absorbed });
-      log(state, 'Bloqueas ' + absorbed + '.');
+      log(state, DD.T('Bloqueas {0}.', absorbed));
     }
     if (dmg > 0) {
       body.hp = Math.max(0, body.hp - dmg);
       events.push({ type: 'damage', target: 'player', amount: dmg });
-      log(state, 'Recibes ' + dmg + ' de daño.');
+      log(state, DD.T('Recibes {0} de daño.', dmg));
     }
     if (body.hp <= 0) finish(state, 'lose', events);
   }
@@ -160,7 +162,7 @@ window.DD = window.DD || {};
   function bleedBody(state, body, amount, events) {
     body.hp = Math.max(0, body.hp - amount);
     events.push({ type: 'damage', target: 'player', amount: amount });
-    log(state, 'Sangras ' + amount + '.');
+    log(state, DD.T('Sangras {0}.', amount));
     if (body.hp <= 0) finish(state, 'lose', events);
   }
 
@@ -178,7 +180,7 @@ window.DD = window.DD || {};
       case 'block':
         state.block += amount;
         events.push({ type: 'block', target: 'player', amount: amount });
-        log(state, 'Ganas ' + amount + ' de bloque.');
+        log(state, DD.T('Ganas {0} de bloque.', amount));
         break;
 
       case 'heal': {
@@ -188,7 +190,7 @@ window.DD = window.DD || {};
         const healed = body.hp - before;
         if (healed > 0) {
           events.push({ type: 'heal', amount: healed });
-          log(state, 'Te coses ' + healed + ' PV.');
+          log(state, DD.T('Te coses {0} PV.', healed));
         }
         break;
       }
@@ -199,12 +201,12 @@ window.DD = window.DD || {};
 
       case 'energy':
         state.energy += amount;
-        log(state, 'Energía +' + amount + '.');
+        log(state, DD.T('Energía +{0}.', amount));
         break;
 
       case 'cool':
         DD.Body.cool(body, amount);
-        log(state, 'Se enfría tu carne.');
+        log(state, DD.T('Se enfría tu carne.'));
         break;
 
       case 'bleed':
@@ -212,23 +214,23 @@ window.DD = window.DD || {};
       case 'weak':
         state.enemy[effect.op] += amount;
         events.push({ type: 'status', name: effect.op, target: 'enemy', amount: amount });
-        log(state, 'Aplicas ' + STATUS_ES[effect.op] + ' ' + amount + '.');
+        log(state, DD.T('Aplicas {0} {1}.', [STATUS_ES[effect.op], amount]));
         break;
 
       case 'stun':
         state.enemy.stun += 1;
         events.push({ type: 'status', name: 'stun', target: 'enemy', amount: 1 });
-        log(state, 'El enemigo queda aturdido.');
+        log(state, DD.T('El enemigo queda aturdido.'));
         break;
 
       case 'harvest':
         state.harvestAll = true;
-        log(state, 'Puedes cosechar todo el cuerpo.');
+        log(state, DD.T('Puedes cosechar todo el cuerpo.'));
         break;
 
       case 'time':
         events.push({ type: 'time', amount: amount });
-        log(state, 'El reloj retrocede ' + amount + ' s.');
+        log(state, DD.T('El reloj retrocede {0} s.', amount));
         break;
 
       default:
@@ -248,7 +250,7 @@ window.DD = window.DD || {};
   }
 
   function startPlayerTurn(state, body, events) {
-    log(state, 'Turno ' + state.turn + '.');
+    log(state, DD.T('Turno {0}.', state.turn));
     state.block = 0;
     if (state.bleed > 0) {
       const tick = state.bleed;
@@ -265,13 +267,13 @@ window.DD = window.DD || {};
     const enemy = state.enemy;
     switch (intent.type) {
       case 'attack':
-        log(state, enemy.name + ' ataca.');
+        log(state, DD.T('{0} ataca.', enemy.name));
         hurtPlayer(state, body, intent.amount || 0, events);
         break;
 
       case 'multi': {
         const times = intent.times || 1;
-        log(state, enemy.name + ' ataca ' + times + ' veces.');
+        log(state, DD.T('{0} ataca {1} veces.', [enemy.name, times]));
         for (let i = 0; i < times && !state.over; i++) {
           hurtPlayer(state, body, intent.amount || 0, events);
         }
@@ -281,16 +283,16 @@ window.DD = window.DD || {};
       case 'block':
         enemy.block += intent.amount || 0;
         events.push({ type: 'block', target: 'enemy', amount: intent.amount || 0 });
-        log(state, 'El enemigo se protege.');
+        log(state, DD.T('El enemigo se protege.'));
         break;
 
       case 'heat': {
         const intact = DD.Body.intactSlots(body);
         if (!intact.length) {
-          log(state, 'No queda carne que quemar.');
+          log(state, DD.T('No queda carne que quemar.'));
           break;
         }
-        log(state, 'El enemigo te recalienta.');
+        log(state, DD.T('El enemigo te recalienta.'));
         heatSlot(state, body, intact[randInt(intact.length)], intent.amount || 0, events);
         break;
       }
@@ -299,7 +301,7 @@ window.DD = window.DD || {};
       case 'weak':
         state[intent.type] += intent.amount || 0;
         events.push({ type: 'status', name: intent.type, target: 'player', amount: intent.amount || 0 });
-        log(state, 'Sufres ' + STATUS_ES[intent.type] + ' ' + (intent.amount || 0) + '.');
+        log(state, DD.T('Sufres {0} {1}.', [STATUS_ES[intent.type], intent.amount || 0]));
         break;
 
       default:
@@ -316,7 +318,7 @@ window.DD = window.DD || {};
       enemy.bleed -= 1;
       enemy.hp = Math.max(0, enemy.hp - tick);
       events.push({ type: 'damage', target: 'enemy', amount: tick });
-      log(state, 'El enemigo sangra ' + tick + '.');
+      log(state, DD.T('El enemigo sangra {0}.', tick));
       if (enemy.hp <= 0) {
         finish(state, 'win', events);
         return;
@@ -325,7 +327,7 @@ window.DD = window.DD || {};
 
     if (enemy.stun > 0) {
       enemy.stun -= 1;
-      log(state, 'El enemigo está aturdido.');
+      log(state, DD.T('El enemigo está aturdido.'));
       return;
     }
 
@@ -372,7 +374,7 @@ window.DD = window.DD || {};
       pending: []            // not in §4: the opening draw's events, see takePending
     };
 
-    log(state, '¡' + state.enemy.name + ' te cierra el paso!');
+    log(state, DD.T('¡{0} te cierra el paso!', state.enemy.name));
     startPlayerTurn(state, body, state.pending);
     return state;
   }
@@ -395,7 +397,7 @@ window.DD = window.DD || {};
     takePending(state, events);
     state.hand.splice(handIndex, 1);
     state.energy -= card.cost || 0;
-    log(state, 'Juegas ' + card.name + '.');
+    log(state, DD.T('Juegas {0}.', card.name));
 
     const effects = card.effects || [];
     for (let i = 0; i < effects.length; i++) {
@@ -421,7 +423,7 @@ window.DD = window.DD || {};
     state.hand = [];
     if (state.vulnerable > 0) state.vulnerable -= 1;
     if (state.weak > 0) state.weak -= 1;
-    log(state, 'Terminas el turno.');
+    log(state, DD.T('Terminas el turno.'));
 
     enemyTurn(state, body, events);
     if (state.over) return { events: events };

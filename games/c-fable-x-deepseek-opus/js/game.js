@@ -120,7 +120,7 @@ const Game = {
       if (G.timeLeft > 0 && G.timeLeft < 30 && Math.ceil(G.timeLeft) !== Math.ceil(before)) Snd.sfx('tick');
       if (G.timeLeft <= 0) {
         G.timeLeft = 0;
-        Game.die('el reloj');
+        Game.die(I18N.t('el reloj'));
       }
     }
 
@@ -131,7 +131,7 @@ const Game = {
         if (F) {
           Tower.shift(F);
           Tower.spawnEnemy(F, G.pos.x, G.pos.y);
-          Game.say('¡El laberinto se retuerce!');
+          Game.say(I18N.t('¡El laberinto se retuerce!'));
           Snd.sfx('shift');
         }
         G.shiftIn = DATA.SHIFT_SECONDS;
@@ -169,7 +169,7 @@ const Game = {
     G.run.grafts += 1;
     if (G.meta.discovered.indexOf(limbId) < 0) G.meta.discovered.push(limbId);
     Snd.sfx('graft');
-    Game.say(`Injertas ${limb.name} en tu ${String(DATA.SLOT_NAMES[slot]).toLowerCase()}`);
+    Game.say(I18N.t('Injertas {0} en tu {1}', limb.name, String(DATA.SLOT_NAMES[slot]).toLowerCase()));
     Game._backToExplore();
   },
 
@@ -206,7 +206,7 @@ const Game = {
     const owned = cosmetic ? G.meta.cosmetics.indexOf(id) >= 0 : G.meta.unlocks.indexOf(id) >= 0;
     if (owned) return;
     if (G.meta.essence < item.price) {
-      Game.say('Esencia insuficiente');
+      Game.say(I18N.t('Esencia insuficiente'));
       return;
     }
     G.meta.essence -= item.price;
@@ -218,7 +218,7 @@ const Game = {
         if (DATA.limbs[limbId] && G.meta.discovered.indexOf(limbId) < 0) G.meta.discovered.push(limbId);
       });
     }
-    Game.say(`Compras ${item.name}`);
+    Game.say(I18N.t('Compras {0}', item.name));
     Game.save();
     Snd.sfx('buy');
   },
@@ -271,7 +271,7 @@ const Game = {
     } catch (e) { /* quota or a blocked store: progress just is not persisted */ }
   },
 
-  /** The run ends in death (§6.6). @param {string} cause Spanish text */
+  /** The run ends in death (§6.6). @param {string} cause already translated text */
   die(cause) {
     const G = Game.G;
     if (!G || G.screen === 'death' || G.screen === 'escape') return;
@@ -416,28 +416,28 @@ const Game = {
     const G = Game.G;
     const res = DATA.resources[cell.content];
     const fx = (res && res.fx) || {};
-    const name = (res && res.name) || 'Un hallazgo';
+    const name = (res && res.name) || I18N.t('Un hallazgo');
     let text = `${name}.`;
     if (fx.heal) {
       const before = G.body.hp;
       G.body.hp = Math.min(G.body.maxHp, G.body.hp + fx.heal);
-      text = `${name}: recuperas ${G.body.hp - before} PV.`;
+      text = I18N.t('{0}: recuperas {1} PV.', name, G.body.hp - before);
     }
     if (fx.cool) {
       Body.cool(G.body, fx.cool);
-      text = `${name}: el frío recorre tus junturas.`;
+      text = I18N.t('{0}: el frío recorre tus junturas.', name);
     }
     if (fx.essence) {
       G.run.essence += fx.essence;
-      text = `${name}: +${fx.essence} de esencia.`;
+      text = I18N.t('{0}: +{1} de esencia.', name, fx.essence);
     }
     if (fx.blueprint) {
       const found = Game._discover();
       if (found) {
-        text = `${name}: descubres ${DATA.limbs[found].name}.`;
+        text = I18N.t('{0}: descubres {1}.', name, DATA.limbs[found].name);
       } else {
         G.run.essence += 10;   // nothing left to discover: the parchment is worth essence
-        text = `${name}: ya no queda plano por descubrir; +10 de esencia.`;
+        text = I18N.t('{0}: ya no queda plano por descubrir; +10 de esencia.', name);
       }
     }
     cell.type = DATA.ROOM.EMPTY;
@@ -457,16 +457,16 @@ const Game = {
     });
     cell.type = DATA.ROOM.EMPTY;
     cell.content = null;
-    let text = `¡Una trampa! Pierdes ${DATA.TRAP_DAMAGE} PV.`;
+    let text = I18N.t('¡Una trampa! Pierdes {0} PV.', DATA.TRAP_DAMAGE);
     if (broken.length) {
-      text += ` Se te rompe la ${broken.join(' y la ')}`;
+      text += I18N.t(' Se te rompe la {0}', broken.join(I18N.t(' y la ')));
       Snd.sfx('break');
     }
     Game.say(text);
     Snd.sfx('trap');
     if (G.body.hp <= 0) {
       G.body.hp = 0;
-      Game.die('una trampa');
+      Game.die(I18N.t('una trampa'));
     }
   },
 
@@ -479,7 +479,7 @@ const Game = {
     G.pos.x = next.start.x;
     G.pos.y = next.start.y;
     Tower.reveal(next, G.pos.x, G.pos.y);
-    Game.say(`Subes al piso ${G.floor + 1}`);
+    Game.say(I18N.t('Subes al piso {0}', G.floor + 1));
     Snd.sfx('stairs');
   },
 
