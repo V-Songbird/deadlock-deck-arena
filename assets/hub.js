@@ -143,10 +143,12 @@
   function openHashTarget() {
     var id = location.hash.slice(1);
     var el = id && document.getElementById(id);
-    if (el && el.tagName === 'DETAILS' && !el.open) {
-      el.open = true;
-      el.scrollIntoView();
-    }
+    if (!el || el.tagName !== 'DETAILS' || el.open) return;
+    el.open = true;
+    // The browser has usually scrolled here already; scrolling again on top of
+    // its own jump races it and leaves the page half-painted.
+    var top = el.getBoundingClientRect().top;
+    if (top < 0 || top > window.innerHeight) el.scrollIntoView();
   }
   window.addEventListener('hashchange', openHashTarget);
 
