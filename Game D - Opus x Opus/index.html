@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Deadlock Deck: El Reloj Anatómico</title>
+<style>
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: #08070c; color: #d9cfb8;
+    font-family: monospace;
+    overflow: hidden;
+    touch-action: manipulation;
+  }
+  /* render.js positions and scales the canvas itself (fixed, integer scale). */
+  #wrap {
+    position: fixed; inset: 0; z-index: 0;
+    background: radial-gradient(ellipse at 50% 0%, #1b1420 0%, #08070c 70%);
+  }
+  canvas {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    display: block;
+    z-index: 2;
+    box-shadow: 0 0 0 1px #332a3d, 0 0 60px #000;
+    cursor: crosshair;
+  }
+  #hint {
+    position: fixed; bottom: 4px; left: 0; right: 0; z-index: 1;
+    text-align: center; font-size: 11px; color: #4a3f55;
+    letter-spacing: 1px; pointer-events: none;
+  }
+</style>
+</head>
+<body>
+  <div id="wrap"><canvas id="game"></canvas></div>
+  <div id="hint">RATÓN / 1-6 MOVER · F BAJAR · ESPACIO FIN DE TURNO · M SILENCIO</div>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

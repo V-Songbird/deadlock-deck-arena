@@ -1,0 +1,2990 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#172012">
+  <meta name="description" content="Deadlock Deck: El Reloj Anatómico. Un roguelike de cartas en el que tu cuerpo es tu mazo. Seis minutos para escapar de una torre alquímica en llamas.">
+  <title>Deadlock Deck — El Reloj Anatómico</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2064%2064%22%20shape-rendering%3D%22crispEdges%22%3E%3Cpath%20fill%3D%22%23172012%22%20d%3D%22M0%200h64v64H0z%22/%3E%3Cpath%20fill%3D%22%23d9b46d%22%20d%3D%22M16%2010h32v5h5v27H43v12H21V42H11V15h5z%22/%3E%3Cpath%20fill%3D%22%23172012%22%20d%3D%22M18%2022h10v10H18zm18%200h10v10H36zm-6%2010h4v8h-4zm-3%2014h3v8h-3zm7%200h3v8h-3z%22/%3E%3C/svg%3E%0A">
+  <style>
+/* Deadlock Deck — gótico alquímico, tinta, latón y fósforo. */
+:root {
+  color-scheme: dark;
+  --bg: #10140f;
+  --panel: #151a14;
+  --panel-deep: #111610;
+  --line: #31372a;
+  --line-soft: #252b21;
+  --text: #e0d6bf;
+  --muted: #a1a590;
+  --dim: #727c69;
+  --gold: #d9b46d;
+  --gold-soft: #a48750;
+  --green: #9bb398;
+  --red: #d98d76;
+  --blue: #90b3ad;
+  --serif: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+  --sans: Inter, 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+* { box-sizing: border-box; }
+html { background: var(--bg); scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: radial-gradient(ellipse at 45% 15%, #1c2218 0, #11170f 45%, #0d120e 100%);
+  color: var(--text);
+  font: 14px/1.5 var(--sans);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 20;
+  opacity: .022;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, #b8b190 2px, #b8b190 3px);
+}
+button, input, select { font: inherit; }
+button { cursor: pointer; color: inherit; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+button:disabled { cursor: not-allowed; }
+button, a, input { outline-offset: 5px; }
+button:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid #f0cf87; }
+a { color: inherit; text-decoration: none; }
+button { border-radius: 0; }
+h1, h2, h3, p { margin: 0; }
+.icon { width: 19px; height: 19px; flex: 0 0 auto; display: inline-block; vertical-align: middle; }
+.eyebrow { color: var(--muted); font-size: 10px; font-weight: 600; letter-spacing: 1.4px; line-height: 1.6; text-transform: uppercase; }
+.eyebrow .icon { width: 13px; height: 13px; margin-right: 3px; }
+.muted, .subtle { color: var(--muted); }
+.text-gold { color: var(--gold); }
+.text-green { color: var(--green); }
+.text-red { color: var(--red); }
+.separator { color: var(--gold-soft); padding: 0 7px; }
+.live-dot { display: inline-block; width: 5px; height: 5px; background: var(--gold); box-shadow: 0 0 9px #cfa55b55; border-radius: 50%; flex: 0 0 auto; }
+.btn {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  border: 1px solid #53563d;
+  background: #20271b;
+  padding: 10px 15px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .25px;
+  line-height: 1.4;
+  transition: background .15s, border-color .15s, transform .15s;
+}
+.btn:hover:not(:disabled) { background: #2e3624; border-color: #999067; }
+.btn:active:not(:disabled) { transform: translateY(1px); }
+.btn:disabled { color: #707964; border-color: #343c2d; background: #1a2017; }
+.btn.primary { color: #1b2116; background: #d1b072; border-color: #e5c58b; box-shadow: inset 0 0 0 3px #d1b072, inset 0 0 0 4px #917d4d; }
+.btn.primary:hover:not(:disabled) { background: #e4c38c; box-shadow: inset 0 0 0 3px #e4c38c, inset 0 0 0 4px #ad965f; }
+.btn.primary:disabled { background: #5e6248; border-color: #717355; color: #303b2d; box-shadow: none; }
+.btn.quiet { border-color: transparent; background: transparent; color: var(--muted); }
+.btn.quiet:hover:not(:disabled) { color: var(--text); background: #242c20; }
+.btn.small { font-size: 11px; padding: 8px 10px; min-height: 38px; }
+.btn.small .icon { width: 15px; height: 15px; }
+.btn.icon-only { width: 40px; height: 40px; padding: 0; }
+.btn.wide { width: 100%; }
+.btn.danger-outline { color: var(--red); border-color: #744c3e; background: #2d201a; }
+.btn.danger-outline:hover:not(:disabled) { background: #452b22; border-color: #c08468; }
+kbd { font: 9px/1 var(--sans); color: var(--muted); padding: 4px 5px; border: 1px solid #596046; font-weight: 500; border-radius: 2px; }
+.topbar {
+  height: 83px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 0 32px;
+  border-bottom: 1px solid #3c4130;
+  background: #10160feb;
+}
+.brand { display: flex; align-items: center; gap: 13px; }
+.brand-mark { display: grid; place-items: center; width: 43px; height: 47px; color: var(--gold); background: #2a2c1c; border: 1px solid #7d7046; position: relative; clip-path: polygon(0 0, 100% 0, 100% 83%, 50% 100%, 0 83%); }
+.brand-mark::before { content: ''; position: absolute; inset: 4px; border: 1px solid #766940; clip-path: polygon(0 0, 100% 0, 100% 83%, 50% 100%, 0 83%); }
+.brand-mark .icon { width: 25px; height: 25px; }
+.brand strong { display: block; font: 700 21px/1.1 var(--serif); letter-spacing: 1.5px; }
+.brand-dot { color: var(--gold); }
+.brand small { display: block; margin-top: 6px; font-size: 8px; letter-spacing: 3.45px; color: var(--muted); }
+.header-middle { color: #b6a781; font-size: 9px; letter-spacing: 2px; display: flex; gap: 9px; align-items: center; }
+.header-actions { display: flex; gap: 3px; align-items: center; }
+.header-actions .btn { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; }
+.header-actions .desktop-label { margin-right: 5px; padding-left: 9px; padding-right: 9px; }
+.game-shell { width: 100%; max-width: 1660px; margin: 0 auto; padding: 0 30px 20px; }
+.status-bar { display: grid; grid-template-columns: 1.3fr 1.1fr 1.5fr .5fr .4fr; gap: 36px; align-items: center; padding: 19px 0 23px; }
+.subject-block strong { font: 17px/1.5 var(--serif); display: block; margin-top: 3px; }
+.subject-block .subtle { font: 11px var(--sans); }
+.stat-line { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.stat-line > span { font-size: 9px; font-weight: 600; color: var(--muted); letter-spacing: 1.2px; display: flex; align-items: center; gap: 6px; }
+.stat-line > span .icon { width: 15px; height: 15px; color: #be806d; }
+.stat-line strong { font-size: 16px; color: #d1b8a0; font-weight: 500; }
+.stat-line strong span { color: var(--muted); font-size: 11px; }
+.health-track { width: 100%; height: 5px; background: #3f2c24; margin-top: 8px; border: 1px solid #52352a; }
+.health-track > span { display: block; height: 3px; background: linear-gradient(to right, #966752, #ce9578); transition: width .2s; }
+.clock-block { position: relative; padding: 0 22px; display: grid; grid-template-columns: 1fr auto; gap: 4px 17px; align-items: center; border-left: 1px solid var(--line); border-right: 1px solid var(--line); }
+.clock-label { display: block; font-size: 8px; color: var(--muted); letter-spacing: 1.45px; max-width: 120px; line-height: 1.6; }
+.clock-label .icon { color: var(--gold); width: 15px; height: 15px; margin-right: 2px; }
+#clock { font: 36px/1 'Courier New', monospace; letter-spacing: 1px; color: var(--gold); font-variant-numeric: tabular-nums; text-shadow: 0 0 16px #b9994422; }
+.clock-track { grid-column: 1 / -1; background: #383923; height: 3px; overflow: hidden; margin-top: 5px; }
+#clock-fill { display: block; height: 3px; background: repeating-linear-gradient(90deg, var(--gold) 0, var(--gold) 10px, #574f32 10px, #574f32 12px); transition: width .2s linear; }
+.clock-block.critical #clock { color: #f3a081; }
+.clock-block.critical #clock-fill { background: #da8564; }
+.clock-block.critical .clock-label { color: #d29479; }
+.resource-block > strong { display: block; font: 24px/1.3 var(--serif); color: #bfb389; margin-top: 3px; }
+.resource-block .eyebrow { font-size: 8px; white-space: nowrap; }
+.echoes-stat > strong { color: #97b6a0; }
+.game-grid { display: grid; grid-template-columns: 238px minmax(0, 1fr) 218px; gap: 19px; align-items: start; }
+.panel { background: #141b12; border: 1px solid #363e2d; box-shadow: 0 5px 20px #0000000f; }
+.panel-title { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); min-height: 49px; gap: 8px; }
+.panel-title h2 { font: 18px var(--serif); letter-spacing: .1px; }
+.panel-title > span { color: var(--dim); font-size: 8px; letter-spacing: 1.1px; }
+.panel-title .icon { color: var(--gold-soft); width: 17px; height: 17px; }
+.anatomy-panel { padding: 0 14px 14px; }
+.anatomy-illustration { height: 146px; display: grid; place-items: center; position: relative; overflow: hidden; margin: 0 -4px; background: radial-gradient(ellipse, #242e1d55, transparent 68%); }
+.anatomy-illustration canvas { image-rendering: pixelated; width: 200px; height: 148px; }
+.specimen-tag { position: absolute; bottom: 5px; right: 6px; color: #69745e; font: 7px monospace; letter-spacing: 2px; }
+.anatomy-slots { display: grid; gap: 5px; }
+.body-slot { display: flex; gap: 9px; padding: 9px 7px; min-height: 62px; width: 100%; background: #192014; border: 1px solid #323c29; text-align: left; transition: border-color .15s, background .15s; }
+.body-slot:hover { background: #25301d; border-color: #707d50; }
+.slot-glyph { display: flex; align-items: center; color: #969d75; padding: 0 1px; }
+.slot-glyph .icon { width: 20px; height: 20px; }
+.slot-content { flex: 1; min-width: 0; }
+.slot-heading { display: flex; justify-content: space-between; align-items: center; font-size: 8px; color: #9da38c; text-transform: uppercase; letter-spacing: .7px; line-height: 1; }
+.slot-heading b { font-size: 9px; color: #a2aa82; font-weight: 400; }
+.slot-content > strong { display: block; font-size: 11px; font-weight: 500; color: #d0cdb2; margin: 5px 0; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; line-height: 1.25; }
+.limb-meter, .heat-meter { display: block; height: 2px; background: #303928; overflow: hidden; }
+.limb-meter i, .heat-meter i { display: block; height: 100%; }
+.limb-meter i { opacity: .85; }
+.heat-meter { background: transparent; height: 1px; margin-top: 2px; }
+.heat-meter i { background: #d4985b; }
+.body-slot.hot { border-color: #8b6840; background: #2a2718; }
+.body-slot.hot .slot-heading b { color: #ebad6c; }
+.body-slot.broken { border-color: #774a39; background: #291c15; }
+.body-slot.broken .slot-heading b { color: var(--red); }
+.anatomy-legend { display: flex; gap: 14px; justify-content: center; color: var(--dim); font-size: 8px; margin: 11px 0 14px; }
+.anatomy-legend > span { display: flex; align-items: center; gap: 5px; }
+.integrity-dot, .heat-dot { display: inline-block; width: 8px; height: 2px; background: #a8ac87; }
+.heat-dot { background: #d59c5d; }
+.bag-button { background: #272d1b; font-size: 10px; text-transform: uppercase; letter-spacing: .9px; padding: 10px 8px; border-color: #5e6140; justify-content: flex-start; }
+.bag-button > span { flex: 1; text-align: left; }
+.bag-button b { float: right; display: inline-block; min-width: 19px; text-align: center; color: var(--gold); }
+.bag-button .icon { width: 16px; height: 16px; color: #c2ac72; }
+.consumables { display: grid; gap: 5px; margin-top: 12px; }
+.consumable { display: flex; align-items: center; gap: 8px; border: 1px solid #2e3928; background: #162014; padding: 8px; text-align: left; }
+.consumable .icon { width: 18px; height: 18px; color: #c1926c; }
+.consumable.coolant .icon { color: #91b1a3; }
+.consumable > span { flex: 1; font-size: 10px; }
+.consumable small { color: var(--dim); display: block; font-size: 8px; }
+.consumable b { color: #c4b481; font-weight: 500; font-size: 13px; }
+.consumable:disabled { opacity: .45; }
+.consumable:hover:not(:disabled) { border-color: #7a8651; background: #24301d; }
+.center-column { min-width: 0; }
+.scene-panel { overflow: hidden; }
+.scene-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px 13px; border-bottom: 1px solid #3d432e; background: linear-gradient(90deg, #1b2216, #182013); }
+.scene-heading h1 { font: 22px/1.25 var(--serif); margin-top: 3px; }
+.scene-heading .eyebrow { font-size: 8px; letter-spacing: .95px; }
+.phase-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 8px; font-weight: 500; letter-spacing: .7px; color: #b4b58b; border: 1px solid #495137; padding: 6px 8px; white-space: nowrap; }
+.phase-badge .icon { width: 13px; height: 13px; }
+.combat-badge { color: #d39b76; border-color: #785943; background: #332a1c; }
+.scene-wrap { position: relative; background: #161a13; height: 302px; overflow: hidden; }
+#scene { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center 66%; image-rendering: pixelated; }
+.scene-topline, .scene-bottomline { display: flex; align-items: center; justify-content: space-between; position: absolute; left: 14px; right: 14px; pointer-events: none; font-size: 7px; letter-spacing: 1.2px; color: #c1b88d; text-shadow: 0 1px 5px #000; }
+.scene-topline { top: 12px; }
+.scene-topline .icon { width: 12px; height: 12px; color: #a19464; margin-right: 5px; }
+.scene-coordinates { font-family: monospace; font-size: 9px; }
+.scene-bottomline { bottom: 9px; color: #a29e7e; font-size: 7px; }
+.combat-info { position: absolute; inset: 41px 16px auto; display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; }
+.player-chip { font-size: 8px; letter-spacing: .6px; color: #bdd0b8; padding: 5px 8px; background: #172318ba; border: 1px solid #74866b55; }
+.player-chip .icon { width: 12px; height: 12px; margin-right: 3px; }
+.enemy-chip { width: 220px; background: #191b12ec; border-left: 2px solid #ad8055; padding: 8px 11px; }
+.enemy-kind { color: #b19465; font-size: 7px; letter-spacing: 1.2px; display: block; }
+.enemy-chip h3 { font: 17px/1.4 var(--serif); color: #e8d3aa; }
+.enemy-health { height: 4px; background: #533427; margin: 6px 0 3px; }
+.enemy-health > i { display: block; height: 4px; background: #b6805c; transition: width .16s; }
+.enemy-numbers { display: flex; justify-content: space-between; gap: 6px; color: #c1ae82; font-size: 8px; }
+.enemy-numbers > span:last-child { color: #c49768; font-size: 7px; }
+.enemy-intent { position: absolute; bottom: 32px; right: 18px; padding: 7px 10px; background: #2a251bf0; border: 1px solid #826a42; color: #e9c28a; display: flex; align-items: center; gap: 7px; font-size: 10px; box-shadow: 0 4px 13px #0005; }
+.enemy-intent .icon { width: 14px; height: 14px; }
+.enemy-intent.stunned, .enemy-intent.guard { color: #b3c3a2; border-color: #647650; background: #1b291bd9; }
+.room-event { display: flex; align-items: center; justify-content: space-between; gap: 17px; padding: 17px 18px; background: #1a2114; border-top: 1px solid #3f452e; min-height: 89px; }
+.event-copy { min-width: 0; }
+.event-copy h3 { font: 17px/1.35 var(--serif); color: #dacfaa; }
+.event-copy p { font-size: 10px; color: #a8ac91; line-height: 1.65; margin-top: 4px; max-width: 480px; }
+.event-copy .eyebrow { font-size: 8px; letter-spacing: 1px; display: block; margin-bottom: 2px; }
+.event-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 7px; flex: 0 1 auto; }
+.event-actions .btn { font-size: 10px; white-space: nowrap; min-height: 39px; }
+.room-event > .btn { white-space: nowrap; }
+.event-emblem { color: var(--gold); display: grid; place-items: center; width: 41px; height: 44px; border: 1px solid #74653e; background: #34331c; flex-shrink: 0; }
+.event-emblem .icon { width: 23px; height: 23px; }
+.loot-event .event-copy { flex: 1; }
+.loot-event .event-actions { flex-direction: column; }
+.workshop-event, .trap-event { align-items: flex-start; flex-direction: column; }
+.workshop-event .event-actions, .trap-event .event-actions { justify-content: flex-start; width: 100%; }
+.combat-guidance { display: flex; gap: 10px; align-items: center; justify-content: space-between; font-size: 10px; color: #aeb49a; background: #192216; border-top: 1px solid var(--line); padding: 14px 17px; min-height: 62px; }
+.combat-guidance > span:first-child { flex: 1; }
+.combat-guidance > span:last-child { font-size: 9px; color: #b9b59c; white-space: nowrap; }
+.combat-guidance .icon { width: 14px; height: 14px; margin-right: 4px; color: #a19c6e; }
+.combat-guidance strong { color: #d5d6b5; margin-right: 3px; }
+.movement { display: flex; align-items: center; gap: 7px; padding: 0 17px 15px; background: #1a2114; }
+.direction-button { min-height: 38px; padding: 8px 11px; font-size: 10px; background: #242d1c; border-color: #586340; flex: 1; }
+.direction-button .icon { width: 15px; height: 15px; }
+.direction-button:disabled { opacity: .35; }
+.movement-hint { font-size: 7px; line-height: 1.9; letter-spacing: 1px; color: #707b60; margin-left: 5px; min-width: 64px; }
+.movement-hint > span { display: none; }
+.hand-section { margin-top: 16px; }
+.hand-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 0 2px 12px; }
+.hand-header > div { display: flex; align-items: baseline; gap: 13px; }
+.hand-header h2 { font: 18px var(--serif); }
+.hand-header > div > span { font-size: 7px; color: #8d987d; letter-spacing: .85px; }
+.text-button { background: transparent; color: #b5b08a; border: none; font-size: 9px; padding: 4px 0 4px 6px; min-height: 30px; }
+.text-button .icon { width: 13px; height: 13px; margin-left: 5px; }
+.text-button:hover { color: var(--gold); }
+.hand { display: flex; gap: 9px; padding: 5px 3px 11px; margin: -5px -3px -5px; overflow-x: auto; scrollbar-width: thin; scrollbar-color: #767548 transparent; scroll-snap-type: x proximity; align-items: stretch; }
+.anatomy-card { --part-color: #a4b094; display: flex; flex-direction: column; position: relative; flex: 1 0 0; min-width: 102px; padding: 10px 10px 0; min-height: 197px; border: 1px solid #797249; background: linear-gradient(155deg, #323824, #222b1b 45%, #1b2418); text-align: left; box-shadow: inset 0 0 0 3px #1b2318, inset 0 0 0 4px #454b31; transition: transform .16s, background .16s, border-color .16s; scroll-snap-align: start; }
+.anatomy-card::after { content: ''; position: absolute; left: 7px; right: 7px; bottom: 31px; height: 1px; background: #525537; opacity: .6; }
+.anatomy-card:hover:not(:disabled) { transform: translateY(-4px); background: linear-gradient(155deg, #4a4d2e, #323b23 45%, #222f1e); border-color: #d1b971; z-index: 1; }
+.anatomy-card:active:not(:disabled) { transform: translateY(-1px); }
+.anatomy-card:disabled:not(.preview-card) { opacity: .6; }
+.anatomy-card.preview-card { cursor: default; }
+.card-top { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
+.energy-cost { display: grid; place-items: center; width: 24px; height: 24px; font: 19px var(--serif); color: #e3d5a3; border: 1px solid #978454; background: #353723; box-shadow: inset 0 0 0 2px #202a1a; border-radius: 50%; flex-shrink: 0; }
+.card-origin { font-size: 6.5px; text-transform: uppercase; letter-spacing: .8px; color: var(--part-color); text-align: right; flex: 1; }
+.card-top kbd { color: #a2a982; font-size: 7px; padding: 2px; border-color: #4f5637; border-radius: 0; }
+.preview-card kbd, .detail-cards kbd, .deck-grid kbd { display: none; }
+.card-art { display: grid; place-items: center; height: 61px; flex: 0 0 61px; position: relative; margin-top: 3px; background: radial-gradient(ellipse, #7f8b4540, transparent 68%); }
+.card-art::before { content: ''; position: absolute; width: 48px; height: 48px; border: 1px solid #75764c66; transform: rotate(45deg); }
+.pixel-symbol { width: 60px; height: 60px; position: relative; filter: drop-shadow(0 3px 2px #050b0566); }
+.anatomy-card h3 { font: 600 14px/1.18 var(--serif); color: #e1d4ac; margin-top: 4px; min-height: 33px; }
+.anatomy-card p { font-size: 9px; color: #bfc2a4; line-height: 1.6; margin: 4px 0 10px; flex: 1; }
+.card-bottom { display: flex; justify-content: space-between; align-items: center; gap: 4px; font-size: 8px; color: #b9ab78; height: 31px; flex: 0 0 31px; }
+.card-bottom .icon { width: 12px; height: 12px; margin-right: 1px; color: #c8a767; }
+.card-bottom > span:last-child { font-size: 7px; }
+.anatomy-card.will-break { border-color: #d59960; background: linear-gradient(150deg, #4c3520, #322718); }
+.will-break .card-bottom { color: #f2ae80; }
+.stump-card { border-color: #80533d; background: #2e241a; }
+.many-cards .anatomy-card { min-width: 116px; }
+.empty-hand { padding: 35px; border: 1px dashed #495439; color: #a6b396; width: 100%; text-align: center; }
+.turn-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0 0; }
+.energy-display { display: flex; align-items: center; gap: 10px; }
+.energy-display > .icon { width: 25px; height: 25px; color: #d0b26e; }
+.energy-display > strong { font: 29px var(--serif); color: #dcc796; white-space: nowrap; }
+.energy-display strong small { font: 11px var(--sans); color: #939b77; }
+.energy-display > div { padding-left: 8px; border-left: 1px solid #39412d; }
+.energy-display b { font-weight: 500; font-size: 8px; letter-spacing: 1.2px; color: #b5b896; display: block; }
+.energy-display div span { font-size: 8px; color: #879477; display: block; margin-top: 3px; }
+.turn-button { min-width: 196px; min-height: 46px; font-size: 11px; }
+.turn-button > span { display: flex; align-items: center; gap: 11px; }
+.turn-button kbd { color: inherit; border-color: #746941; font-size: 7px; }
+.map-panel { padding: 0 14px 17px; }
+.floor-stack { margin: 13px 0 18px; display: grid; gap: 5px; }
+.floor-row { display: flex; align-items: center; min-height: 34px; gap: 10px; padding: 4px 8px; font-size: 10px; color: #7b886b; border: 1px solid #303b27; background: #192314; }
+.floor-numeral { width: 21px; font: 15px var(--serif); color: #91936c; }
+.floor-row > span:nth-child(2) { flex: 1; }
+.floor-row > .icon { width: 11px; height: 11px; color: #69755d; }
+.floor-row.active { color: #d1bd85; border-color: #8a784a; background: #2e321c; }
+.floor-row.active .floor-numeral { color: var(--gold); }
+.floor-row.completed { opacity: .7; }
+.floor-row.completed .icon { color: #a7b890; }
+.map-heading { display: flex; justify-content: space-between; color: #939b77; font-size: 7px; letter-spacing: .8px; }
+.tower-map { aspect-ratio: 1; position: relative; margin: 9px 0 10px; background: #101a0f; border: 1px solid #323c28; background-image: linear-gradient(#39442917 1px, transparent 1px), linear-gradient(90deg, #39442917 1px, transparent 1px); background-size: 12px 12px; }
+.map-links { position: absolute; inset: 0; width: 100%; height: 100%; }
+.map-links line { stroke: #465437; stroke-width: 1.5; }
+.map-links .visited-link { stroke: #a9995a; stroke-width: 2; }
+.map-node { position: absolute; transform: translate(-50%, -50%); width: 24px; height: 24px; display: grid; place-items: center; background: #172012; border: 1px solid #3c472f; color: #919d79; padding: 0; z-index: 1; }
+.map-node:disabled { cursor: default; }
+.map-node .icon { width: 11px; height: 11px; }
+.map-node.seen { background: #273220; border-color: #55613f; }
+.map-node.visited { background: #28331e; border-color: #7b7950; color: #c2bc80; }
+.map-node.reachable { border-color: #b5a261; color: #d5cca0; box-shadow: 0 0 0 2px #bfa26717; }
+.map-node.reachable:hover { background: #5b5930; border-color: #e4cb7f; }
+.map-node.current { background: #c3a363; border-color: #efcd83; box-shadow: 0 0 13px #c1a24e44; }
+.map-node.current::after { content: ''; position: absolute; inset: -4px; border: 1px solid #7b7846; }
+.you-dot { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: #e3c880; }
+.current .you-dot { background: #252c1a; width: 6px; height: 6px; }
+.unknown-dot { display: inline-block; width: 3px; height: 3px; background: #62724e; border-radius: 50%; }
+.exit-node { border-color: #869a6a !important; color: #c0d9a4 !important; background: #2a3a23 !important; }
+.map-legend { display: flex; justify-content: space-between; gap: 7px; font-size: 8px; color: #939e7d; }
+.map-legend > span { display: flex; align-items: center; gap: 5px; }
+.map-legend .icon { width: 11px; height: 11px; }
+.objective { margin-top: 22px; padding-top: 17px; border-top: 1px solid #35412c; }
+.objective .eyebrow { font-size: 8px; letter-spacing: 1px; color: #bbae79; }
+.objective p { font: 14px/1.6 var(--serif); color: #c7c3a5; margin-top: 5px; }
+.map-tip { display: flex; gap: 8px; align-items: flex-start; margin-top: 17px; padding: 12px 8px; background: #252a18; border: 1px solid #434c2d; color: #a9a580; font-size: 9px; line-height: 1.7; }
+.map-tip .icon { width: 14px; height: 14px; margin-top: 2px; color: #bea86d; }
+.run-record { border-top: 1px solid #33412a; margin-top: 20px; padding-top: 16px; }
+.run-record .eyebrow { font-size: 7px; letter-spacing: 1.1px; }
+.run-record > div { display: flex; justify-content: space-between; margin-top: 10px; font-size: 10px; color: #a5b191; }
+.run-record strong { color: #cab780; font-weight: 500; }
+.game-footer { margin-top: 19px; border-top: 1px solid #313e28; padding-top: 12px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.journal-preview { display: flex; align-items: center; gap: 9px; background: none; border: none; text-align: left; min-width: 0; color: #9eab8b; font-size: 10px; padding: 4px 0; flex: 1; }
+.journal-preview .icon { color: #92966d; width: 14px; height: 14px; }
+.journal-preview > span { white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+.journal-preview > .icon:last-child { width: 11px; height: 11px; }
+.journal-preview:hover { color: #ddcb91; }
+.version-label { font-size: 7px; color: #7e8d6c; letter-spacing: 1px; white-space: nowrap; }
+.version-label i { display: inline-block; width: 3px; height: 3px; background: #7f8e59; margin: 0 9px 2px; }
+.mobile-toolbar { display: none; }
+
+/* Dialogs keep the real-time clock visible. */
+.has-modal { overflow: hidden; }
+.modal-backdrop { position: fixed; inset: 0; z-index: 50; background: #070f09cb; display: grid; place-items: center; padding: 24px; backdrop-filter: blur(3px); }
+.modal { background: #172112; border: 1px solid #7f8050; width: min(640px, 100%); max-height: calc(100dvh - 48px); box-shadow: 0 18px 100px #0009, inset 0 0 0 4px #172112, inset 0 0 0 5px #38452b; display: flex; flex-direction: column; }
+.modal.wide-modal { width: min(870px, 100%); }
+.modal-header { display: flex; justify-content: space-between; align-items: center; gap: 15px; padding: 23px 26px 20px; border-bottom: 1px solid #3f4b2d; }
+.modal-header .eyebrow { font-size: 8px; letter-spacing: 1.6px; color: #c0b27d; }
+.modal-header h2 { font: 29px/1.25 var(--serif); margin-top: 5px; color: #e1d8b6; }
+.modal-header .btn { flex-shrink: 0; color: #c2c7a5; }
+.modal-clock-note { padding: 6px 27px; border-bottom: 1px solid #3b462c; background: #2d311b; color: #c0b780; font-size: 10px; letter-spacing: .4px; display: flex; justify-content: space-between; }
+.modal-live-clock { font: 13px monospace; color: var(--gold); }
+.modal-body { padding: 23px 26px 26px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: #69764a #1d2716; }
+.modal-intro { font-size: 12px; color: #bbc4a2; line-height: 1.8; margin-bottom: 18px; }
+.modal-intro strong { color: #e2d29d; font-weight: 500; }
+.empty-state { text-align: center; padding: 24px 10px 37px; }
+.empty-state > .icon { width: 45px; height: 45px; color: #858c5e; }
+.empty-state h3 { font: 24px var(--serif); margin: 16px 0 8px; }
+.empty-state p { color: #a9b994; font-size: 12px; max-width: 370px; margin: auto; line-height: 1.8; }
+.inventory-list { display: grid; gap: 10px; }
+.inventory-item { display: flex; gap: 15px; padding: 17px 14px; border: 1px solid #445233; background: #1f2b18; margin-top: 9px; }
+.inventory-symbol { display: flex; align-items: flex-start; padding-top: 20px; }
+.inventory-symbol .icon { width: 33px; height: 33px; }
+.inventory-description { flex: 1; min-width: 0; }
+.inventory-description .eyebrow { font-size: 8px; letter-spacing: .7px; }
+.inventory-description h3 { font: 19px var(--serif); color: #ddcfa5; margin-top: 3px; }
+.inventory-description p { font-size: 10px; line-height: 1.6; color: #acb99a; margin-top: 5px; }
+.inventory-condition { color: #d1b67c; margin-left: 8px; }
+.inventory-actions { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+.inventory-actions .btn { font-size: 10px; }
+.part-stats { display: flex; gap: 23px; justify-content: space-between; margin: 21px 0; padding: 12px; background: #27321c; border: 1px solid #485734; }
+.part-stats > span { color: #b9c3a3; font-size: 11px; }
+.part-stats .icon { width: 15px; height: 15px; margin-right: 3px; color: #c0ab71; }
+.part-stats b { display: block; font: 21px var(--serif); color: #e1d29d; margin: 5px 0 0 21px; }
+.lore { font: italic 18px/1.6 var(--serif); color: #cac6a0; }
+.detail-cards { display: flex; gap: 15px; max-width: 340px; margin: 23px auto; }
+.detail-cards .anatomy-card { min-width: 135px; padding: 11px 12px 0; }
+.detail-cards .anatomy-card h3, .deck-grid .anatomy-card h3 { font-size: 16px; }
+.detail-cards .anatomy-card p, .deck-grid .anatomy-card p { font-size: 11px; }
+.detail-cards .card-art { height: 72px; flex-basis: 72px; }
+.section-caption { font: 20px var(--serif); margin-bottom: 15px; }
+.deck-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+.deck-grid .anatomy-card { min-height: 235px; }
+.deck-grid .card-art { height: 76px; flex-basis: 76px; }
+.filter-tabs { display: flex; gap: 7px; margin-bottom: 19px; flex-wrap: wrap; }
+.filter-tabs button { border: 1px solid #465535; color: #a3b58e; font-size: 10px; background: #1c2815; min-height: 36px; padding: 7px 13px; }
+.filter-tabs button.selected { color: #e3cd8b; background: #3a3f20; border-color: #91814b; }
+.blueprint-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.blueprint { padding: 15px; border: 1px solid #4b5b37; background: linear-gradient(135deg, #2b3820, #1e2a17); display: flex; flex-direction: column; }
+.blueprint-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+.blueprint-top .icon { color: #a1b488; width: 21px; height: 21px; }
+.tier { font-size: 7px; letter-spacing: 1.1px; text-transform: uppercase; color: #b4bd95; }
+.tier-2 { color: #99b7a3; }
+.tier-3 { color: #dec089; }
+.blueprint h3 { font: 18px/1.3 var(--serif); color: #dcd4af; }
+.blueprint p { font-size: 10px; line-height: 1.75; color: #9aad8a; margin: 8px 0 17px; flex: 1; }
+.blueprint .btn { align-self: flex-start; min-height: 34px; font-size: 9px; }
+.blueprint.locked { border-style: dashed; background: #182512; opacity: .63; }
+.locked .blueprint-top .icon { color: #778760; }
+.locked-label { font-size: 6px; letter-spacing: 1px; color: #84986f; }
+.shop-notice { display: flex; align-items: flex-start; gap: 12px; background: #24351b; border: 1px solid #4b6139; padding: 15px; font-size: 11px; line-height: 1.7; color: #afc398; margin-bottom: 20px; }
+.shop-notice .icon { color: #c4b87e; }
+.shop-notice strong { color: #d8d4a2; }
+.skin-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+.skin-card { background: #24321b; border: 1px solid #50613a; padding: 18px; }
+.skin-swatch { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #4c5b3477; margin-bottom: 15px; padding-bottom: 11px; }
+.skin-swatch .pixel-symbol { width: 52px; height: 52px; opacity: .6; }
+.skin-swatch > span { display: grid; place-items: center; width: 58px; height: 58px; color: var(--skin); border: 1px solid var(--skin); background: #182511; }
+.skin-swatch > span .icon { width: 38px; height: 38px; }
+.skin-card h3 { font: 20px var(--serif); color: #e3d6ab; }
+.skin-card p { font-size: 11px; color: #a9bd93; margin: 6px 0 18px; line-height: 1.65; }
+.skin-card .equipped { color: #b6c59b; border-color: #617647; background: #2b3d20; }
+.expansion-card { margin-top: 20px; padding: 21px; display: flex; gap: 25px; align-items: center; border: 1px solid #8c7950; background: linear-gradient(125deg, #393c20, #27321b); }
+.expansion-card h3 { font: 24px var(--serif); color: #dcc88d; margin: 3px 0 9px; }
+.expansion-card p { font-size: 11px; line-height: 1.7; color: #b4ba90; }
+.expansion-card > .btn { flex-shrink: 0; }
+.setting-row { display: flex; justify-content: space-between; align-items: center; gap: 24px; border-bottom: 1px solid #405332; padding: 20px 0; }
+.setting-row:first-child { padding-top: 2px; }
+.setting-row label, .setting-row > div:first-child { font-size: 14px; color: #d9d9b1; }
+.setting-row small { display: block; font-size: 10px; color: #a0b48a; margin-top: 5px; }
+.setting-row input[type=checkbox] { width: 22px; height: 22px; accent-color: #c1b874; flex-shrink: 0; cursor: pointer; }
+.volume-control { display: flex; align-items: center; gap: 12px; min-width: 170px; }
+.volume-control input { accent-color: #c1b874; width: 120px; }
+.volume-control output { font: 12px monospace; color: #c1c49a; width: 32px; }
+.save-note { display: flex; align-items: flex-start; gap: 10px; margin-top: 21px; padding: 15px; background: #22381c; border: 1px solid #456539; color: #b0cba0; font-size: 11px; line-height: 1.8; }
+.save-note .icon { margin-top: 2px; width: 16px; height: 16px; }
+.abandon-row { margin-top: 25px; }
+.abandon-row p { font-size: 10px; color: #9db58a; margin-top: 8px; }
+.confirm-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 25px 0 10px; }
+.help-lead { font: 30px/1.3 var(--serif); color: #dfd5ad; margin: 0 0 25px; }
+.help-lead em { color: #baa869; }
+.help-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px 30px; }
+.help-grid article > span { font: 15px monospace; color: #b39c60; }
+.help-grid h3 { font: 21px var(--serif); color: #d5d4a9; margin: 4px 0 7px; }
+.help-grid p { font-size: 11px; line-height: 1.85; color: #a8be92; }
+.help-grid strong { color: #dccd8f; font-weight: 500; }
+.controls-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-top: 29px; border-top: 1px solid #496336; padding-top: 24px; }
+.controls-grid .icon { color: #baa573; width: 24px; height: 24px; }
+.controls-grid h3 { font: 19px var(--serif); margin: 6px 0; color: #d3d5a8; }
+.controls-grid p { font-size: 11px; line-height: 2; color: #a2bd8d; }
+.help-fineprint { font-size: 10px; line-height: 1.8; margin-top: 25px; color: #a4b88b; border-top: 1px solid #476333; padding-top: 15px; }
+.journal-list { margin: 0; padding-left: 22px; color: #8ba776; }
+.journal-list li { padding: 10px 0 10px 8px; font-size: 12px; color: #bfcea7; line-height: 1.8; border-bottom: 1px solid #3f5a2f; }
+.map-modal { width: min(435px, 100%); }
+.large-map { max-width: 330px; margin-left: auto; margin-right: auto; }
+.large-map .map-node { width: 37px; height: 37px; }
+.large-map .map-node .icon { width: 17px; height: 17px; }
+.map-modal .floor-row { font-size: 12px; }
+.mobile-anatomy { max-width: 400px; margin: auto; }
+.mobile-anatomy .panel-title { display: none; }
+.mobile-anatomy .anatomy-slots { grid-template-columns: 1fr 1fr; gap: 8px; }
+.mobile-anatomy .slot-content > strong { font-size: 11px; }
+.mobile-anatomy .body-slot { min-height: 74px; }
+.mobile-anatomy .consumables { grid-template-columns: 1fr 1fr; }
+
+/* Opening and the loop's end are playable, not marketing screens. */
+.intro-backdrop { background: #07120bad; backdrop-filter: blur(1px); }
+.intro-modal { width: min(580px, 100%); text-align: center; background: radial-gradient(ellipse at 50% 20%, #353b239e, transparent 60%), #18220ff5; border: 1px solid #95935c; box-shadow: 0 20px 150px #0009, inset 0 0 0 7px #17220f, inset 0 0 0 8px #4b5630; padding: 34px 40px 27px; max-height: calc(100dvh - 48px); overflow-y: auto; }
+.intro-kicker { display: flex; justify-content: center; align-items: center; gap: 11px; color: #b9b986; font-size: 8px; letter-spacing: 2.1px; }
+.intro-kicker > span { width: 25px; height: 1px; background: #7c8650; }
+.intro-sigil { display: grid; place-items: center; width: 82px; height: 82px; border: 1px solid #8b8750; margin: 25px auto 26px; position: relative; color: #d9c484; border-radius: 50%; background: #7d773013; }
+.intro-sigil::before { content: ''; position: absolute; inset: 6px; border: 1px solid #5d6b3c; transform: rotate(45deg); }
+.intro-sigil::after { content: ''; position: absolute; inset: -8px; border: 1px solid #697c4244; border-radius: 50%; }
+.intro-sigil .icon { width: 40px; height: 40px; position: relative; }
+.intro-modal h2 { font: 39px/1.18 var(--serif); letter-spacing: -.75px; color: #e6ddb8; }
+.intro-modal h2 em { font-weight: 400; color: #d4b576; }
+.intro-modal > p { color: #b9c39d; font-size: 12px; line-height: 1.9; margin-top: 18px; }
+.intro-pillars { display: flex; justify-content: center; gap: 26px; margin: 25px 0; color: #b3b986; font-size: 7px; letter-spacing: 1px; }
+.intro-pillars .icon { width: 15px; height: 15px; color: #c2b571; margin-right: 5px; }
+.intro-start { width: 100%; max-width: 365px; height: 54px; text-transform: uppercase; font-size: 12px; letter-spacing: 3px; }
+.intro-start .icon { width: 18px; height: 18px; margin-right: 5px; }
+.intro-footer { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+.intro-footer > .btn { font-size: 9px; padding: 7px; min-height: 34px; color: #c5c39a; }
+.intro-footer > .btn .icon { width: 14px; height: 14px; }
+.intro-footer > span { font-size: 8px; color: #9daf83; }
+.content-note { color: #889e70; font-size: 8px; display: block; margin-top: 13px; }
+.end-modal { width: min(680px, 100%); text-align: center; padding: 37px 40px; border: 1px solid #8e7950; background: radial-gradient(ellipse at 50% 0%, #55402d66, transparent 65%), #202817; box-shadow: inset 0 0 0 6px #202817, inset 0 0 0 7px #525637, 0 15px 100px #0008; max-height: calc(100dvh - 48px); overflow-y: auto; }
+.end-modal.won { background: radial-gradient(ellipse at 50% 0%, #82914855, transparent 65%), #24301a; }
+.end-symbol { color: #c9ad76; margin-bottom: 20px; }
+.end-symbol .icon { width: 51px; height: 51px; }
+.end-modal > .eyebrow { font-size: 8px; color: #b7b386; letter-spacing: 1.8px; }
+.end-modal h2 { font: 36px/1.3 var(--serif); color: #e0d5ac; margin-top: 9px; }
+.end-modal > p { font: 15px/1.8 var(--serif); max-width: 480px; margin: 15px auto 0; color: #bcc59a; }
+.result-grid { display: grid; grid-template-columns: repeat(4, 1fr); margin: 29px 0 22px; padding: 22px 0; border-top: 1px solid #65704477; border-bottom: 1px solid #65704477; }
+.result-grid > div { border-right: 1px solid #58653b; padding: 0 8px; }
+.result-grid > div:last-child { border: none; }
+.result-grid strong { display: block; font: 31px var(--serif); color: #ddbe7f; }
+.result-grid span { display: block; margin-top: 6px; color: #a9bd8e; font-size: 7px; letter-spacing: .8px; }
+.result-clock { color: #b8bd90; font-size: 11px; }
+.result-clock .icon { color: #d0b674; width: 15px; height: 15px; margin-right: 6px; }
+.end-actions { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 26px; }
+.end-modal > small { display: block; margin-top: 20px; color: #9fb68b; font-size: 10px; }
+#notifications { position: fixed; right: 20px; top: 16px; width: min(440px, calc(100% - 40px)); display: grid; gap: 8px; z-index: 100; pointer-events: none; }
+.toast { padding: 14px 18px; border: 1px solid #8b8751; background: #25381ef5; color: #e0ddb6; box-shadow: 0 5px 30px #0008; font-size: 12px; line-height: 1.75; animation: toast-in .18s ease-out; }
+.toast.good { border-color: #88a06b; background: #243e21f5; }
+.toast.warning { border-color: #b59956; background: #443e22f5; }
+.toast.danger { border-color: #c49665; background: #4b3020f5; color: #f1d3ad; }
+@keyframes toast-in { from { transform: translateY(-5px); opacity: .2; } to { transform: translateY(0); opacity: 1; } }
+.reduce-motion *, .reduce-motion *::before, .reduce-motion *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+.boot-error { max-width: 600px; padding: 50px 25px; margin: auto; }
+.boot-error h1 { font-family: var(--serif); }
+.boot-error p { margin: 20px 0; }
+.boot-error button { padding: 12px 25px; color: #222d17; background: #cab678; border: 1px solid #e3d297; }
+
+@media (min-width: 1600px) {
+  .game-grid { grid-template-columns: 257px minmax(0, 1fr) 235px; gap: 24px; }
+  .scene-wrap { height: 350px; }
+  .anatomy-card { min-height: 220px; }
+  .anatomy-card h3 { font-size: 16px; }
+  .anatomy-card p { font-size: 10px; }
+  .card-art { flex-basis: 72px; height: 72px; }
+  .body-slot { min-height: 70px; }
+  .slot-content > strong { font-size: 12px; }
+}
+@media (max-width: 1220px) {
+  .topbar { padding: 0 23px; }
+  .header-middle { display: none; }
+  .game-shell { padding-left: 20px; padding-right: 20px; }
+  .game-grid { grid-template-columns: 204px minmax(0, 1fr) 190px; gap: 13px; }
+  .anatomy-panel, .map-panel { padding-left: 11px; padding-right: 11px; }
+  .status-bar { gap: 22px; grid-template-columns: 1.1fr 1.1fr 1.5fr .4fr; }
+  .echoes-stat { display: none; }
+  .subject-block .subtle { display: block; font-size: 9px; margin-top: 2px; }
+  .clock-block { padding: 0 17px; }
+  #clock { font-size: 34px; }
+  .scene-wrap { height: 280px; }
+  .scene-heading { padding: 12px 14px; }
+  .scene-heading h1 { font-size: 20px; }
+  .scene-heading .eyebrow { font-size: 6.5px; }
+  .phase-badge { padding: 5px; font-size: 6.5px; letter-spacing: .3px; }
+  .phase-badge .icon { width: 11px; height: 11px; }
+  .anatomy-illustration { height: 140px; }
+  .slot-heading { font-size: 7px; letter-spacing: .3px; }
+  .slot-content > strong { font-size: 10px; }
+  .slot-glyph .icon { width: 17px; height: 17px; }
+  .body-slot { gap: 6px; padding-left: 6px; padding-right: 6px; }
+  .hand-header > div { display: block; }
+  .hand-header > div > span { display: block; margin-top: 4px; }
+  .hand { gap: 7px; }
+  .anatomy-card { padding: 8px 8px 0; min-width: 105px; }
+  .anatomy-card h3 { font-size: 13px; }
+  .anatomy-card p { font-size: 8.5px; }
+  .card-origin { font-size: 6px; }
+  .card-top kbd { display: none; }
+  .energy-display > div { display: none; }
+  .turn-button { min-width: 170px; min-height: 44px; }
+  .turn-button kbd { font-size: 6px; padding: 3px; }
+  .enemy-chip { width: 190px; }
+  .enemy-chip h3 { font-size: 15px; }
+  .room-event { padding: 13px 14px; }
+  .event-copy h3 { font-size: 15px; }
+  .event-copy p { font-size: 9px; }
+  .event-actions .btn { padding: 8px 10px; font-size: 9px; }
+  .movement { gap: 5px; padding-left: 13px; padding-right: 13px; }
+  .direction-button { font-size: 9px; padding: 7px; }
+  .direction-button .icon { width: 13px; height: 13px; }
+  .movement-hint { display: none; }
+  .combat-guidance { flex-wrap: wrap; gap: 5px; padding: 10px 12px; font-size: 9px; }
+  .combat-guidance > span:first-child { flex-basis: 100%; }
+  .panel-title h2 { font-size: 17px; }
+}
+@media (max-width: 990px) {
+  .game-grid { grid-template-columns: 210px minmax(0, 1fr); gap: 15px; }
+  .map-panel { display: none; }
+  .game-shell { padding-bottom: 83px; }
+  .mobile-toolbar { display: flex; justify-content: center; gap: 25px; position: fixed; bottom: 0; left: 0; right: 0; z-index: 30; background: #162511f7; border-top: 1px solid #6c7445; padding: 8px 10px calc(8px + env(safe-area-inset-bottom)); backdrop-filter: blur(10px); }
+  .mobile-toolbar .btn { font-size: 10px; gap: 8px; padding: 7px 12px; color: #c2c396; }
+  .mobile-toolbar .icon { width: 17px; height: 17px; color: #ccba77; }
+  .scene-wrap { height: 290px; }
+  .subject-block { display: none; }
+  .status-bar { grid-template-columns: 1.1fr 1.5fr .5fr; gap: 22px; padding: 17px 0; }
+}
+@media (max-width: 720px) {
+  .topbar { height: 70px; padding: 0 15px; gap: 7px; }
+  .brand { gap: 9px; }
+  .brand-mark { width: 35px; height: 39px; }
+  .brand-mark .icon { width: 22px; height: 22px; }
+  .brand strong { font-size: 16px; letter-spacing: .8px; }
+  .brand small { font-size: 6px; letter-spacing: 2.45px; margin-top: 5px; }
+  .header-actions .desktop-label { display: none; }
+  .header-actions .icon-only { width: 35px; height: 38px; }
+  .header-actions { gap: 0; }
+  .header-actions .icon { width: 17px; height: 17px; }
+  .game-shell { padding: 0 12px 87px; }
+  .game-grid { grid-template-columns: minmax(0, 1fr); }
+  .anatomy-panel { display: none; }
+  .status-bar { gap: 15px; padding: 14px 1px 17px; grid-template-columns: 1fr 1.3fr .35fr; }
+  .stat-line > span { font-size: 7px; letter-spacing: .5px; gap: 4px; }
+  .stat-line > span .icon { width: 12px; height: 12px; }
+  .stat-line strong { font-size: 14px; }
+  .stat-line strong > span { font-size: 9px; }
+  .health-track { margin-top: 6px; height: 4px; }
+  .health-track > span { height: 2px; }
+  .clock-block { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; padding: 0 9px; gap: 3px 7px; }
+  .clock-label { font-size: 6px; max-width: 80px; letter-spacing: .5px; }
+  .clock-label .icon { width: 12px; height: 12px; }
+  #clock { font-size: 29px; letter-spacing: .3px; }
+  .clock-track { width: 100%; height: 2px; margin: 3px 0 0; }
+  .resource-block > strong { font-size: 22px; margin: 0; }
+  .resource-block .eyebrow { font-size: 6px; letter-spacing: .5px; }
+  .resource-block .eyebrow .icon { display: none; }
+  .scene-wrap { height: auto; aspect-ratio: 512 / 276; }
+  #scene { height: auto; object-fit: initial; }
+  .scene-heading { padding: 13px 13px 12px; }
+  .scene-heading h1 { font-size: 21px; }
+  .scene-heading .eyebrow { font-size: 7px; }
+  .phase-badge { font-size: 7px; padding: 6px; max-width: 110px; white-space: normal; text-align: center; line-height: 1.5; }
+  .scene-topline { top: 9px; left: 11px; right: 11px; font-size: 6px; }
+  .scene-bottomline { bottom: 7px; left: 10px; right: 10px; font-size: 6px; }
+  .combat-info { top: 30px; left: 10px; right: 10px; gap: 8px; }
+  .player-chip { font-size: 7px; padding: 4px 6px; }
+  .player-chip .icon { width: 10px; height: 10px; }
+  .enemy-chip { width: 44%; padding: 5px 8px; }
+  .enemy-kind { font-size: 5px; letter-spacing: .6px; }
+  .enemy-chip h3 { font-size: 12px; line-height: 1.3; }
+  .enemy-health { margin: 4px 0 2px; height: 3px; }
+  .enemy-health > i { height: 3px; }
+  .enemy-numbers { font-size: 7px; }
+  .enemy-numbers > span:last-child { font-size: 6px; }
+  .enemy-intent { font-size: 8px; padding: 5px 7px; right: 10px; bottom: 24px; }
+  .enemy-intent .icon { width: 11px; height: 11px; }
+  .room-event { padding: 15px 13px; gap: 10px; min-height: 87px; }
+  .event-copy h3 { font-size: 17px; }
+  .event-copy p { font-size: 10px; }
+  .event-actions .btn { font-size: 10px; padding: 9px; min-height: 42px; }
+  .event-emblem { display: none; }
+  .loot-event { align-items: flex-start; }
+  .loot-event .event-actions { flex-shrink: 0; }
+  .workshop-event .event-actions, .trap-event .event-actions { gap: 8px; }
+  .movement { padding: 0 13px 14px; gap: 7px; }
+  .direction-button { min-height: 43px; font-size: 10px; padding: 9px 6px; }
+  .direction-button .icon { width: 15px; height: 15px; }
+  .combat-guidance { font-size: 10px; padding: 12px; }
+  .combat-guidance > span:last-child { font-size: 10px; }
+  .hand-section { margin-top: 16px; }
+  .hand-header { margin-bottom: 11px; }
+  .hand-header h2 { font-size: 19px; }
+  .hand-header > div > span { font-size: 7px; }
+  .text-button { font-size: 10px; padding: 8px 0 8px 8px; }
+  .hand { gap: 10px; padding-top: 4px; padding-bottom: 12px; }
+  .anatomy-card, .many-cards .anatomy-card { flex: 0 0 137px; min-width: 137px; padding: 10px 10px 0; min-height: 214px; }
+  .anatomy-card h3 { font-size: 15px; min-height: 37px; }
+  .anatomy-card p { font-size: 10px; line-height: 1.55; }
+  .card-art { height: 66px; flex-basis: 66px; }
+  .card-origin { font-size: 7px; }
+  .card-bottom { font-size: 9px; }
+  .card-bottom > span:last-child { font-size: 8px; }
+  .turn-bar { padding-top: 10px; gap: 8px; }
+  .turn-button { min-width: 182px; min-height: 46px; }
+  .turn-button kbd { display: none; }
+  .energy-display > div { display: block; border: 0; padding: 0; }
+  .energy-display div span { display: none; }
+  .energy-display b { font-size: 7px; }
+  .energy-display { gap: 7px; }
+  .energy-display > .icon { width: 20px; height: 20px; }
+  .energy-display > strong { font-size: 28px; }
+  .game-footer { margin-top: 18px; padding-top: 10px; }
+  .version-label { display: none; }
+  .journal-preview { font-size: 9px; line-height: 1.6; }
+  .mobile-toolbar { gap: 0; justify-content: space-around; padding-top: 6px; padding-bottom: calc(6px + env(safe-area-inset-bottom)); }
+  .mobile-toolbar .btn { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 8px; min-height: 45px; padding: 6px 10px; letter-spacing: .4px; min-width: 66px; }
+  .mobile-toolbar .icon { width: 19px; height: 19px; }
+  .modal-backdrop { padding: 12px; }
+  .modal { max-height: calc(100dvh - 24px); }
+  .modal-header { padding: 18px 18px 15px; }
+  .modal-header h2 { font-size: 25px; }
+  .modal-header .eyebrow { font-size: 7px; letter-spacing: 1.1px; }
+  .modal-clock-note { padding-left: 18px; padding-right: 18px; }
+  .modal-body { padding: 18px; }
+  .modal-intro { font-size: 11px; }
+  .inventory-item { padding: 13px 11px; gap: 9px; }
+  .inventory-symbol .icon { width: 24px; height: 24px; }
+  .inventory-description h3 { font-size: 17px; }
+  .inventory-description .eyebrow { font-size: 6px; }
+  .inventory-description p { font-size: 9px; }
+  .inventory-actions { gap: 7px; }
+  .inventory-actions .btn { min-height: 40px; font-size: 9px; padding: 8px; }
+  .inventory-actions .btn .icon { width: 12px; height: 12px; }
+  .inventory-condition { margin-left: 4px; }
+  .detail-cards { gap: 12px; }
+  .detail-cards .anatomy-card { flex: 1 1 0; min-width: 120px; }
+  .deck-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .deck-grid .anatomy-card { min-width: 0; }
+  .deck-grid .anatomy-card h3 { font-size: 15px; }
+  .deck-grid .anatomy-card p { font-size: 10px; }
+  .blueprint-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+  .blueprint { padding: 12px; }
+  .blueprint h3 { font-size: 16px; }
+  .blueprint p { font-size: 9px; }
+  .blueprint .btn { width: 100%; font-size: 8px; padding: 8px 5px; min-height: 40px; }
+  .blueprint .btn .icon { width: 12px; height: 12px; }
+  .filter-tabs { gap: 5px; }
+  .filter-tabs button { font-size: 9px; padding: 7px 10px; min-height: 39px; }
+  .skin-grid { gap: 10px; }
+  .skin-card { padding: 12px; }
+  .skin-card h3 { font-size: 17px; }
+  .skin-card p { font-size: 10px; }
+  .skin-swatch .pixel-symbol { width: 37px; height: 37px; }
+  .skin-swatch > span { width: 43px; height: 43px; }
+  .skin-swatch > span .icon { width: 29px; height: 29px; }
+  .skin-card .btn { width: 100%; font-size: 9px; padding: 8px 6px; min-height: 41px; }
+  .skin-card .btn .icon { width: 13px; height: 13px; }
+  .expansion-card { flex-direction: column; align-items: stretch; gap: 16px; padding: 17px; }
+  .expansion-card h3 { font-size: 22px; }
+  .setting-row { gap: 15px; }
+  .setting-row label { font-size: 12px; }
+  .setting-row small { font-size: 9px; }
+  .setting-row:first-child { flex-wrap: wrap; }
+  .volume-control { width: 100%; }
+  .volume-control input { width: 100%; }
+  .help-lead { font-size: 25px; }
+  .help-grid { grid-template-columns: 1fr; gap: 20px; }
+  .help-grid h3 { font-size: 20px; }
+  .help-grid p { font-size: 12px; }
+  .controls-grid { grid-template-columns: 1fr; gap: 20px; }
+  .controls-grid p { font-size: 11px; }
+  .intro-modal { padding: 27px 23px 24px; max-height: calc(100dvh - 24px); }
+  .intro-kicker { font-size: 7px; gap: 8px; letter-spacing: 1.4px; }
+  .intro-kicker > span { width: 18px; }
+  .intro-sigil { width: 66px; height: 66px; margin: 23px auto; }
+  .intro-sigil .icon { width: 31px; height: 31px; }
+  .intro-modal h2 { font-size: 30px; letter-spacing: -.65px; line-height: 1.25; }
+  .intro-modal > p { font-size: 11px; line-height: 1.85; }
+  .intro-pillars { gap: 15px; margin: 21px 0; font-size: 6px; letter-spacing: .4px; }
+  .intro-pillars .icon { width: 13px; height: 13px; margin-right: 3px; }
+  .intro-footer { gap: 1px; margin-top: 10px; }
+  .content-note { font-size: 7px; }
+  .end-modal { padding: 28px 21px; max-height: calc(100dvh - 24px); }
+  .end-modal h2 { font-size: 29px; }
+  .end-modal > p { font-size: 14px; }
+  .result-grid { grid-template-columns: 1fr 1fr; gap: 19px 0; margin: 23px 0 20px; }
+  .result-grid > div:nth-child(2) { border: none; }
+  .result-grid strong { font-size: 29px; }
+  .result-grid span { font-size: 6px; letter-spacing: .6px; }
+  .result-clock { font-size: 9px; }
+  .end-actions { flex-direction: column; gap: 8px; }
+  .end-actions .btn { min-height: 46px; }
+  .end-modal > small { font-size: 9px; }
+  .toast { font-size: 11px; padding: 12px 15px; }
+  #notifications { right: 12px; top: 12px; width: calc(100% - 24px); }
+}
+@media (max-width: 380px) {
+  .brand strong { font-size: 14px; }
+  .brand small { font-size: 5px; letter-spacing: 2.3px; }
+  .brand-mark { width: 30px; height: 35px; }
+  .topbar { padding: 0 11px; }
+  .header-actions .icon-only { width: 31px; }
+  .game-shell { padding-left: 9px; padding-right: 9px; }
+  .status-bar { gap: 10px; }
+  .clock-label { max-width: 68px; font-size: 5.5px; }
+  .clock-label .icon { display: none; }
+  #clock { font-size: 28px; }
+  .scene-heading h1 { font-size: 19px; }
+  .scene-heading .eyebrow { font-size: 6px; }
+  .phase-badge { max-width: 80px; font-size: 6px; }
+  .energy-display > div { display: none; }
+  .turn-button { min-width: 166px; }
+  .intro-modal h2 { font-size: 27px; }
+  .intro-pillars { gap: 10px; }
+  .mobile-anatomy .anatomy-slots { grid-template-columns: 1fr; }
+}
+@media (max-height: 600px) and (min-width: 721px) {
+  .modal-backdrop { padding: 10px; }
+  .modal, .intro-modal, .end-modal { max-height: calc(100dvh - 20px); }
+  .intro-modal { padding: 19px 35px; }
+  .intro-sigil { width: 49px; height: 49px; margin: 15px auto; }
+  .intro-sigil .icon { width: 25px; height: 25px; }
+  .intro-modal h2 { font-size: 31px; }
+  .intro-pillars { margin: 15px 0; }
+  .intro-modal > p { margin-top: 10px; }
+}
+
+/* El tiempo debe seguir a la vista mientras se consultan las cartas en móvil. */
+@media (max-width: 720px) {
+  .status-bar {
+    position: sticky;
+    top: 0;
+    z-index: 25;
+    background: #111a0ff7;
+    border-bottom: 1px solid #35462a;
+    margin-bottom: 12px;
+  }
+  #notifications { top: auto; bottom: calc(76px + env(safe-area-inset-bottom)); }
+}
+
+</style>
+  <script>
+/* Deadlock Deck — contenido original. Sin dependencias. */
+'use strict';
+
+window.DDData = (() => {
+  const slots = [
+    { id: 'head', label: 'Cabeza', short: 'Cabeza', kind: 'head' },
+    { id: 'torso', label: 'Torso', short: 'Torso', kind: 'torso' },
+    { id: 'armL', label: 'Brazo izquierdo', short: 'Brazo I', kind: 'arm' },
+    { id: 'armR', label: 'Brazo derecho', short: 'Brazo D', kind: 'arm' },
+    { id: 'legL', label: 'Pierna izquierda', short: 'Pierna I', kind: 'leg' },
+    { id: 'legR', label: 'Pierna derecha', short: 'Pierna D', kind: 'leg' }
+  ];
+
+  const cards = {
+    focus: { name: 'Lucidez prestada', cost: 0, draw: 2, heat: 16, wear: 3, icon: 'eye', text: 'Roba 2 cartas.' },
+    whisper: { name: 'Susurro impuro', cost: 1, damage: 7, weak: 1, heat: 14, wear: 3, icon: 'eye', text: '7 de daño. Debilita 1 turno.' },
+    diagnose: { name: 'Diagnóstico', cost: 1, draw: 2, heal: 5, heat: 15, wear: 3, icon: 'eye', text: 'Roba 2 cartas. Recupera 5 de vida.' },
+    incision: { name: 'Incisión precisa', cost: 1, damage: 12, pierce: true, heat: 22, wear: 5, icon: 'blade', text: '12 de daño. Ignora la defensa.' },
+    omen: { name: 'Mal augurio', cost: 2, damage: 15, stun: 1, heat: 34, wear: 8, icon: 'eye', text: '15 de daño. Cancela la intención enemiga.' },
+    vision: { name: 'Visión imposible', cost: 0, draw: 3, heat: 27, wear: 6, icon: 'eye', text: 'Roba 3 cartas.' },
+    bite: { name: 'Hambre de tumba', cost: 1, damage: 11, heal: 4, heat: 23, wear: 5, icon: 'fang', text: '11 de daño. Recupera 4 de vida.' },
+    scream: { name: 'Grito sin lengua', cost: 1, weak: 2, draw: 1, heat: 19, wear: 4, icon: 'fang', text: 'Debilita 2 turnos. Roba 1 carta.' },
+    stitch: { name: 'Sutura de urgencia', cost: 1, heal: 9, heat: 17, wear: 4, icon: 'heart', text: 'Recupera 9 de vida.' },
+    brace: { name: 'Costillas cerradas', cost: 1, block: 11, heat: 12, wear: 3, icon: 'shield', text: 'Obtén 11 de defensa.' },
+    eruption: { name: 'Combustión interna', cost: 2, damage: 25, burn: 3, heat: 42, wear: 11, icon: 'flame', text: '25 de daño. Aplica 3 de quemadura.' },
+    vent: { name: 'Válvula de escape', cost: 1, cool: 28, heat: 4, wear: 2, icon: 'snow', text: 'Enfría todos tus injertos 28°.' },
+    ironwall: { name: 'Bastión de hierro', cost: 1, block: 19, heat: 20, wear: 5, icon: 'shield', text: 'Obtén 19 de defensa.' },
+    recoil: { name: 'Retroceso blindado', cost: 1, damage: 8, block: 9, heat: 22, wear: 5, icon: 'shield', text: '8 de daño. Obtén 9 de defensa.' },
+    transfusion: { name: 'Sangre de mercurio', cost: 1, heal: 15, heat: 27, wear: 6, icon: 'heart', text: 'Recupera 15 de vida.' },
+    surge: { name: 'Segundo corazón', cost: 0, energy: 2, heat: 36, wear: 9, icon: 'bolt', text: 'Obtén 2 de energía.' },
+    slash: { name: 'Tajo de hueso', cost: 1, damage: 10, heat: 16, wear: 4, icon: 'blade', text: '10 de daño.' },
+    heavy: { name: 'Fractura expuesta', cost: 2, damage: 19, heat: 28, wear: 6, icon: 'bone', text: '19 de daño.' },
+    scalpel: { name: 'Corte quirúrgico', cost: 1, damage: 13, heat: 22, wear: 5, icon: 'blade', text: '13 de daño.' },
+    dissect: { name: 'Disección viva', cost: 2, damage: 21, weak: 1, heat: 33, wear: 8, icon: 'blade', text: '21 de daño. Debilita 1 turno.' },
+    rip: { name: 'Desgarro necrótico', cost: 1, damage: 10, burn: 4, heat: 24, wear: 5, icon: 'fang', text: '10 de daño. Aplica 4 de quemadura.' },
+    reap: { name: 'Cosecha carmesí', cost: 2, damage: 19, heal: 7, heat: 32, wear: 7, icon: 'fang', text: '19 de daño. Recupera 7 de vida.' },
+    discharge: { name: 'Descarga galvánica', cost: 2, damage: 26, heat: 41, wear: 10, icon: 'bolt', text: '26 de daño.' },
+    arc: { name: 'Arco paralizante', cost: 1, damage: 8, stun: 1, heat: 34, wear: 8, icon: 'bolt', text: '8 de daño. Cancela la intención enemiga.' },
+    punch: { name: 'Puño de pistón', cost: 1, damage: 16, heat: 28, wear: 6, icon: 'bone', text: '16 de daño.' },
+    crusher: { name: 'Prensa hidráulica', cost: 3, damage: 43, heat: 52, wear: 14, icon: 'bone', text: '43 de daño. Un precio terrible.' },
+    kick: { name: 'Patada de cadáver', cost: 1, damage: 8, block: 3, heat: 13, wear: 3, icon: 'foot', text: '8 de daño. Obtén 3 de defensa.' },
+    dodge: { name: 'Paso torcido', cost: 1, block: 10, heat: 12, wear: 3, icon: 'foot', text: 'Obtén 10 de defensa.' },
+    leap: { name: 'Salto arácnido', cost: 1, damage: 9, block: 9, heat: 23, wear: 5, icon: 'foot', text: '9 de daño. Obtén 9 de defensa.' },
+    silk: { name: 'Seda de sutura', cost: 1, weak: 2, draw: 1, heat: 20, wear: 4, icon: 'shield', text: 'Debilita 2 turnos. Roba 1 carta.' },
+    impact: { name: 'Rodilla de acero', cost: 2, damage: 24, heat: 31, wear: 7, icon: 'foot', text: '24 de daño.' },
+    momentum: { name: 'Inercia prohibida', cost: 0, energy: 1, draw: 1, heat: 25, wear: 6, icon: 'bolt', text: 'Obtén 1 de energía. Roba 1 carta.' },
+    grave: { name: 'Quietud de mármol', cost: 1, block: 15, cool: 10, heat: 14, wear: 3, icon: 'shield', text: '15 de defensa. Enfría todos los injertos 10°.' },
+    silent: { name: 'Paso entre tumbas', cost: 1, block: 6, draw: 2, heat: 20, wear: 4, icon: 'foot', text: '6 de defensa. Roba 2 cartas.' },
+    forbidden: { name: 'Liturgia de ceniza', cost: 2, damage: 18, burn: 8, heat: 39, wear: 10, icon: 'flame', text: '18 de daño. Aplica 8 de quemadura.' },
+    echoes: { name: 'Coro de los muertos', cost: 1, draw: 2, energy: 1, heat: 31, wear: 7, icon: 'eye', text: 'Roba 2 cartas. Obtén 1 de energía.' },
+    stumpHead: { name: 'Eco del espíritu', cost: 1, damage: 3, heat: 0, wear: 0, icon: 'eye', text: '3 de daño. Necesitas una cabeza.' },
+    stumpTorso: { name: 'Último latido', cost: 1, block: 4, heat: 0, wear: 0, icon: 'heart', text: '4 de defensa. Necesitas un torso.' },
+    stumpArm: { name: 'Golpe de muñón', cost: 1, damage: 4, heat: 0, wear: 0, icon: 'bone', text: '4 de daño. Necesitas un brazo.' },
+    stumpLeg: { name: 'Arrastrarse', cost: 1, block: 3, heat: 0, wear: 0, icon: 'foot', text: '3 de defensa. Necesitas una pierna.' }
+  };
+
+  const parts = {
+    skull: { name: 'Cráneo cosido', kind: 'head', tier: 1, color: '#8fa58e', cards: ['focus', 'whisper'], lore: 'Alguien dejó un recuerdo dentro.' },
+    surgeon: { name: 'Máscara del cirujano', kind: 'head', tier: 2, color: '#bda8b7', cards: ['diagnose', 'incision'], lore: 'El último rostro que vieron sus pacientes.' },
+    oracle: { name: 'Oráculo de vidrio', kind: 'head', tier: 3, color: '#79b9b6', cards: ['omen', 'vision'], lore: 'Ve futuros que no deberían existir.' },
+    jaw: { name: 'Mandíbula de fosa', kind: 'head', tier: 2, color: '#bc7e78', cards: ['bite', 'scream'], lore: 'La muerte no le quitó el apetito.' },
+    sutures: { name: 'Torso de suturas', kind: 'torso', tier: 1, color: '#8fa58e', cards: ['stitch', 'brace'], lore: 'Seis vidas. Una mala costura.' },
+    boiler: { name: 'Caldera torácica', kind: 'torso', tier: 3, color: '#ce9759', cards: ['eruption', 'vent'], lore: 'La llama ocupa el lugar del corazón.' },
+    iron: { name: 'Caja de hierro', kind: 'torso', tier: 2, color: '#859498', cards: ['ironwall', 'recoil'], lore: 'Ningún pulmón. Ninguna duda.' },
+    mercury: { name: 'Corazón de mercurio', kind: 'torso', tier: 3, color: '#a3c1cb', cards: ['transfusion', 'surge'], lore: 'Una segunda vida, a interés compuesto.' },
+    bone: { name: 'Brazo de hueso', kind: 'arm', tier: 1, color: '#c4bca2', cards: ['slash', 'heavy'], lore: 'Todavía recuerda cómo romper cosas.' },
+    scalpel: { name: 'Brazo de bisturís', kind: 'arm', tier: 2, color: '#adb8b0', cards: ['scalpel', 'dissect'], lore: 'La precisión también puede ser crueldad.' },
+    claw: { name: 'Garra de la morgue', kind: 'arm', tier: 2, color: '#bd8178', cards: ['rip', 'reap'], lore: 'Nada que toque vuelve a estar entero.' },
+    cannon: { name: 'Cañón galvánico', kind: 'arm', tier: 3, color: '#c99e60', cards: ['discharge', 'arc'], lore: 'Un trueno encerrado en carne.' },
+    piston: { name: 'Puño hidráulico', kind: 'arm', tier: 3, color: '#b39979', cards: ['punch', 'crusher'], lore: 'Diseñado para trabajar. Adaptado para sobrevivir.' },
+    legs: { name: 'Pierna reanimada', kind: 'leg', tier: 1, color: '#8fa58e', cards: ['kick', 'dodge'], lore: 'Un paso más lejos de la mesa.' },
+    spider: { name: 'Zanca arácnida', kind: 'leg', tier: 2, color: '#9c93b9', cards: ['leap', 'silk'], lore: 'Demasiadas articulaciones. Ningún tropiezo.' },
+    pistons: { name: 'Pierna de pistón', kind: 'leg', tier: 3, color: '#c19860', cards: ['impact', 'momentum'], lore: 'El hierro tampoco quiere arder.' },
+    funeral: { name: 'Pie funerario', kind: 'leg', tier: 2, color: '#879caf', cards: ['grave', 'silent'], lore: 'Aprendió a caminar entre los muertos.' },
+    ash: { name: 'Cráneo de ceniza', kind: 'head', tier: 3, color: '#d09262', cards: ['forbidden', 'echoes'], lore: 'El archivo prohibido habla a través de ti.', expansion: true }
+  };
+
+  const enemies = {
+    orderly: { name: 'Celador de la morgue', tag: 'ABOMINACIÓN', sprite: 'brute', hp: 30, attack: 9, loot: ['claw', 'bone', 'funeral'], pattern: ['attack', 'guard', 'attack', 'fury'] },
+    scientist: { name: 'Cirujano apóstata', tag: 'CIENTÍFICO CORRUPTO', sprite: 'scientist', hp: 27, attack: 8, loot: ['surgeon', 'scalpel', 'mercury'], pattern: ['attack', 'heat', 'attack', 'guard'] },
+    stitched: { name: 'El mal cosido', tag: 'ABOMINACIÓN', sprite: 'stitched', hp: 34, attack: 10, loot: ['jaw', 'iron', 'spider'], pattern: ['guard', 'attack', 'fury', 'attack'] },
+    furnace: { name: 'Custodio de la caldera', tag: 'AUTÓMATA ALQUÍMICO', sprite: 'furnace', hp: 39, attack: 11, loot: ['boiler', 'cannon', 'pistons', 'piston'], pattern: ['attack', 'heat', 'fury', 'guard'] },
+    oracle: { name: 'Anatomista sin ojos', tag: 'CIENTÍFICO CORRUPTO', sprite: 'oracle', hp: 33, attack: 10, loot: ['oracle', 'mercury', 'surgeon'], pattern: ['heat', 'attack', 'guard', 'fury'] },
+    archivist: { name: 'Archivista de ceniza', tag: 'ALA PROHIBIDA', sprite: 'ash', hp: 40, attack: 11, loot: ['ash', 'boiler'], pattern: ['heat', 'fury', 'guard', 'attack'] },
+    boss: { name: 'El Rector de Carne', tag: 'GUARDIÁN DE LA SALIDA', sprite: 'boss', hp: 95, attack: 15, loot: ['cannon', 'mercury', 'oracle'], pattern: ['attack', 'guard', 'fury', 'heat', 'fury'], boss: true }
+  };
+
+  const floors = [
+    { name: 'Laboratorios de sutura', small: 'Laboratorio', roman: 'I', subtitle: 'Donde la muerte es apenas un procedimiento.' },
+    { name: 'Fundición de los réprobos', small: 'Fundición', roman: 'II', subtitle: 'El humo ya conoce tu nombre.' },
+    { name: 'Observatorio del Rector', small: 'Observatorio', roman: 'III', subtitle: 'La última puerta todavía respira.' }
+  ];
+
+  const roomNames = {
+    start: 'Mesa de disección', corridor: 'Pasillo de ceniza', combat: 'Sala de contención',
+    cache: 'Suministros abandonados', workshop: 'Estación de injertos', trap: 'Conducto de vapor',
+    stairs: 'Escalera de caracol', boss: 'El umbral del Rector', archive: 'Archivo anatómico'
+  };
+
+  const skins = {
+    suture: { name: 'Piel de suturas', cost: 0, color: '#8fa58e', description: 'Carne prestada. Puntadas imperfectas.' },
+    copper: { name: 'Óxido y cobre', cost: 15, color: '#bd875b', description: 'Pátina cobriza para tu nuevo cuerpo.' },
+    spectral: { name: 'Espíritu de éter', cost: 25, color: '#72b9bd', description: 'Un resplandor espectral entre las costuras.' },
+    crimson: { name: 'Luto carmesí', cost: 35, color: '#be777d', description: 'El color de lo que no has olvidado.' }
+  };
+
+  return { slots, cards, parts, enemies, floors, roomNames, skins };
+})();
+
+</script>
+  <script>
+/* Reglas, torre procedural, reloj y guardado local. */
+'use strict';
+
+window.DDGame = class extends EventTarget {
+  constructor() {
+    super();
+    this.key = 'deadlock-deck.v1';
+    this.storageAvailable = true;
+    this.meta = {
+      version: 1, runs: 0, deaths: 0, wins: 0, souls: 0, best: null,
+      blueprints: ['skull', 'sutures', 'bone', 'legs'], skins: ['suture'],
+      skin: 'suture', expansion: false, volume: 0.3, sfx: true,
+      motion: !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    };
+    this.state = null;
+    this.load();
+    this.timer = window.setInterval(() => this.tick(), 200);
+  }
+
+  emit(type, detail = {}) {
+    this.dispatchEvent(new CustomEvent(type, { detail }));
+  }
+
+  notice(text, tone = 'info') {
+    this.emit('notice', { text, tone });
+  }
+
+  sound(name) {
+    this.emit('sound', { name });
+  }
+
+  log(text) {
+    if (!this.state) return;
+    this.state.log.unshift(text);
+    this.state.log = this.state.log.slice(0, 24);
+  }
+
+  load() {
+    try {
+      const raw = localStorage.getItem(this.key);
+      if (!raw) return;
+      const stored = JSON.parse(raw);
+      if (stored.version !== 1 || !stored.meta) return;
+      this.meta = { ...this.meta, ...stored.meta };
+      this.meta.blueprints = this.meta.blueprints.filter(id => DDData.parts[id]);
+      this.meta.skins = this.meta.skins.filter(id => DDData.skins[id]);
+      if (!this.meta.skins.includes(this.meta.skin)) this.meta.skin = 'suture';
+      const s = stored.state;
+      if (s && s.body && s.map?.length === 16 && Number.isFinite(s.deadline)
+          && Array.isArray(s.hand) && Array.isArray(s.inventory) && s.version === 1) {
+        this.state = s;
+      }
+    } catch (_) {
+      this.storageAvailable = false;
+    }
+  }
+
+  save() {
+    try {
+      localStorage.setItem(this.key, JSON.stringify({ version: 1, meta: this.meta, state: this.state }));
+    } catch (_) {
+      if (this.storageAvailable) {
+        this.storageAvailable = false;
+        this.notice('El navegador no permite guardar. Esta sesión sigue siendo jugable.', 'warning');
+      }
+    }
+  }
+
+  change() {
+    this.save();
+    this.emit('change');
+  }
+
+  random() {
+    let t = this.state.rng += 0x6D2B79F5;
+    t = Math.imul(t ^ t >>> 15, t | 1);
+    t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+    this.state.rng >>>= 0;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  }
+
+  pick(items) {
+    return items[Math.floor(this.random() * items.length)];
+  }
+
+  shuffle(items) {
+    const result = [...items];
+    for (let i = result.length - 1; i > 0; i--) {
+      const j = Math.floor(this.random() * (i + 1));
+      [result[i], result[j]] = [result[j], result[i]];
+    }
+    return result;
+  }
+
+  active() {
+    return this.state && !['dead', 'won'].includes(this.state.phase);
+  }
+
+  remaining() {
+    if (!this.state) return 360000;
+    if (this.state.phase === 'won') return this.state.remainingAtEnd;
+    if (this.state.phase === 'dead') return this.state.remainingAtEnd || 0;
+    return Math.max(0, this.state.deadline - Date.now());
+  }
+
+  guard() {
+    if (!this.active()) return false;
+    if (this.remaining() <= 0) {
+      this.finish(false, 'La torre se derrumbó. El reloj no concede segundas oportunidades; tu espíritu, sí.');
+      return false;
+    }
+    return true;
+  }
+
+  start() {
+    const bytes = new Uint32Array(1);
+    if (window.crypto?.getRandomValues) window.crypto.getRandomValues(bytes);
+    else bytes[0] = Date.now() >>> 0;
+    const seed = bytes[0] || 1;
+    this.meta.runs++;
+    this.state = {
+      version: 1, seed, rng: seed, startedAt: Date.now(), deadline: Date.now() + 360000,
+      phase: 'explore', floor: 0, current: 12, previous: 12, map: [],
+      hp: 80, maxHp: 80, block: 0, energy: 3, body: {}, inventory: [],
+      scraps: 16, potions: 2, coolants: 2, hand: [], draw: [], discard: [],
+      enemy: null, turn: 1, uid: 0, shiftStage: 0, reward: null,
+      stats: { kills: 0, grafts: 0, broken: 0, rooms: 1, discovered: 0 },
+      log: [], origin: '', awarded: false
+    };
+    const bases = [
+      { name: 'El ensamblado', hp: 80, arm: 'scalpel', torso: 'sutures', head: 'skull', leg: 'legs' },
+      { name: 'El estibador', hp: 88, arm: 'bone', torso: 'iron', head: 'skull', leg: 'legs' },
+      { name: 'El hambriento', hp: 76, arm: 'bone', torso: 'sutures', head: 'jaw', leg: 'funeral' }
+    ];
+    const base = this.meta.runs === 1 ? bases[0] : this.pick(bases);
+    this.state.origin = base.name;
+    this.state.hp = this.state.maxHp = base.hp;
+    const bodyIds = { head: base.head, torso: base.torso, armL: 'bone', armR: base.arm, legL: 'legs', legR: base.leg };
+    for (const slot of DDData.slots) {
+      const id = bodyIds[slot.id];
+      this.state.body[slot.id] = { id, heat: 0, integrity: 100 };
+      this.discover(id, false);
+    }
+    this.state.map = this.generateFloor(0);
+    this.reveal(12);
+    this.log('Has despertado. Encuentra la escalera al noreste. El reloj ya corre.');
+    this.log(`${base.name}: otro cuerpo para un espíritu que se niega a morir.`);
+    this.sound('revive');
+    this.change();
+  }
+
+  tick() {
+    if (this.active()) {
+      if (!this.guard()) return;
+      const stage = this.remaining() < 120000 ? 2 : this.remaining() < 240000 ? 1 : 0;
+      if (stage > this.state.shiftStage) {
+        this.state.shiftStage = stage;
+        this.shiftTower();
+      }
+    }
+    this.emit('clock', { ms: this.remaining() });
+  }
+
+  neighbours(index) {
+    const x = index % 4;
+    const y = Math.floor(index / 4);
+    return [y > 0 ? index - 4 : null, x < 3 ? index + 1 : null,
+      y < 3 ? index + 4 : null, x > 0 ? index - 1 : null].filter(v => v !== null);
+  }
+
+  connect(map, a, b) {
+    if (!map[a].links.includes(b)) map[a].links.push(b);
+    if (!map[b].links.includes(a)) map[b].links.push(a);
+  }
+
+  path(map, start, end) {
+    const queue = [start];
+    const parent = new Map([[start, null]]);
+    while (queue.length) {
+      const current = queue.shift();
+      if (current === end) break;
+      for (const next of map[current].links) {
+        if (!parent.has(next)) {
+          parent.set(next, current);
+          queue.push(next);
+        }
+      }
+    }
+    if (!parent.has(end)) return [];
+    const result = [];
+    for (let n = end; n !== null; n = parent.get(n)) result.unshift(n);
+    return result;
+  }
+
+  generateFloor(floor) {
+    const map = Array.from({ length: 16 }, (_, id) => ({
+      id, links: [], type: 'corridor', visited: false, seen: false, resolved: false
+    }));
+    const visited = new Set([12]);
+    const stack = [12];
+    while (stack.length) {
+      const current = stack[stack.length - 1];
+      const choices = this.neighbours(current).filter(n => !visited.has(n));
+      if (!choices.length) { stack.pop(); continue; }
+      const next = this.pick(choices);
+      this.connect(map, current, next);
+      visited.add(next);
+      stack.push(next);
+    }
+    for (let k = 0; k < 3; k++) {
+      const a = Math.floor(this.random() * 16);
+      this.connect(map, a, this.pick(this.neighbours(a)));
+    }
+    const route = this.path(map, 12, 3);
+    for (const room of map) {
+      const r = this.random();
+      room.type = r < 0.25 ? 'combat' : r < 0.39 ? 'cache' : r < 0.5 ? 'trap'
+        : r < 0.61 ? 'workshop' : r < 0.71 ? 'archive' : 'corridor';
+    }
+    // Two encounters on the escape route; optional rooms offer other risks and rewards.
+    for (let i = 1; i < route.length - 1; i++) {
+      map[route[i]].type = i === Math.floor(route.length * 0.35)
+        || i === Math.floor(route.length * 0.68) ? 'combat' : 'corridor';
+    }
+    if (route.length > 4) {
+      map[route[1]].type = floor === 0 ? 'cache' : 'workshop';
+      map[route[route.length - 2]].type = floor === 2 ? 'cache' : 'archive';
+    }
+    map[12].type = 'start';
+    map[12].visited = map[12].seen = map[12].resolved = true;
+    map[3].type = floor === 2 ? 'boss' : 'stairs';
+    map[3].seen = true;
+    return map;
+  }
+
+  shiftTower() {
+    const map = this.state.map;
+    const closed = [];
+    for (let a = 0; a < 16; a++) {
+      for (const b of this.neighbours(a)) {
+        if (a < b && !map[a].links.includes(b)) closed.push([a, b]);
+      }
+    }
+    if (closed.length) {
+      const added = this.pick(closed);
+      this.connect(map, ...added);
+      const edges = [];
+      for (const room of map) {
+        for (const b of room.links) {
+          if (room.id < b && !(room.id === added[0] && b === added[1])) edges.push([room.id, b]);
+        }
+      }
+      for (const [a, b] of this.shuffle(edges)) {
+        map[a].links = map[a].links.filter(n => n !== b);
+        map[b].links = map[b].links.filter(n => n !== a);
+        if (this.path(map, a, b).length) break;
+        this.connect(map, a, b);
+      }
+    }
+    this.reveal(this.state.current);
+    this.log('¡El derrumbe ha cambiado los pasillos! La salida sigue siendo accesible.');
+    this.notice('La torre se retuerce. Los pasillos han cambiado.', 'warning');
+    this.sound('collapse');
+    this.emit('effect', { type: 'shake' });
+    this.change();
+  }
+
+  reveal(index) {
+    const map = this.state.map;
+    map[index].seen = map[index].visited = true;
+    for (const next of map[index].links) map[next].seen = true;
+  }
+
+  move(index) {
+    if (!this.guard()) return;
+    const s = this.state;
+    if (s.phase !== 'explore') {
+      this.notice(s.phase === 'combat' ? 'Resuelve el combate para seguir explorando.' : 'Resuelve esta sala antes de avanzar.');
+      return;
+    }
+    if (!s.map[s.current].links.includes(index)) return;
+    s.previous = s.current;
+    s.current = index;
+    const room = s.map[index];
+    if (!room.visited) s.stats.rooms++;
+    this.reveal(index);
+    for (const part of Object.values(s.body)) part.heat = Math.max(0, part.heat - 7);
+    this.sound('step');
+    if (!room.resolved) {
+      if (room.type === 'combat' || room.type === 'boss') this.beginCombat(room.type === 'boss');
+      else if (['cache', 'trap', 'workshop', 'archive'].includes(room.type)) s.phase = 'event';
+      else room.resolved = true;
+    }
+    this.log(`${DDData.roomNames[room.type]} · ${DDData.floors[s.floor].small}.`);
+    this.change();
+  }
+
+  moveDirection(direction) {
+    if (!this.state) return;
+    const current = this.state.current;
+    const delta = { north: -4, east: 1, south: 4, west: -1 }[direction];
+    const next = current + delta;
+    if (this.neighbours(current).includes(next)) this.move(next);
+  }
+
+  ascend() {
+    if (!this.guard()) return;
+    const s = this.state;
+    if (s.phase !== 'explore' || s.map[s.current].type !== 'stairs' || s.floor >= 2) return;
+    s.floor++;
+    s.map = this.generateFloor(s.floor);
+    s.current = s.previous = 12;
+    s.stats.rooms++;
+    this.reveal(12);
+    for (const part of Object.values(s.body)) part.heat = Math.max(0, part.heat - 15);
+    this.log(`Has alcanzado ${DDData.floors[s.floor].name}.`);
+    this.sound('stairs');
+    this.change();
+  }
+
+  discover(id, notify = true) {
+    if (this.meta.blueprints.includes(id)) return false;
+    this.meta.blueprints.push(id);
+    if (this.state) this.state.stats.discovered++;
+    if (notify) {
+      this.notice(`Plano descubierto: ${DDData.parts[id].name}. Lo conservarás al morir.`, 'good');
+      this.log(`Plano permanente descubierto: ${DDData.parts[id].name}.`);
+    }
+    return true;
+  }
+
+  addPart(id) {
+    this.discover(id);
+    const item = { uid: ++this.state.uid, id, heat: 0, integrity: 100 };
+    this.state.inventory.push(item);
+    return item;
+  }
+
+  collectCache() {
+    if (!this.guard()) return;
+    const s = this.state;
+    const room = s.map[s.current];
+    if (s.phase !== 'event' || room.type !== 'cache' || room.resolved) return;
+    const amount = 9 + Math.floor(this.random() * 7);
+    s.scraps += amount;
+    s.potions++;
+    s.coolants++;
+    const ids = s.floor === 0 ? ['claw', 'scalpel', 'spider', 'iron'] : ['cannon', 'pistons', 'boiler', 'oracle'];
+    const item = this.addPart(this.pick(ids));
+    this.log(`Recoges ${amount} de chatarra, un suero, un refrigerante y ${DDData.parts[item.id].name}.`);
+    this.notice(`+${amount} chatarra · +1 suero · +1 refrigerante · injerto en la bolsa`, 'good');
+    room.resolved = true;
+    s.phase = 'explore';
+    this.sound('loot');
+    this.change();
+  }
+
+  resolveTrap(choice) {
+    if (!this.guard()) return;
+    const s = this.state;
+    const room = s.map[s.current];
+    if (s.phase !== 'event' || room.type !== 'trap' || room.resolved) return;
+    if (choice === 'scraps') {
+      if (s.scraps < 5) { this.notice('Necesitas 5 de chatarra.'); return; }
+      s.scraps -= 5;
+      this.log('Desvías el vapor con una válvula improvisada.');
+    } else if (choice === 'legs') {
+      const legs = ['legL', 'legR'].filter(key => s.body[key].id);
+      if (!legs.length) { this.notice('Necesitas al menos una pierna intacta.'); return; }
+      for (const key of legs) this.stress(key, 30, 12);
+      this.log('Saltas sobre el vapor. Tus piernas absorben el esfuerzo.');
+    } else if (choice === 'cross') {
+      s.hp -= 9 + s.floor * 2;
+      this.log('Atraviesas el vapor. Tu carne paga el precio.');
+      this.sound('hurt');
+    } else return;
+    room.resolved = true;
+    s.phase = 'explore';
+    if (s.hp <= 0) this.finish(false, 'El vapor ha deshecho tus últimas suturas.');
+    else this.change();
+  }
+
+  searchArchive() {
+    if (!this.guard()) return;
+    const s = this.state;
+    const room = s.map[s.current];
+    if (s.phase !== 'event' || room.type !== 'archive' || room.resolved) return;
+    const unknown = Object.keys(DDData.parts).filter(id => !this.meta.blueprints.includes(id)
+      && (!DDData.parts[id].expansion || this.meta.expansion));
+    if (unknown.length) this.discover(this.pick(unknown));
+    else {
+      s.scraps += 10;
+      this.notice('Ya conoces estos planos. Recuperas 10 de chatarra.', 'good');
+    }
+    room.resolved = true;
+    s.phase = 'explore';
+    this.sound('discover');
+    this.change();
+  }
+
+  leaveWorkshop() {
+    if (!this.guard()) return;
+    const s = this.state;
+    if (s.phase !== 'event' || s.map[s.current].type !== 'workshop') return;
+    s.map[s.current].resolved = true;
+    s.phase = 'explore';
+    this.change();
+  }
+
+  atWorkshop() {
+    return this.active() && this.state.map[this.state.current].type === 'workshop'
+      && ['explore', 'event'].includes(this.state.phase);
+  }
+
+  craft(id) {
+    if (!this.guard() || !this.atWorkshop()) { this.notice('Solo puedes fabricar en una estación de injertos.'); return; }
+    const def = DDData.parts[id];
+    if (!def || !this.meta.blueprints.includes(id) || (def.expansion && !this.meta.expansion)) return;
+    const cost = 6 + def.tier * 5;
+    if (this.state.scraps < cost) { this.notice(`Necesitas ${cost} de chatarra.`, 'warning'); return; }
+    this.state.scraps -= cost;
+    this.addPart(id);
+    this.log(`Has fabricado ${def.name}. Está en tu bolsa de injertos.`);
+    this.notice(`${def.name} añadido a la bolsa.`, 'good');
+    this.sound('graft');
+    this.change();
+  }
+
+  repair() {
+    if (!this.guard() || !this.atWorkshop()) return;
+    if (this.state.scraps < 8) { this.notice('Necesitas 8 de chatarra.'); return; }
+    const parts = Object.values(this.state.body).filter(p => p.id);
+    if (!parts.some(p => p.integrity < 100 || p.heat > 0)) { this.notice('Tus injertos intactos ya están en perfecto estado.'); return; }
+    this.state.scraps -= 8;
+    for (const part of parts) {
+      part.integrity = Math.min(100, part.integrity + 40);
+      part.heat = 0;
+    }
+    this.log('La estación repara 40 de integridad y enfría tus injertos intactos.');
+    this.sound('graft');
+    this.change();
+  }
+
+  equip(uid, slotId) {
+    if (!this.guard()) return;
+    const s = this.state;
+    const slot = DDData.slots.find(v => v.id === slotId);
+    const index = s.inventory.findIndex(item => item.uid === Number(uid));
+    if (index < 0 || !slot) return;
+    const item = s.inventory[index];
+    if (DDData.parts[item.id].kind !== slot.kind) return;
+    if (s.phase === 'combat' && s.energy < 1) { this.notice('Injertar durante el combate cuesta 1 de energía.'); return; }
+    const old = s.body[slotId];
+    s.inventory.splice(index, 1);
+    if (old.id) s.inventory.push({ ...old, uid: ++s.uid });
+    s.body[slotId] = { id: item.id, heat: item.heat, integrity: item.integrity };
+    this.purgeSlot(slotId);
+    if (s.phase === 'combat') {
+      s.energy--;
+      for (const card of this.cardsForSlot(slotId)) {
+        if (s.hand.length < 7) s.hand.push(card);
+        else s.draw.push(card);
+      }
+    }
+    s.stats.grafts++;
+    this.log(`Injertas ${DDData.parts[item.id].name} en ${slot.label.toLowerCase()}.`);
+    this.notice('Injerto conectado. Tu cuerpo y tu mazo han cambiado.', 'good');
+    this.sound('graft');
+    this.change();
+  }
+
+  salvage(uid) {
+    if (!this.guard()) return;
+    const s = this.state;
+    const index = s.inventory.findIndex(item => item.uid === Number(uid));
+    if (index < 0) return;
+    const item = s.inventory.splice(index, 1)[0];
+    const amount = DDData.parts[item.id].tier * 3;
+    s.scraps += amount;
+    this.notice(`Injerto desguazado: +${amount} de chatarra.`, 'good');
+    this.sound('loot');
+    this.change();
+  }
+
+  useItem(kind) {
+    if (!this.guard()) return;
+    const s = this.state;
+    if (kind === 'heal') {
+      if (s.potions <= 0) { this.notice('No te quedan sueros.'); return; }
+      if (s.hp >= s.maxHp) { this.notice('Tu vida ya está al máximo.'); return; }
+      s.potions--;
+      s.hp = Math.min(s.maxHp, s.hp + 28);
+      this.log('Suero vital: recuperas hasta 28 de vida.');
+      this.sound('heal');
+    } else if (kind === 'cool') {
+      if (s.coolants <= 0) { this.notice('No te queda refrigerante.'); return; }
+      if (!Object.values(s.body).some(p => p.id && (p.heat > 0 || p.integrity < 100))) {
+        this.notice('No necesitas enfriar ni reparar ningún injerto.'); return;
+      }
+      s.coolants--;
+      for (const part of Object.values(s.body)) {
+        if (!part.id) continue;
+        part.heat = Math.max(0, part.heat - 38);
+        part.integrity = Math.min(100, part.integrity + 12);
+      }
+      this.log('Refrigerante: −38° y +12 de integridad en todos los injertos intactos.');
+      this.sound('cool');
+    } else return;
+    this.change();
+  }
+
+  cardsForSlot(slotId) {
+    const slot = DDData.slots.find(v => v.id === slotId);
+    const part = this.state.body[slotId];
+    const fallback = { head: 'stumpHead', torso: 'stumpTorso', arm: 'stumpArm', leg: 'stumpLeg' };
+    const ids = part.id ? DDData.parts[part.id].cards : [fallback[slot.kind]];
+    return ids.map(id => ({ uid: ++this.state.uid, id, slot: slotId, part: part.id }));
+  }
+
+  fullDeck() {
+    return DDData.slots.flatMap(slot => this.cardsForSlot(slot.id));
+  }
+
+  purgeSlot(slotId) {
+    for (const zone of ['hand', 'draw', 'discard']) {
+      this.state[zone] = this.state[zone].filter(card => card.slot !== slotId);
+    }
+  }
+
+  stress(slotId, heat, wear) {
+    const part = this.state.body[slotId];
+    if (!part.id) return;
+    part.heat = Math.min(100, part.heat + heat);
+    part.integrity = Math.max(0, part.integrity - wear - (part.heat >= 75 ? 7 : 0));
+    if (part.heat >= 100 || part.integrity <= 0) {
+      const name = DDData.parts[part.id].name;
+      this.state.body[slotId] = { id: null, heat: 0, integrity: 0 };
+      this.state.stats.broken++;
+      this.purgeSlot(slotId);
+      if (this.state.phase === 'combat') this.state.draw.push(...this.cardsForSlot(slotId));
+      this.notice(`¡${name} se ha roto! Sus cartas desaparecen. Injerta un reemplazo.`, 'danger');
+      this.log(`${name} se rompe. Solo queda un muñón.`);
+      this.sound('break');
+      this.emit('effect', { type: 'break', slot: slotId });
+    }
+  }
+
+  beginCombat(boss = false) {
+    const s = this.state;
+    let choices = s.floor === 0 ? ['orderly', 'scientist', 'stitched']
+      : s.floor === 1 ? ['furnace', 'scientist', 'stitched'] : ['furnace', 'oracle', 'stitched'];
+    if (this.meta.expansion) choices = [...choices, 'archivist'];
+    const id = boss ? 'boss' : this.pick(choices);
+    const def = DDData.enemies[id];
+    const hp = def.hp + (boss ? 0 : s.floor * 7);
+    s.enemy = { id, hp, maxHp: hp, block: 0, burn: 0, weak: 0, stun: 0, move: 0 };
+    s.phase = 'combat';
+    s.turn = 1;
+    s.block = 0;
+    s.energy = 3;
+    s.hand = [];
+    s.discard = [];
+    s.draw = this.shuffle(this.fullDeck());
+    this.drawCards(5);
+    this.log(`${def.name} te bloquea el paso. La intención enemiga está a la vista.`);
+    this.sound(boss ? 'boss' : 'combat');
+  }
+
+  drawCards(amount) {
+    const s = this.state;
+    for (let i = 0; i < amount && s.hand.length < 7; i++) {
+      if (!s.draw.length) {
+        if (!s.discard.length) break;
+        s.draw = this.shuffle(s.discard);
+        s.discard = [];
+      }
+      s.hand.push(s.draw.pop());
+    }
+  }
+
+  intent() {
+    const s = this.state;
+    if (!s?.enemy) return null;
+    const e = s.enemy;
+    const def = DDData.enemies[e.id];
+    const kind = def.pattern[e.move % def.pattern.length];
+    const base = def.attack + (def.boss ? 0 : s.floor * 2) + (this.remaining() < 120000 ? 2 : 0);
+    const damage = Math.floor(base * (kind === 'fury' ? 1.6 : 1) * (e.weak > 0 ? 0.6 : 1));
+    if (e.stun > 0) return { kind: 'stunned', label: 'Aturdido · no actuará', value: 0, icon: 'bolt' };
+    if (kind === 'guard') return { kind, label: 'Se protegerá · 12 defensa', value: 12, icon: 'shield' };
+    if (kind === 'heat') return { kind, label: 'Vapor · +22° a un injerto', value: 22, icon: 'flame' };
+    return { kind, label: `${kind === 'fury' ? 'Golpe brutal' : 'Atacará'} · ${damage} de daño`, value: damage, icon: 'blade' };
+  }
+
+  play(uid) {
+    if (!this.guard() || this.state.phase !== 'combat') return;
+    const s = this.state;
+    const index = s.hand.findIndex(card => card.uid === Number(uid));
+    if (index < 0) return;
+    const card = s.hand[index];
+    if (s.body[card.slot].id !== card.part) { this.purgeSlot(card.slot); this.change(); return; }
+    const def = DDData.cards[card.id];
+    if (def.cost > s.energy) { this.notice('No tienes suficiente energía. Termina el turno para recuperar 3.'); return; }
+    s.energy -= def.cost;
+    s.hand.splice(index, 1);
+    if (def.damage) {
+      let hit = def.damage;
+      if (!def.pierce) {
+        const blocked = Math.min(s.enemy.block, hit);
+        s.enemy.block -= blocked;
+        hit -= blocked;
+      }
+      s.enemy.hp = Math.max(0, s.enemy.hp - hit);
+      this.emit('effect', { type: 'hit', amount: hit, target: 'enemy' });
+    }
+    if (def.block) s.block += def.block;
+    if (def.heal) s.hp = Math.min(s.maxHp, s.hp + def.heal);
+    if (def.energy) s.energy += def.energy;
+    if (def.burn) s.enemy.burn += def.burn;
+    if (def.weak) s.enemy.weak = Math.max(s.enemy.weak, def.weak);
+    if (def.stun) s.enemy.stun = 1;
+    if (def.cool) {
+      for (const part of Object.values(s.body)) part.heat = Math.max(0, part.heat - def.cool);
+    }
+    this.stress(card.slot, def.heat, def.wear);
+    // A broken/replaced part must not return through the discard pile.
+    if (s.body[card.slot].id === card.part) s.discard.push(card);
+    if (def.draw) this.drawCards(def.draw);
+    this.log(`${def.name}: ${def.text}`);
+    this.sound(def.damage ? 'attack' : def.heal ? 'heal' : def.block ? 'guard' : 'card');
+    if (s.enemy.hp <= 0) this.victory();
+    this.change();
+  }
+
+  endTurn() {
+    if (!this.guard() || this.state.phase !== 'combat') return;
+    const s = this.state;
+    const e = s.enemy;
+    if (e.burn > 0) {
+      e.hp = Math.max(0, e.hp - e.burn);
+      this.emit('effect', { type: 'hit', target: 'enemy', amount: e.burn });
+      this.log(`La quemadura inflige ${e.burn} de daño.`);
+      e.burn = Math.max(0, e.burn - 1);
+      if (e.hp <= 0) { this.victory(); this.change(); return; }
+    }
+    const intent = this.intent();
+    if (intent.kind === 'stunned') {
+      this.log('El enemigo está aturdido. Su intención queda cancelada.');
+      e.stun = 0;
+    } else if (intent.kind === 'guard') {
+      e.block = Math.min(24, e.block + intent.value);
+      this.log('El enemigo se protege con 12 de defensa.');
+      this.sound('guard');
+    } else if (intent.kind === 'heat') {
+      const slots = DDData.slots.filter(slot => s.body[slot.id].id);
+      if (slots.length) {
+        const slot = this.pick(slots);
+        this.stress(slot.id, intent.value, 3);
+        this.log(`Una descarga de vapor recalienta tu ${slot.label.toLowerCase()}.`);
+        this.sound('burn');
+      }
+    } else {
+      const damage = Math.max(0, intent.value - s.block);
+      s.hp = Math.max(0, s.hp - damage);
+      this.log(`El enemigo inflige ${damage} de daño; tu defensa absorbe ${Math.min(s.block, intent.value)}.`);
+      this.emit('effect', { type: 'hit', target: 'player', amount: damage });
+      this.sound(damage ? 'hurt' : 'guard');
+    }
+    if (s.hp <= 0) { this.finish(false, 'Tus suturas han cedido. La carne se queda; el espíritu continúa.'); return; }
+    e.move++;
+    e.weak = Math.max(0, e.weak - 1);
+    for (const part of Object.values(s.body)) part.heat = Math.max(0, part.heat - 12);
+    s.discard.push(...s.hand);
+    s.hand = [];
+    s.block = 0;
+    s.energy = 3;
+    s.turn++;
+    this.drawCards(5);
+    this.change();
+  }
+
+  victory() {
+    const s = this.state;
+    const def = DDData.enemies[s.enemy.id];
+    const amount = 7 + s.floor * 3;
+    const item = this.addPart(this.pick(def.loot));
+    s.scraps += amount;
+    s.hp = Math.min(s.maxHp, s.hp + 5);
+    s.stats.kills++;
+    s.map[s.current].resolved = true;
+    s.reward = { id: item.id, uid: item.uid, scraps: amount, enemy: def.name, boss: Boolean(def.boss) };
+    s.phase = 'loot';
+    s.block = 0;
+    this.log(`${def.name} cae. Cosechas ${DDData.parts[item.id].name}, ${amount} de chatarra y 5 de vida.`);
+    this.sound('victory');
+  }
+
+  continueAfterLoot() {
+    if (!this.guard() || this.state.phase !== 'loot') return;
+    const s = this.state;
+    s.phase = 'explore';
+    s.hand = s.draw = s.discard = [];
+    s.enemy = null;
+    this.change();
+  }
+
+  escape() {
+    if (!this.guard()) return;
+    const s = this.state;
+    if (s.floor !== 2 || s.current !== 3 || !s.map[3].resolved || s.phase !== 'explore') return;
+    this.finish(true, 'Sales de la torre mientras el cielo se llena de ceniza. Este cuerpo, por fin, te pertenece.');
+  }
+
+  finish(won, reason) {
+    if (!this.active()) return;
+    const s = this.state;
+    s.remainingAtEnd = Math.max(0, s.deadline - Date.now());
+    s.phase = won ? 'won' : 'dead';
+    s.reason = reason;
+    if (!s.awarded) {
+      s.awarded = true;
+      s.earnedSouls = 3 + s.stats.kills + s.floor * 2 + (won ? 15 : 0);
+      this.meta.souls += s.earnedSouls;
+      if (won) {
+        this.meta.wins++;
+        const elapsed = 360000 - s.remainingAtEnd;
+        this.meta.best = this.meta.best === null ? elapsed : Math.min(this.meta.best, elapsed);
+      } else this.meta.deaths++;
+    }
+    this.log(reason);
+    this.sound(won ? 'escape' : 'death');
+    this.change();
+  }
+
+  buy(id) {
+    if (id === 'expansion') {
+      if (this.meta.expansion) return;
+      if (this.meta.souls < 30) { this.notice('Necesitas 30 ecos. Los obtienes al terminar cada intento.'); return; }
+      this.meta.souls -= 30;
+      this.meta.expansion = true;
+      this.notice('Ala prohibida abierta. Su archivista puede aparecer en los próximos encuentros.', 'good');
+    } else {
+      const skin = DDData.skins[id];
+      if (!skin) return;
+      if (!this.meta.skins.includes(id)) {
+        if (this.meta.souls < skin.cost) { this.notice(`Necesitas ${skin.cost} ecos.`); return; }
+        this.meta.souls -= skin.cost;
+        this.meta.skins.push(id);
+      }
+      this.meta.skin = id;
+      this.notice(`Apariencia equipada: ${skin.name}.`, 'good');
+    }
+    this.sound('discover');
+    this.change();
+  }
+
+  setPreference(name, value) {
+    if (!['volume', 'sfx', 'motion'].includes(name)) return;
+    this.meta[name] = name === 'volume' ? Math.max(0, Math.min(1, Number(value))) : Boolean(value);
+    this.save();
+    this.emit('preference');
+  }
+};
+
+</script>
+  <script>
+/* Pixel art original dibujado en lienzos de baja resolución. */
+'use strict';
+
+window.DDArt = class {
+  constructor(game) {
+    this.game = game;
+    this.canvas = null;
+    this.anatomy = null;
+    this.effects = [];
+    this.backgrounds = new Map();
+    this.sprite = document.createElement('canvas');
+    this.sprite.width = 100;
+    this.sprite.height = 116;
+    this.last = 0;
+    game.addEventListener('effect', event => {
+      this.effects.push({ ...event.detail, time: performance.now() });
+    });
+    const frame = now => {
+      if (now - this.last > 40) {
+        this.last = now;
+        this.draw(now);
+      }
+      requestAnimationFrame(frame);
+    };
+    requestAnimationFrame(frame);
+  }
+
+  bind() {
+    this.canvas = document.getElementById('scene');
+    this.anatomy = document.getElementById('body-canvas');
+    this.draw(performance.now());
+  }
+
+  rect(c, x, y, w, h, color) {
+    c.fillStyle = color;
+    c.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
+  }
+
+  line(c, x1, y1, x2, y2, color, width = 1) {
+    c.strokeStyle = color;
+    c.lineWidth = width;
+    c.beginPath();
+    c.moveTo(Math.round(x1) + 0.5, Math.round(y1) + 0.5);
+    c.lineTo(Math.round(x2) + 0.5, Math.round(y2) + 0.5);
+    c.stroke();
+  }
+
+  ellipse(c, x, y, rx, ry, color) {
+    for (let py = -ry; py <= ry; py++) {
+      const span = Math.floor(rx * Math.sqrt(Math.max(0, 1 - py * py / (ry * ry))));
+      this.rect(c, x - span, y + py, span * 2 + 1, 1, color);
+    }
+  }
+
+  arch(c, x, y, width, height) {
+    const r = this.rect.bind(this, c);
+    r(x - 3, y + 24, width + 6, height - 20, '#39372f');
+    r(x + 2, y + 12, width - 4, height - 9, '#39372f');
+    r(x + 10, y + 5, width - 20, height - 2, '#454035');
+    r(x + 20, y, width - 40, 8, '#454035');
+    r(x + 3, y + 27, width - 6, height - 25, '#0b1016');
+    r(x + 7, y + 17, width - 14, height - 15, '#0b1016');
+    r(x + 14, y + 10, width - 28, height - 8, '#0b1016');
+    r(x + 23, y + 6, width - 46, 11, '#0b1016');
+    for (let i = 0; i < 16; i++) {
+      const px = x + 9 + (i * 17) % (width - 18);
+      const py = y + 21 + (i * 19) % (height - 29);
+      r(px, py, 1, 1, i % 4 === 0 ? '#ae9870' : '#484b53');
+    }
+    this.ellipse(c, x + width / 2 + 7, y + 34, 9, 9, '#aaa993');
+    this.ellipse(c, x + width / 2 + 11, y + 30, 9, 9, '#0b1016');
+    r(x + 5, y + height - 28, width - 10, 29, '#141a1c');
+    for (let i = 0; i < 5; i++) {
+      r(x + 7 + i * 10, y + height - 35 - (i % 2) * 7, 6, 24, '#141a1c');
+      r(x + 9 + i * 10, y + height - 40 - (i % 2) * 7, 2, 10, '#141a1c');
+    }
+    r(x + width / 2 - 1, y + 9, 3, height - 5, '#504838');
+    r(x + 4, y + 56, width - 8, 3, '#403c33');
+    r(x - 6, y + height + 2, width + 12, 5, '#554b3c');
+    r(x - 4, y + height + 7, width + 8, 3, '#262822');
+  }
+
+  background(floor, seed) {
+    const key = `${floor}:${seed}`;
+    if (this.backgrounds.has(key)) return this.backgrounds.get(key);
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 276;
+    const c = canvas.getContext('2d');
+    const r = this.rect.bind(this, c);
+    r(0, 0, 512, 276, '#151817');
+    const bricks = ['#202321', '#222522', '#252723', '#272924', '#1e2221'];
+    for (let row = 0; row < 14; row++) {
+      for (let col = -1; col < 18; col++) {
+        const x = col * 32 + (row % 2) * 16;
+        const y = row * 13;
+        r(x, y, 30, 11, bricks[Math.abs((row * 31 + col * 17 + seed) % bricks.length)]);
+        r(x + 2, y + 1, 25, 1, '#2b2d27');
+      }
+    }
+    this.arch(c, 42, 26, 62, 109);
+    this.arch(c, 224, 14, 64, 116);
+    this.arch(c, 406, 26, 62, 109);
+    for (const x of [16, 126, 196, 310, 382, 491]) {
+      r(x, 0, 8, 178, '#1a1e1b');
+      r(x + 1, 0, 2, 176, '#494337');
+      r(x - 4, 167, 16, 13, '#38392f');
+      r(x - 6, 178, 20, 5, '#444235');
+      r(x - 3, 19, 14, 5, '#444235');
+    }
+    // Pipes, pressure gauges, gears and suspension chains.
+    r(0, 8, 512, 5, '#554335');
+    r(0, 8, 512, 1, '#816447');
+    for (const x of [140, 362]) {
+      r(x, 11, 5, 112, '#745539');
+      r(x, 11, 1, 112, '#a07a4c');
+      r(x - 2, 102, 9, 4, '#383a30');
+      this.ellipse(c, x + 2, 57, 11, 11, '#161b18');
+      this.ellipse(c, x + 2, 57, 8, 8, '#9f8050');
+      this.ellipse(c, x + 2, 57, 6, 6, '#b8af8c');
+      this.line(c, x + 2, 57, x + 5, 52, '#512f25');
+      r(x - 3, 124, 16, 5, '#83633d');
+    }
+    for (const x of [170, 339]) {
+      for (let y = 0; y < 62; y += 5) {
+        r(x, y, 3, 4, '#645944');
+        r(x + 1, y + 1, 1, 2, '#1a201d');
+      }
+      r(x - 10, 61, 23, 4, '#66533b');
+      r(x - 6, 66, 14, 3, '#38372a');
+    }
+    // Stone floor, mosaic and ritual circle.
+    r(0, 183, 512, 93, '#232620');
+    for (let row = 0; row < 7; row++) {
+      for (let col = -1; col < 13; col++) {
+        const x = col * 48 + (row % 2) * 24;
+        const y = 183 + row * 15;
+        r(x, y, 46, 13, (row + col) % 3 === 0 ? '#2d2f26' : '#292c25');
+        r(x + 2, y + 1, 39, 1, '#36372b');
+      }
+    }
+    this.ellipse(c, 256, 230, 122, 31, '#41402d');
+    this.ellipse(c, 256, 230, 120, 29, '#282c25');
+    this.ellipse(c, 256, 230, 107, 25, '#514632');
+    this.ellipse(c, 256, 230, 105, 24, '#282c25');
+    for (let i = 0; i < 12; i++) {
+      const a = i / 12 * Math.PI * 2;
+      const x = 256 + Math.cos(a) * 113;
+      const y = 230 + Math.sin(a) * 27;
+      this.line(c, x - 2, y - 2, x + 2, y + 2, '#89714a');
+      r(x, y - 3, 1, 6, '#89714a');
+    }
+    this.line(c, 180, 216, 325, 240, '#574b32');
+    this.line(c, 325, 216, 190, 240, '#574b32');
+    this.line(c, 256, 205, 256, 254, '#574b32');
+    // Alchemist's workbench.
+    r(28, 164, 93, 8, '#675039');
+    r(31, 171, 4, 27, '#443d2e');
+    r(112, 171, 4, 27, '#443d2e');
+    r(30, 166, 88, 2, '#9b7750');
+    for (let i = 0; i < 5; i++) {
+      const x = 37 + i * 16;
+      r(x + 3, 142 - i % 2 * 8, 4, 8, '#606b58');
+      r(x, 149 - i % 2 * 8, 11, 14 + i % 2 * 8, '#45594a');
+      r(x + 2, 153, 7, 8, ['#78a28d', '#b48b52', '#a96d58'][i % 3]);
+      r(x + 1, 148 - i % 2 * 8, 2, 7, '#9aab87');
+    }
+    // Holding tank with something imperfectly alive inside.
+    r(423, 134, 39, 45, '#303b31');
+    r(426, 137, 33, 39, '#35554a');
+    r(430, 140, 2, 29, '#718b6a');
+    r(419, 131, 47, 5, '#7d6544');
+    r(419, 177, 47, 5, '#7d6544');
+    this.ellipse(c, 444, 150, 7, 8, '#84947b');
+    r(439, 157, 10, 13, '#6b806b');
+    r(439, 148, 2, 2, '#232c24');
+    r(446, 148, 2, 2, '#232c24');
+    // Loose bones, books and rubble, deterministic rather than noisy.
+    for (let i = 0; i < 30; i++) {
+      const x = (i * 73 + seed % 51) % 508;
+      const y = 192 + (i * 17) % 78;
+      r(x, y, 3 + i % 4, 2, i % 4 === 0 ? '#79694b' : '#373a2e');
+    }
+    if (floor === 1) {
+      r(218, 35, 75, 130, '#30271e');
+      r(223, 40, 65, 120, '#796046');
+      r(228, 48, 55, 104, '#261f18');
+      r(233, 92, 45, 55, '#8b4127');
+      r(238, 105, 35, 42, '#bd6a2e');
+      for (const x of [234, 244, 254, 264, 274]) r(x, 51, 3, 99, '#3c3427');
+    }
+    if (floor === 2) {
+      for (let i = 0; i < 8; i++) {
+        const x = 150 + i * 29;
+        r(x, 152 - i % 2 * 6, 18, 25, '#463331');
+        r(x + 2, 156 - i % 2 * 6, 2, 17, '#a0814e');
+      }
+      r(146, 177, 246, 5, '#806345');
+    }
+    // Soft vignette applied at source resolution, never blurring the sprites.
+    const vignette = c.createRadialGradient(256, 146, 85, 256, 146, 285);
+    vignette.addColorStop(0, 'rgba(0,0,0,0)');
+    vignette.addColorStop(1, 'rgba(0,0,0,0.58)');
+    c.fillStyle = vignette;
+    c.fillRect(0, 0, 512, 276);
+    if (this.backgrounds.size > 6) this.backgrounds.clear();
+    this.backgrounds.set(key, canvas);
+    return canvas;
+  }
+
+  flame(c, x, y, tick, big = false) {
+    const r = this.rect.bind(this, c);
+    const phase = Math.floor(tick / 140 + x) % 4;
+    const height = big ? 32 : 17;
+    r(x - 3, y - height + phase * 2, 4, height - phase * 2, '#8c482b');
+    r(x + 2, y - height + 7 - phase, 6, height - 7 + phase, '#a1532a');
+    r(x - 1, y - height + 6 + phase, 5, height - 6 - phase, '#d9913e');
+    r(x, y - 7 - phase, 3, 8 + phase, '#edc477');
+    r(x + 1, y - 2, 2, 3, '#f4dda1');
+  }
+
+  defaultBody() {
+    const ids = { head: 'skull', torso: 'sutures', armL: 'bone', armR: 'scalpel', legL: 'legs', legR: 'legs' };
+    return Object.fromEntries(Object.entries(ids).map(([key, id]) => [key, { id, heat: 0, integrity: 100 }]));
+  }
+
+  drawBody(target, cx, ground, scale, body, tick, skinId = 'suture', attack = false) {
+    const sc = this.sprite.getContext('2d');
+    sc.clearRect(0, 0, 100, 116);
+    const r = this.rect.bind(this, sc);
+    const skin = DDData.skins[skinId]?.color || '#8fa58e';
+    const dark = '#3c4e43';
+    const shadow = '#121b18';
+    const light = '#b3ba92';
+    const bob = this.game.meta.motion ? Math.floor(Math.sin(tick / 430)) : 0;
+    const color = key => body[key]?.id ? DDData.parts[body[key].id].color : '#7f4e46';
+    // Feet and legs are independent anatomical slots.
+    for (const [key, x] of [['legL', 32], ['legR', 51]]) {
+      const id = body[key]?.id;
+      if (!id) {
+        r(x, 77, 10, 6, shadow);
+        r(x + 2, 78, 7, 4, '#8d5850');
+        r(x + 5, 82, 3, 13, '#a69476');
+        r(x + 2, 95, 8, 3, '#756b54');
+      } else if (['pistons', 'spider'].includes(id)) {
+        r(x - 1, 77, 13, 8, shadow);
+        r(x, 78, 11, 6, color(key));
+        r(x + 2, 84, 3, 14, '#a4aca0');
+        r(x + 7, 84, 2, 14, '#645d47');
+        r(x - 2, 98, 16, 6, shadow);
+        r(x - 1, 99, 13, 3, color(key));
+        if (id === 'spider') { r(x - 7, 89, 5, 3, color(key)); r(x - 8, 92, 3, 9, color(key)); }
+      } else {
+        r(x - 2, 75, 15, 19, shadow);
+        r(x, 76, 10, 19, id === 'legs' ? skin : color(key));
+        r(x + 7, 78, 3, 15, dark);
+        r(x + 1, 91, 10, 9, '#454e41');
+        r(x - 3, 99, 17, 6, shadow);
+        r(x - 2, 99, 14, 3, '#5c6250');
+        r(x + 1, 83, 8, 1, '#594d3e');
+        r(x + 3, 81, 1, 5, light);
+        r(x + 6, 81, 1, 5, light);
+      }
+    }
+    // Torso.
+    const torso = body.torso?.id;
+    const ty = 39 + bob;
+    r(26, ty + 2, 43, 34, shadow);
+    r(30, ty - 3, 34, 45, shadow);
+    if (!torso) {
+      r(33, ty + 2, 26, 30, '#5b463d');
+      for (let i = 0; i < 5; i++) r(32, ty + 3 + i * 6, 30, 2, '#a79f82');
+      r(45, ty, 3, 33, '#bead8d');
+      r(47, ty + 13, 6, 9, '#8e554c');
+    } else if (['boiler', 'iron', 'mercury'].includes(torso)) {
+      r(28, ty + 3, 39, 29, color('torso'));
+      r(31, ty - 1, 32, 39, color('torso'));
+      r(34, ty + 3, 25, 29, '#41483c');
+      r(37, ty + 6, 20, 22, '#1c2622');
+      if (torso === 'boiler') {
+        this.flame(sc, 46, ty + 26, tick, false);
+        for (let i = 0; i < 4; i++) r(37 + i * 6, ty + 5, 2, 24, '#816143');
+      } else if (torso === 'mercury') {
+        this.ellipse(sc, 47, ty + 16, 7, 9, '#5d9997');
+        r(45, ty + 10, 4, 9, '#acd4ba');
+      } else {
+        r(37, ty + 8, 20, 4, '#85948d');
+        r(37, ty + 18, 20, 4, '#85948d');
+        r(44, ty + 6, 5, 21, '#b8b7a0');
+      }
+      for (const x of [31, 62]) for (const y of [ty + 3, ty + 31]) r(x, y, 2, 2, '#d2c39c');
+    } else {
+      r(29, ty + 3, 36, 29, skin);
+      r(32, ty - 1, 29, 39, skin);
+      r(54, ty + 3, 9, 31, dark);
+      r(31, ty + 3, 3, 25, light);
+      r(35, ty + 5, 11, 9, '#a0ae8c');
+      r(48, ty + 5, 12, 9, '#728a70');
+      r(35, ty + 16, 20, 2, '#536651');
+      r(45, ty + 3, 2, 31, '#5a463d');
+      for (let y = ty + 4; y < ty + 31; y += 6) r(42, y, 8, 1, '#c7ba98');
+      r(35, ty + 24, 8, 1, '#567052');
+    }
+    r(30, ty + 36, 34, 6, '#4a4234');
+    r(44, ty + 37, 7, 5, '#bd9c60');
+    // Arms, including cannon and surgical attachments.
+    for (const [key, x] of [['armL', 17], ['armR', 65]]) {
+      const id = body[key]?.id;
+      const ay = ty + (key === 'armR' && attack ? -7 : 5);
+      r(x - 2, ay - 2, 15, 28, shadow);
+      if (!id) {
+        r(x, ay, 11, 9, '#83594b');
+        r(x + 4, ay + 9, 4, 5, '#b9a283');
+      } else if (id === 'cannon' || id === 'piston') {
+        r(x - 2, ay + 1, 17, 29, '#756044');
+        r(x - 1, ay + 2, 14, 6, '#c69f63');
+        r(x, ay + 9, 12, 4, '#bdab7a');
+        r(x - 3, ay + 15, 18, 13, color(key));
+        r(x - 1, ay + 18, 14, 8, '#34443c');
+        r(x + 2, ay + 20, 8, 5, '#80b5a5');
+        if (id === 'piston') r(x - 4, ay + 23, 20, 10, '#a59775');
+      } else {
+        r(x, ay, 11, 23, id === 'bone' ? skin : color(key));
+        r(x + 8, ay + 2, 3, 20, '#5c6652');
+        r(x + 1, ay + 6, 8, 2, '#b6b995');
+        r(x - 1, ay + 21, 13, 6, '#b4aa85');
+        if (id === 'scalpel') {
+          r(x + 3, ay + 24, 3, 18, '#c4ccbe');
+          r(x + 6, ay + 27, 2, 12, '#869891');
+          r(x - 1, ay + 25, 2, 11, '#bec9c0');
+        } else if (id === 'claw') {
+          for (let i = 0; i < 3; i++) { r(x + i * 4, ay + 26, 2, 9 + i * 2, '#c2b18c'); r(x + i * 4 + 1, ay + 33 + i * 2, 3, 2, '#c2b18c'); }
+        } else {
+          r(x, ay + 27, 10, 7, '#8e9d7d');
+          r(x + 1, ay + 30, 8, 2, '#4a5545');
+        }
+      }
+    }
+    // Head, neck bolts and eyes.
+    const head = body.head?.id;
+    const hy = 13 + bob;
+    r(40, hy + 19, 15, 12, shadow);
+    r(42, hy + 20, 11, 10, skin);
+    if (!head) {
+      r(44, hy + 14, 7, 10, '#b7a489');
+      this.ellipse(sc, 47, hy + 5, 7, 8, '#436d65');
+      r(43, hy + 3, 2, 2, '#9fcfba');
+      r(49, hy + 3, 2, 2, '#9fcfba');
+    } else {
+      r(32, hy, 30, 22, shadow);
+      r(35, hy - 3, 24, 28, shadow);
+      r(34, hy + 1, 26, 20, head === 'skull' ? skin : color('head'));
+      r(37, hy - 1, 20, 25, head === 'skull' ? skin : color('head'));
+      r(54, hy + 2, 5, 18, dark);
+      r(36, hy + 3, 19, 2, light);
+      r(37, hy + 8, 8, 6, '#29382f');
+      r(48, hy + 8, 8, 6, '#29382f');
+      r(39, hy + 10, 4, 2, '#e6c379');
+      r(49, hy + 10, 4, 2, '#e6c379');
+      r(45, hy + 13, 2, 4, dark);
+      r(39, hy + 20, 15, 1, '#544538');
+      r(29, hy + 13, 5, 4, '#ab9e74');
+      r(60, hy + 13, 5, 4, '#ab9e74');
+      if (head === 'surgeon') {
+        r(36, hy + 16, 20, 9, '#b2b6a0');
+        r(38, hy + 18, 16, 1, '#738a7d');
+        r(35, hy - 3, 24, 6, '#c1b9a0');
+        r(43, hy - 5, 7, 8, '#886557');
+      } else if (head === 'jaw') {
+        r(34, hy + 17, 25, 10, '#59352f');
+        for (let i = 0; i < 5; i++) r(36 + i * 4, hy + 18, 2, 5 + i % 2 * 2, '#cec2a2');
+      } else if (head === 'oracle' || head === 'ash') {
+        r(34, hy - 5, 26, 5, '#aa945e');
+        for (let i = 0; i < 5; i++) r(35 + i * 5, hy - 12 + i % 2 * 4, 3, 9, '#b1a077');
+        r(45, hy + 2, 4, 5, head === 'ash' ? '#e7ad65' : '#a8d3ba');
+      } else {
+        r(39, hy - 1, 1, 9, '#564b3a');
+        for (let i = 0; i < 3; i++) r(37, hy + i * 3, 5, 1, '#d0c59e');
+      }
+    }
+    // Overheated grafts have localized incandescent stitches.
+    for (const slot of DDData.slots) {
+      if ((body[slot.id]?.heat || 0) < 60) continue;
+      const positions = { head: [35, 20], torso: [31, 50], armL: [18, 57], armR: [66, 57], legL: [34, 87], legR: [52, 87] };
+      const [x, y] = positions[slot.id];
+      r(x, y, 3, 2, '#f0a55b');
+      r(x + 2, y + 5, 2, 2, '#c76c44');
+    }
+    target.imageSmoothingEnabled = false;
+    target.drawImage(this.sprite, Math.round(cx - 48 * scale), Math.round(ground - 105 * scale), Math.round(100 * scale), Math.round(116 * scale));
+  }
+
+  drawEnemy(c, cx, ground, scale, id, tick) {
+    const def = DDData.enemies[id];
+    if (!def) return;
+    if (['brute', 'stitched', 'furnace', 'boss'].includes(def.sprite)) {
+      const config = def.sprite === 'furnace' ? ['jaw', 'boiler', 'cannon', 'piston', 'pistons', 'pistons']
+        : def.sprite === 'boss' ? ['oracle', 'mercury', 'claw', 'piston', 'spider', 'pistons']
+        : def.sprite === 'brute' ? ['jaw', 'sutures', 'claw', 'bone', 'legs', 'funeral']
+        : ['skull', 'sutures', 'claw', 'claw', 'spider', 'legs'];
+      const body = Object.fromEntries(DDData.slots.map((s, i) => [s.id, { id: config[i], heat: 0 }]));
+      c.save();
+      c.translate(cx * 2, 0);
+      c.scale(-1, 1);
+      this.drawBody(c, cx, ground, scale * (def.boss ? 1.35 : 1.08), body, tick + 800, def.boss ? 'crimson' : 'copper');
+      c.restore();
+      if (def.boss) {
+        this.ellipse(c, cx, ground - 151, 22, 3, '#9a7845');
+        this.ellipse(c, cx, ground - 151, 20, 2, '#222721');
+      }
+      return;
+    }
+    const sc = this.sprite.getContext('2d');
+    sc.clearRect(0, 0, 100, 116);
+    const r = this.rect.bind(this, sc);
+    const ash = def.sprite === 'ash';
+    const oracle = def.sprite === 'oracle';
+    const bob = this.game.meta.motion ? Math.floor(Math.sin(tick / 470)) : 0;
+    const robe = ash ? '#826349' : oracle ? '#70647e' : '#8b8880';
+    r(35, 93, 12, 13, '#1c2220');
+    r(53, 93, 12, 13, '#1c2220');
+    r(31, 103, 17, 5, '#494c40');
+    r(52, 103, 18, 5, '#494c40');
+    r(26, 36 + bob, 45, 60, '#131b19');
+    r(30, 34 + bob, 37, 62, robe);
+    r(25, 62 + bob, 49, 33, robe);
+    r(44, 39 + bob, 6, 54, '#393b35');
+    r(32, 42 + bob, 4, 46, '#a2a396');
+    r(62, 43 + bob, 7, 49, '#565f54');
+    r(25, 94 + bob, 48, 3, '#baac8b');
+    r(22, 37 + bob, 12, 37, '#181f1c');
+    r(23, 39 + bob, 9, 31, robe);
+    r(64, 38 + bob, 13, 37, '#181f1c');
+    r(65, 40 + bob, 10, 29, robe);
+    r(21, 70 + bob, 10, 8, '#b6ad8e');
+    r(68, 70 + bob, 10, 8, '#b6ad8e');
+    r(34, 10 + bob, 29, 27, '#141d19');
+    r(37, 12 + bob, 23, 23, '#c0b499');
+    r(37, 9 + bob, 24, 5, robe);
+    r(31, 12 + bob, 36, 3, '#bbb198');
+    if (oracle || ash) {
+      r(36, 18 + bob, 26, 7, '#242c28');
+      r(40, 20 + bob, 3, 2, ash ? '#e8b25d' : '#7fb9b0');
+      r(53, 20 + bob, 3, 2, ash ? '#e8b25d' : '#7fb9b0');
+      r(33, 6 + bob, 31, 5, '#b09663');
+    } else {
+      r(33, 17 + bob, 28, 10, '#564b37');
+      r(35, 19 + bob, 8, 6, '#a4b4a0');
+      r(50, 19 + bob, 8, 6, '#a4b4a0');
+      r(33, 29 + bob, 27, 5, '#9f967b');
+      r(29, 25 + bob, 13, 6, '#9f967b');
+    }
+    // Long syringe and an illuminated flask.
+    r(22, 75 + bob, 3, 21, '#bbb7a2');
+    r(20, 78 + bob, 7, 10, '#649185');
+    r(22, 94 + bob, 1, 12, '#c4c9b5');
+    r(70, 78 + bob, 5, 5, '#b7a87a');
+    r(67, 83 + bob, 11, 12, '#426e60');
+    r(69, 88 + bob, 7, 5, '#8dc4a1');
+    c.imageSmoothingEnabled = false;
+    c.drawImage(this.sprite, Math.round(cx - 48 * scale), Math.round(ground - 108 * scale), Math.round(100 * scale), Math.round(116 * scale));
+  }
+
+  draw(tick) {
+    const state = this.game.state;
+    const motion = this.game.meta.motion;
+    const time = motion ? tick : 0;
+    if (this.canvas) {
+      const c = this.canvas.getContext('2d');
+      c.imageSmoothingEnabled = false;
+      c.clearRect(0, 0, 512, 276);
+      c.drawImage(this.background(state?.floor || 0, state?.seed || 119), 0, 0);
+      const overlay = c.createRadialGradient(70, 171, 3, 70, 171, 80);
+      overlay.addColorStop(0, 'rgba(168,119,53,0.15)');
+      overlay.addColorStop(1, 'rgba(168,119,53,0)');
+      c.fillStyle = overlay;
+      c.fillRect(0, 80, 170, 170);
+      this.flame(c, 168, 61, time);
+      this.flame(c, 337, 61, time + 400);
+      this.flame(c, 10, 210, time + 400, true);
+      this.flame(c, 498, 217, time + 600, true);
+      const currentRoom = state?.map[state.current];
+      const fight = state?.phase === 'combat';
+      const hasEnemy = fight || state?.phase === 'loot';
+      const playerX = hasEnemy ? 146 : 232;
+      const recentAttack = this.effects.some(e => e.type === 'hit' && e.target === 'enemy' && tick - e.time < 180);
+      this.ellipse(c, playerX, 234, 35, 7, '#111b17');
+      if (state?.phase !== 'dead') {
+        this.drawBody(c, playerX + (recentAttack && motion ? 6 : 0), 230, 1.3, state?.body || this.defaultBody(), time, this.game.meta.skin, recentAttack);
+      } else {
+        for (let i = 0; i < 8; i++) {
+          const y = 215 - ((time / 30 + i * 16) % 95);
+          this.rect(c, playerX - 12 + (i * 11) % 25, y, 4, 4, '#789e8a');
+        }
+      }
+      if (fight) {
+        this.ellipse(c, 373, 235, 39, 8, '#111b17');
+        this.drawEnemy(c, 373, 230, 1.16, state.enemy.id, time);
+        if (state.enemy.burn) this.flame(c, 397, 224, time + 900, true);
+        if (state.enemy.stun) {
+          for (let i = 0; i < 3; i++) this.rect(c, 359 + i * 10, 82 + Math.sin(time / 180 + i) * 3, 3, 3, '#a6c9bf');
+        }
+      } else if (state?.phase === 'loot') {
+        this.ellipse(c, 373, 232, 37, 9, '#4f3830');
+        this.rect(c, 348, 226, 42, 8, '#6c6850');
+        this.rect(c, 388, 219, 12, 12, '#a39676');
+        this.rect(c, 361, 222, 21, 3, '#a58559');
+      } else if (currentRoom?.type === 'stairs' || currentRoom?.type === 'boss') {
+        for (let i = 0; i < 8; i++) {
+          this.rect(c, 336 + i * 3, 207 - i * 7, 47, 5, '#5f6552');
+          this.rect(c, 337 + i * 3, 208 - i * 7, 46, 2, '#a2a283');
+        }
+        this.rect(c, 354, 115, 38, 40, '#759483');
+        this.rect(c, 360, 119, 26, 31, '#c3cfab');
+      } else if (currentRoom?.type === 'cache') {
+        this.rect(c, 356, 201, 41, 28, '#4c3c2c');
+        this.rect(c, 359, 198, 36, 6, '#997042');
+        this.rect(c, 359, 209, 36, 2, '#ad8a51');
+        this.rect(c, 371, 201, 8, 27, '#b28f56');
+        this.rect(c, 374, 210, 3, 5, '#352c22');
+      } else if (currentRoom?.type === 'trap') {
+        this.rect(c, 331, 223, 78, 5, '#645940');
+        for (let i = 0; i < 5; i++) {
+          const y = 224 - ((time / 28 + i * 13) % 56);
+          this.rect(c, 334 + i * 14, y, 6, 13, '#758577');
+          this.rect(c, 331 + i * 14, y + 3, 12, 5, '#758577');
+        }
+      }
+      // Embers and low-lying fog.
+      for (let i = 0; i < 20; i++) {
+        const x = (i * 97 + Math.floor(time / 80)) % 512;
+        const y = 266 - ((time / (40 + i % 5 * 6) + i * 37) % 270);
+        this.rect(c, x, y, i % 4 === 0 ? 2 : 1, 1, i % 3 ? '#8f7044' : '#dbae62');
+      }
+      c.globalAlpha = 0.13;
+      for (let i = 0; i < 4; i++) {
+        const x = ((time / 120 + i * 160) % 650) - 120;
+        this.rect(c, x, 246 + i % 2 * 7, 146, 3, '#9aa48a');
+        this.rect(c, x + 12, 243 + i % 2 * 7, 98, 3, '#9aa48a');
+      }
+      c.globalAlpha = 1;
+      this.effects = this.effects.filter(e => tick - e.time < 1000);
+      for (const e of this.effects) {
+        if (e.type !== 'hit') continue;
+        const elapsed = tick - e.time;
+        c.globalAlpha = Math.max(0, 1 - elapsed / 1000);
+        c.font = 'bold 15px monospace';
+        c.textAlign = 'center';
+        c.fillStyle = e.target === 'enemy' ? '#f1d195' : '#ef9884';
+        c.fillText(e.amount ? `−${e.amount}` : 'BLOQUEADO', e.target === 'enemy' ? 373 : 146, 116 - (motion ? elapsed / 55 : 0));
+        c.globalAlpha = 1;
+      }
+    }
+    if (this.anatomy) {
+      const c = this.anatomy.getContext('2d');
+      c.clearRect(0, 0, 200, 148);
+      c.imageSmoothingEnabled = false;
+      c.globalAlpha = 0.35;
+      this.line(c, 100, 6, 100, 141, '#5a614c');
+      this.line(c, 27, 70, 173, 70, '#5a614c');
+      this.ellipse(c, 100, 77, 54, 58, '#272e25');
+      this.ellipse(c, 100, 77, 53, 57, '#111713');
+      c.globalAlpha = 1;
+      this.drawBody(c, 100, 133, 1.1, state?.body || this.defaultBody(), time, this.game.meta.skin);
+      for (const [x, y, right] of [[72, 31, false], [120, 64, true], [65, 87, false], [134, 87, true], [81, 119, false], [121, 119, true]]) {
+        this.line(c, x, y, right ? 181 : 19, y - 8, '#6d7355');
+        this.rect(c, right ? 181 : 18, y - 10, 3, 3, '#bd9b57');
+      }
+    }
+  }
+};
+
+</script>
+  <script>
+/* Banda sonora y foley originales sintetizados con Web Audio. */
+'use strict';
+
+window.DDAudio = class {
+  constructor(game) {
+    this.game = game;
+    this.context = null;
+    this.master = null;
+    this.music = null;
+    this.fx = null;
+    this.sequence = 0;
+    this.nextNote = 0;
+    this.interval = null;
+    this.noiseBuffer = null;
+    game.addEventListener('sound', event => this.effect(event.detail.name));
+    game.addEventListener('preference', () => this.update());
+    document.addEventListener('visibilitychange', () => {
+      if (this.context && document.hidden) this.context.suspend().catch(() => {});
+      else if (this.context && this.unlocked) this.context.resume().catch(() => {});
+    });
+  }
+
+  unlock() {
+    try {
+      if (!this.context) {
+        const Audio = window.AudioContext || window.webkitAudioContext;
+        if (!Audio) return;
+        this.context = new Audio();
+        this.master = this.context.createGain();
+        this.music = this.context.createGain();
+        this.fx = this.context.createGain();
+        const compressor = this.context.createDynamicsCompressor();
+        compressor.threshold.value = -16;
+        compressor.ratio.value = 5;
+        this.music.gain.value = 0.33;
+        this.music.connect(this.master);
+        this.fx.connect(this.master);
+        this.master.connect(compressor);
+        compressor.connect(this.context.destination);
+        const buffer = this.context.createBuffer(1, this.context.sampleRate * 2, this.context.sampleRate);
+        const data = buffer.getChannelData(0);
+        let last = 0;
+        for (let i = 0; i < data.length; i++) {
+          last = (last + Math.random() * 0.05 - 0.025) / 1.02;
+          data[i] = last * 8;
+        }
+        this.noiseBuffer = buffer;
+        this.nextNote = this.context.currentTime;
+        this.interval = setInterval(() => this.schedule(), 180);
+      }
+      this.unlocked = true;
+      this.context.resume().catch(() => {});
+      this.update();
+    } catch (_) {
+      this.game.notice('El audio no está disponible en este navegador. El juego puede continuar.');
+    }
+  }
+
+  update() {
+    if (!this.context) return;
+    const now = this.context.currentTime;
+    this.master.gain.setTargetAtTime(this.game.meta.volume, now, 0.08);
+    this.fx.gain.setTargetAtTime(this.game.meta.sfx ? 0.75 : 0, now, 0.04);
+  }
+
+  tone(freq, start, duration, type = 'sine', volume = 0.1, output = null, endFrequency = null) {
+    if (!this.context) return;
+    const oscillator = this.context.createOscillator();
+    const gain = this.context.createGain();
+    oscillator.type = type;
+    oscillator.frequency.setValueAtTime(freq, start);
+    if (endFrequency) oscillator.frequency.exponentialRampToValueAtTime(Math.max(1, endFrequency), start + duration);
+    gain.gain.setValueAtTime(0.001, start);
+    gain.gain.exponentialRampToValueAtTime(Math.max(0.002, volume), start + Math.min(0.04, duration / 4));
+    gain.gain.exponentialRampToValueAtTime(0.001, start + duration);
+    oscillator.connect(gain);
+    gain.connect(output || this.fx);
+    oscillator.start(start);
+    oscillator.stop(start + duration + 0.03);
+  }
+
+  noise(duration, cutoff, volume = 0.25, resonance = 1, endCutoff = null) {
+    if (!this.context || !this.noiseBuffer) return;
+    const source = this.context.createBufferSource();
+    const filter = this.context.createBiquadFilter();
+    const gain = this.context.createGain();
+    const now = this.context.currentTime;
+    source.buffer = this.noiseBuffer;
+    source.playbackRate.value = 0.75 + Math.random() * 0.3;
+    filter.type = 'bandpass';
+    filter.frequency.setValueAtTime(cutoff, now);
+    if (endCutoff) filter.frequency.exponentialRampToValueAtTime(endCutoff, now + duration);
+    filter.Q.value = resonance;
+    gain.gain.setValueAtTime(volume, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+    source.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.fx);
+    source.start(now);
+    source.stop(now + duration);
+  }
+
+  schedule() {
+    if (!this.context || this.context.state !== 'running') return;
+    const now = this.context.currentTime;
+    if (this.nextNote < now - 1) this.nextNote = now;
+    const danger = this.game.active() && this.game.remaining() < 60000;
+    const combat = this.game.state?.phase === 'combat';
+    const beat = danger ? 0.3 : combat ? 0.41 : 0.59;
+    while (this.nextNote < now + 0.4) {
+      const t = this.nextNote;
+      const step = this.sequence++;
+      const roots = [55, 55, 51.913, 58.27];
+      const root = roots[Math.floor(step / 16) % roots.length];
+      if (step % 8 === 0) {
+        // Low string-like pad, a fifth and a dissonant upper layer.
+        this.tone(root, t, beat * 9, 'triangle', 0.14, this.music);
+        this.tone(root * 1.498, t + 0.04, beat * 8.5, 'sine', 0.065, this.music);
+        this.tone(root * 2.012, t + 0.08, beat * 7.7, 'triangle', 0.035, this.music);
+      }
+      const arpeggio = [4, 3, 4.7568, 3.5636, 4, 5.0397, 3, 2.8284];
+      if (step % 2 === 0 || combat) {
+        this.tone(root * arpeggio[step % arpeggio.length], t, 0.55, 'sine', 0.075, this.music);
+        this.tone(root * arpeggio[step % arpeggio.length] * 2, t, 0.2, 'triangle', 0.018, this.music);
+      }
+      if (step % 4 === 0 && this.game.active()) {
+        this.tone(76, t, 0.3, 'sine', 0.22, this.music, 28);
+        this.tone(49, t + 0.17, 0.17, 'sine', 0.13, this.music, 30);
+      }
+      // Mechanical clock ticks intensify as the tower approaches collapse.
+      if (this.game.active()) this.tone(step % 2 ? 1530 : 1970, t, 0.025, 'square', danger ? 0.034 : 0.013, this.music);
+      this.nextNote += beat;
+    }
+  }
+
+  effect(name) {
+    if (!this.context || this.context.state !== 'running' || !this.game.meta.sfx) return;
+    const t = this.context.currentTime;
+    const tone = (freq, duration, type, gain, end) => this.tone(freq, t, duration, type, gain, this.fx, end);
+    if (name === 'attack') {
+      this.noise(0.16, 1200, 0.5, 0.6, 130);
+      tone(145, 0.18, 'sawtooth', 0.14, 45);
+      tone(52, 0.21, 'sine', 0.3, 25);
+    } else if (['hurt', 'death', 'break'].includes(name)) {
+      this.noise(name === 'death' ? 1.2 : 0.4, 600, 0.65, 3.5, 90);
+      tone(99, name === 'death' ? 1.3 : 0.38, 'sawtooth', 0.15, 28);
+      tone(148, 0.35, 'triangle', 0.15, 52);
+      if (name === 'break') this.noise(0.18, 3200, 0.6, 0.5);
+    } else if (name === 'graft') {
+      this.noise(0.45, 480, 0.7, 5, 1300);
+      tone(83, 0.45, 'sawtooth', 0.12, 156);
+      this.tone(660, t + 0.3, 0.2, 'sine', 0.12);
+    } else if (['heal', 'cool'].includes(name)) {
+      this.noise(0.5, name === 'cool' ? 2600 : 620, 0.22, 0.8, 1400);
+      tone(330, 0.45, 'sine', 0.1, 660);
+    } else if (name === 'guard') {
+      tone(440, 0.23, 'triangle', 0.18, 220);
+      tone(713, 0.21, 'sine', 0.1, 510);
+    } else if (['loot', 'discover', 'victory', 'escape', 'revive', 'stairs'].includes(name)) {
+      const notes = name === 'escape' ? [220, 261.63, 329.63, 440, 523.25] : [164.81, 220, 261.63, 329.63];
+      notes.forEach((freq, i) => this.tone(freq, t + i * 0.09, 0.65, 'triangle', 0.105));
+      if (name === 'revive') this.noise(0.8, 210, 0.35, 4, 960);
+    } else if (['collapse', 'boss', 'combat', 'burn'].includes(name)) {
+      this.noise(name === 'collapse' ? 1.6 : 0.55, 170, 0.8, 0.4);
+      tone(59, 0.9, 'sawtooth', 0.16, 29);
+    } else if (name === 'step') {
+      this.noise(0.07, 460, 0.25, 0.8);
+      tone(79, 0.08, 'sine', 0.12, 45);
+    } else {
+      this.noise(0.06, 1600, 0.12, 0.6);
+      tone(520, 0.07, 'triangle', 0.06, 340);
+    }
+  }
+};
+
+</script>
+  <script>
+/* Interfaz en español: ratón, teclado, pantalla táctil y mando. */
+'use strict';
+
+(() => {
+  const D = window.DDData;
+  const paths = {
+    heart: '<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/>',
+    bolt: '<path d="m13 2-9 12h7l-1 8 10-12h-7l1-8Z"/>',
+    flame: '<path d="M12 3c1 5-5 6-5 10a5 5 0 0 0 10 0c0-2-1-5-3-6 0 3-2 4-2 4 2-4 1-6 0-8Z"/>',
+    snow: '<path d="M12 2v20M3.3 7l17.4 10M3.3 17 20.7 7M9 4l3 3 3-3M9 20l3-3 3 3M4 10l4-1-1-4M20 14l-4 1 1 4M7 19l1-4-4-1M17 5l-1 4 4 1"/>',
+    shield: '<path d="M12 3 3 7v5c0 5 9 9 9 9s9-4 9-9V7l-9-4Z"/><path d="m8 12 3 3 5-6"/>',
+    blade: '<path d="m14 4 7-1-1 7-9 9-5-5 8-10ZM4 14l6 6M3 21l4-4M15 9l3-3"/>',
+    bone: '<path d="M7 5a3 3 0 1 0-4 4l12 12a3 3 0 0 0 4-4 3 3 0 0 0-4-4L7 5ZM8 8l8 8"/>',
+    eye: '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
+    fang: '<path d="M4 4v8l4 8 2-7h4l2 7 4-8V4l-4 5H8L4 4Z"/>',
+    foot: '<path d="M9 3h6v10l5 3v5H5v-4l4-5V3ZM6 17h13"/>',
+    bag: '<path d="M5 7h14l2 14H3L5 7ZM8 7V5a4 4 0 0 1 8 0v2M8 12h8"/>',
+    book: '<path d="M3 3h7l2 2 2-2h7v17h-7l-2 2-2-2H3V3ZM12 5v17M6 7h3M15 7h3M6 11h3M15 11h3"/>',
+    skull: '<path d="M7 19v-3c-3-1-4-3-4-6a9 9 0 0 1 18 0c0 3-1 5-4 6v3H7ZM9 19v3M15 19v3"/><circle cx="8" cy="10" r="2"/><circle cx="16" cy="10" r="2"/><path d="m11 15 1-2 1 2"/>',
+    clock: '<circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2M9 1h6"/>',
+    tower: '<path d="M5 21V10l7-7 7 7v11M3 21h18M8 8h8M10 21v-5h4v5M11 10h2v3h-2z"/>',
+    up: '<path d="M12 20V4m-7 7 7-7 7 7"/>',
+    down: '<path d="M12 4v16m-7-7 7 7 7-7"/>',
+    left: '<path d="M20 12H4m7-7-7 7 7 7"/>',
+    right: '<path d="M4 12h16m-7-7 7 7-7 7"/>',
+    close: '<path d="m6 6 12 12M6 18 18 6"/>',
+    sound: '<path d="m11 4-6 5H2v6h3l6 5V4ZM15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/>',
+    mute: '<path d="m11 4-6 5H2v6h3l6 5V4Zm5 5 5 6m0-6-5 6"/>',
+    help: '<circle cx="12" cy="12" r="9"/><path d="M9 8a3 3 0 0 1 6 0c0 2-3 2-3 5M12 17h.01"/>',
+    settings: '<path d="M12 3v3m0 12v3M3 12h3m12 0h3M5.6 5.6l2 2m8.8 8.8 2 2M5.6 18.4l2-2m8.8-8.8 2-2"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+    coin: '<path d="m12 2 9 10-9 10L3 12 9 2Z"/><path d="m12 6 5 6-5 6-5-6 5-6Z"/>',
+    lock: '<rect x="5" y="10" width="14" height="11" rx="1"/><path d="M8 10V6a4 4 0 0 1 8 0v4M12 14v3"/>',
+    check: '<path d="m4 12 5 5L20 6"/>',
+    map: '<path d="m2 5 6-3 8 3 6-3v17l-6 3-8-3-6 3V5ZM8 2v17M16 5v17"/>',
+    flask: '<path d="M9 2h6M10 2v7L4 19c-1 2 0 3 2 3h12c2 0 3-1 2-3L14 9V2M7 15h10"/>',
+    fullscreen: '<path d="M3 9V3h6m6 0h6v6M3 15v6h6m6 0h6v-6"/>',
+    log: '<path d="M5 3h14v18H5V3ZM8 7h8M8 11h8M8 15h5"/>',
+    gear: '<path d="M12 2v4m0 12v4M2 12h4m12 0h4M5 5l3 3m8 8 3 3M5 19l3-3m8-8 3-3"/><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/>',
+    gamepad: '<path d="M7 7h10c3 0 5 12 3 13-2 1-4-4-5-4H9c-1 0-3 5-5 4-2-1 0-13 3-13ZM6 11h4M8 9v4M16 10h.01M18 13h.01"/>'
+  };
+  const icon = (name, cls = '') => `<svg class="icon ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] || paths.gear}</svg>`;
+  const escapeHtml = value => String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const timeLabel = ms => {
+    const seconds = Math.ceil(Math.max(0, ms) / 1000);
+    return `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
+  };
+  const kindLabel = { head: 'Cabeza', torso: 'Torso', arm: 'Brazo', leg: 'Pierna' };
+  const tierLabel = { 1: 'Común', 2: 'Inusual', 3: 'Singular' };
+  const roomIcon = { start: 'skull', corridor: 'gear', combat: 'blade', cache: 'bag', trap: 'flame', workshop: 'flask', stairs: 'up', boss: 'skull', archive: 'book' };
+
+  function pixelArt(type, color) {
+    const figures = {
+      blade: '<path d="M41 6h8v15h-4v6h-5v5h-5v5h-5v5h-5v-9h5v-5h5v-5h4V12h2Z" fill="#c3c7ad"/><path d="M17 29h5v5h5v5h5v5h-6v-4h-5v-5h-4Z" fill="#b9945a"/><path d="m21 38 5 5-12 12H8v-6Z" fill="#6c604d"/><path d="M41 12h3v11h-4v7h-5v5h-3v-7h5v-8h4Z" fill="#f0e9c8"/>',
+      bone: '<path d="M10 8h10v5h5v8h-5v4l21 21h4v-5h8v5h5v10H47v-4h-8L17 30h-4v4H5V23h5v-4H6v-7h4Z" fill="#c6bd9c"/><path d="M17 17h4v7l24 24v5h-4L16 28h-4v-5h5Z" fill="#938a72"/>',
+      eye: '<path d="M6 29h7v-7h8v-5h22v5h8v7h7v9h-7v7h-8v5H21v-5h-8v-7H6Z" fill="#465b50"/><path d="M13 29h8v-7h22v7h8v9h-8v7H21v-7h-8Z" fill="#bdc3a1"/><path d="M25 23h15v21H25Z" fill="#829d84"/><path d="M29 26h7v15h-7Z" fill="#252f29"/><path d="M30 27h4v4h-4Z" fill="#e9d9a0"/><path d="M30 5h4v8h-4ZM9 13h4v4H9Zm43 0h4v4h-4Z" fill="#b29358"/>',
+      heart: '<path d="M7 15h7v-5h12v6h11v-6h12v5h7v19h-6v7h-6v6h-6v6H25v-6h-6v-6h-6v-7H7Z" fill="#9d6255"/><path d="M12 19h10v-4h5v10H15v12h-3Z" fill="#cf9a80"/><path d="M33 20h4v28h-4ZM27 26h15v2H27Zm0 9h15v2H27Z" fill="#ddd1a9"/>',
+      shield: '<path d="M30 5h5v5h9v5h13v22h-6v10h-7v7h-9v5h-6v-5h-9v-7h-7V37H7V15h14v-5h9Z" fill="#b29360"/><path d="M29 13h7v5h14v17h-6v9h-9v8h-6v-8h-9v-9h-6V22h15Z" fill="#4f6250"/><path d="M29 18h6v27h-6ZM20 28h25v5H20Z" fill="#c3c19b"/>',
+      flame: '<path d="M31 4h7v15h7v9h7v18h-7v8H20v-8h-8V29h7v8h6V20h6Z" fill="#a65c35"/><path d="M32 17h5v14h8v13h-7v7H24v-7h-5v-9h7v5h6Z" fill="#df9c43"/><path d="M31 33h6v9h4v7H28v-8h3Z" fill="#f0d88c"/>',
+      snow: '<path d="M30 5h5v14h6v-6h5v10h-6v6h14v5H40v6h6v10h-5v-6h-6v14h-5V44h-6v6h-5V40h6v-6H11v-5h14v-6h-6V13h5v6h6Z" fill="#8cb0a4"/><path d="M28 27h9v9h-9Z" fill="#d8ddbb"/>',
+      bolt: '<path d="M33 4h17L36 25h13L21 59l6-25H13Z" fill="#b59351"/><path d="M36 7h8L30 29h12L27 49l5-19H21Z" fill="#eee0a0"/><path d="M4 19h8v3H4ZM50 46h9v3h-9ZM8 46h4v5H8Z" fill="#9fb8a1"/>',
+      foot: '<path d="M24 7h19v21h-5v13h11v5h9v10H13V43h5V28h6Z" fill="#9caa8c"/><path d="M31 11h5v17h-5Zm-8 22h10v4H23Zm-5 13h27v4H18Z" fill="#dde0b8"/><path d="M12 55h46v4H12Z" fill="#555f4f"/>',
+      fang: '<path d="M9 12h12v7h22v-7h12v27h-6v14h-7V38H22v15h-7V39H9Z" fill="#a26758"/><path d="M13 18h7v14h-7Zm31 0h7v14h-7ZM17 32h6v15h-6Zm24 0h6v15h-6Z" fill="#d3c7a3"/><path d="M26 23h12v7H26Z" fill="#543e32"/>'
+    };
+    return `<svg viewBox="0 0 64 64" class="pixel-symbol" aria-hidden="true" shape-rendering="crispEdges"><path d="M5 5h8v1H6v7H5ZM51 5h8v8h-1V6h-7ZM5 51h1v7h7v1H5Zm53 0h1v8h-8v-1h7Z" fill="${color}" opacity=".5"/>${figures[type] || figures.bone}</svg>`;
+  }
+
+  class UI {
+    constructor() {
+      this.game = new DDGame();
+      this.art = new DDArt(this.game);
+      this.audio = new DDAudio(this.game);
+      this.root = document.getElementById('app');
+      this.modal = this.game.state ? (this.game.active() ? null : 'end') : 'intro';
+      this.part = 'head';
+      this.filter = 'all';
+      this.lastPhase = this.game.state?.phase;
+      this.previousVolume = this.game.meta.volume || 0.3;
+      this.game.addEventListener('change', () => {
+        const phase = this.game.state?.phase;
+        if (['dead', 'won'].includes(phase) && phase !== this.lastPhase) this.modal = 'end';
+        this.lastPhase = phase;
+        this.render();
+      });
+      this.game.addEventListener('clock', () => this.updateClock());
+      this.game.addEventListener('notice', event => this.toast(event.detail));
+      this.game.addEventListener('effect', event => {
+        if (event.detail.type === 'shake' && this.game.meta.motion) {
+          document.getElementById('scene-wrap')?.animate([
+            { transform: 'translateX(0)' }, { transform: 'translateX(-4px)' },
+            { transform: 'translateX(4px)' }, { transform: 'translateX(-2px)' },
+            { transform: 'translateX(0)' }
+          ], { duration: 430 });
+        }
+      });
+      this.root.addEventListener('click', event => this.handleClick(event));
+      this.root.addEventListener('input', event => this.handleInput(event));
+      document.addEventListener('keydown', event => this.handleKey(event));
+      document.addEventListener('pointerdown', () => this.audio.unlock(), { once: true });
+      window.addEventListener('beforeunload', () => this.game.save());
+      this.render();
+      this.game.tick();
+      this.setupGamepad();
+      if (this.game.state && this.game.active()) this.toast({ text: 'Partida restaurada. El reloj siguió corriendo mientras no estabas.', tone: 'warning' });
+      if (!this.game.storageAvailable) this.toast({ text: 'El guardado local no está disponible en este navegador.', tone: 'warning' });
+    }
+
+    button(action, label, iconName, cls = '', attrs = '') {
+      return `<button type="button" class="btn ${cls}" data-action="${action}" ${attrs}>${iconName ? icon(iconName) : ''}<span>${label}</span></button>`;
+    }
+
+    toast({ text, tone = 'info' }) {
+      const root = document.getElementById('notifications');
+      const item = document.createElement('div');
+      item.className = `toast ${tone}`;
+      item.setAttribute('role', tone === 'danger' ? 'alert' : 'status');
+      item.textContent = text;
+      root.appendChild(item);
+      while (root.children.length > 1) root.firstElementChild.remove();
+      setTimeout(() => item.remove(), tone === 'danger' ? 7000 : 4500);
+    }
+
+    header() {
+      return `<header class="topbar">
+        <a class="brand" href="#" data-action="home" aria-label="Deadlock Deck: inicio">
+          <span class="brand-mark">${icon('skull')}</span>
+          <span><strong>DEADLOCK DECK<span class="brand-dot">.</span></strong><small>EL RELOJ ANATÓMICO</small></span>
+        </a>
+        <div class="header-middle"><span class="live-dot"></span> LA TORRE ESTÁ ARDIENDO</div>
+        <nav class="header-actions" aria-label="Menú del juego">
+          ${this.button('archive', 'Archivo', 'book', 'quiet desktop-label')}
+          ${this.button('shop', 'Relicario', 'coin', 'quiet desktop-label')}
+          ${this.button('sound', '', this.game.meta.volume > 0 ? 'sound' : 'mute', 'icon-only quiet', `aria-label="${this.game.meta.volume > 0 ? 'Silenciar sonido' : 'Activar sonido'}" title="Sonido"`)}
+          ${this.button('help', '', 'help', 'icon-only quiet', 'aria-label="Cómo jugar y controles" title="Cómo jugar"')}
+          ${this.button('settings', '', 'settings', 'icon-only quiet', 'aria-label="Ajustes" title="Ajustes"')}
+        </nav>
+      </header>`;
+    }
+
+    statusBar() {
+      const s = this.game.state;
+      const hp = s ? Math.max(0, s.hp) : 80;
+      const maxHp = s?.maxHp || 80;
+      return `<section class="status-bar" aria-label="Estado del intento">
+        <div class="subject-block"><span class="eyebrow">SUJETO REANIMADO</span><strong>N.º ${String(this.game.meta.runs || 1).padStart(3, '0')} <span class="subtle">/ ${s?.origin || 'El ensamblado'}</span></strong></div>
+        <div class="health-block"><div class="stat-line"><span>${icon('heart')} VITALIDAD</span><strong>${hp}<span> / ${maxHp}</span></strong></div><div class="health-track"><span style="width:${hp / maxHp * 100}%"></span></div></div>
+        <div class="clock-block" id="clock-block"><span class="clock-label">${icon('clock')} TIEMPO HASTA EL COLAPSO</span><strong id="clock" aria-label="Tiempo restante">${timeLabel(this.game.remaining())}</strong><div class="clock-track"><span id="clock-fill"></span></div></div>
+        <div class="resource-block"><span class="eyebrow">${icon('gear')} CHATARRA</span><strong>${s?.scraps ?? 0}</strong></div>
+        <div class="resource-block echoes-stat"><span class="eyebrow">${icon('coin')} ECOS</span><strong>${this.game.meta.souls}</strong></div>
+      </section>`;
+    }
+
+    anatomyMarkup(modal = false) {
+      const s = this.game.state;
+      const body = s?.body || this.art.defaultBody();
+      const cardsCount = D.slots.reduce((n, slot) => n + (body[slot.id].id ? 2 : 1), 0);
+      return `<div class="panel-title"><h2>Tu anatomía</h2><span>${cardsCount} CARTAS</span></div>
+        <div class="anatomy-illustration"><canvas id="${modal ? 'modal-body' : 'body-canvas'}" width="200" height="148" aria-label="Tu cuerpo con los seis injertos actuales"></canvas><span class="specimen-tag">FIG. ${String(this.game.meta.runs || 1).padStart(3, '0')}</span></div>
+        <div class="anatomy-slots">${D.slots.map(slot => {
+          const p = body[slot.id];
+          const def = p.id ? D.parts[p.id] : null;
+          const warning = p.heat >= 75 || (p.integrity < 25 && def);
+          return `<button type="button" class="body-slot ${!def ? 'broken' : warning ? 'hot' : ''}" data-action="part" data-slot="${slot.id}" aria-label="${slot.label}: ${def?.name || 'Muñón'}. Calor ${p.heat} grados. Integridad ${p.integrity} por ciento.">
+            <span class="slot-glyph">${icon(slot.kind === 'head' ? 'skull' : slot.kind === 'torso' ? 'heart' : slot.kind === 'arm' ? 'bone' : 'foot')}</span>
+            <span class="slot-content"><span class="slot-heading">${slot.label}<b>${def ? `${p.heat}°` : 'ROTO'}</b></span><strong>${def?.name || 'Muñón · busca un reemplazo'}</strong>
+            <span class="limb-meter"><i style="width:${p.integrity}%;background:${def?.color || '#b97567'}"></i></span><span class="heat-meter"><i style="width:${p.heat}%"></i></span></span>
+          </button>`;
+        }).join('')}</div>
+        <div class="anatomy-legend"><span><i class="integrity-dot"></i> Integridad</span><span><i class="heat-dot"></i> Calor</span></div>
+        ${this.button('bag', `Bolsa de injertos <b>${s?.inventory.length || 0}</b>`, 'bag', 'wide bag-button')}
+        <div class="consumables"><button type="button" class="consumable" data-action="heal" ${!this.game.active() ? 'disabled' : ''} title="Recupera 28 de vida · Q">${icon('flask')}<span>Suero<small>+28 vida</small></span><b>×${s?.potions || 0}</b></button><button type="button" class="consumable coolant" data-action="cool" ${!this.game.active() ? 'disabled' : ''} title="−38° y +12 integridad en todos los injertos intactos · E">${icon('snow')}<span>Refrigerante<small>−38° · repara</small></span><b>×${s?.coolants || 0}</b></button></div>`;
+    }
+
+    mapMarkup(large = false) {
+      const s = this.game.state;
+      const floor = s?.floor || 0;
+      let map;
+      if (s) map = s.map;
+      else {
+        map = Array.from({ length: 16 }, (_, id) => ({ id, links: [], seen: id === 12 || id === 3, type: id === 12 ? 'start' : id === 3 ? 'stairs' : 'corridor', visited: id === 12 }));
+        for (const [a, b] of [[12, 8], [8, 4], [4, 5], [5, 1], [1, 2], [2, 3], [8, 9], [9, 10], [10, 6], [6, 7], [10, 11], [11, 15], [15, 14], [14, 13], [4, 0]]) {
+          map[a].links.push(b); map[b].links.push(a);
+        }
+      }
+      const current = s?.current ?? 12;
+      const canMove = s?.phase === 'explore';
+      const coordinates = id => [25 + (id % 4) * 50, 25 + Math.floor(id / 4) * 50];
+      let edges = '';
+      for (const room of map) for (const next of room.links) {
+        if (next < room.id) continue;
+        const [x1, y1] = coordinates(room.id);
+        const [x2, y2] = coordinates(next);
+        edges += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="${room.visited && map[next].visited ? 'visited-link' : ''}"/>`;
+      }
+      return `<div class="panel-title"><h2>La torre</h2><span>${icon('tower')}</span></div>
+        <div class="floor-stack">${[2, 1, 0].map(i => `<div class="floor-row ${floor === i ? 'active' : floor > i ? 'completed' : ''}"><span class="floor-numeral">${D.floors[i].roman}</span><span>${D.floors[i].small}</span>${floor === i ? '<i class="live-dot"></i>' : floor > i ? icon('check') : icon('lock')}</div>`).join('')}</div>
+        <div class="map-heading"><span>PLANO DEL PISO ${D.floors[floor].roman}</span><span>N ↑</span></div>
+        <div class="tower-map ${large ? 'large-map' : ''}" aria-label="Plano de pasillos. Puedes entrar en las salas conectadas a tu posición.">
+          <svg viewBox="0 0 200 200" class="map-links" aria-hidden="true">${edges}</svg>
+          ${map.map(room => {
+            const [x, y] = coordinates(room.id);
+            const accessible = canMove && map[current].links.includes(room.id);
+            const name = room.seen ? D.roomNames[room.type] : 'Sala desconocida';
+            return `<button type="button" class="map-node ${room.id === current ? 'current' : ''} ${room.visited ? 'visited' : ''} ${room.seen ? 'seen' : ''} ${accessible ? 'reachable' : ''} ${room.id === 3 ? 'exit-node' : ''}" style="left:${x / 2}%;top:${y / 2}%" data-action="move" data-id="${room.id}" ${accessible ? '' : 'disabled'} aria-label="${name}${room.id === current ? ', estás aquí' : accessible ? ', entrar' : ''}" title="${name}">${room.id === current ? '<span class="you-dot"></span>' : room.seen ? icon(roomIcon[room.type]) : '<span class="unknown-dot"></span>'}</button>`;
+          }).join('')}
+        </div>
+        <div class="map-legend"><span><i class="you-dot"></i> Tú</span><span>${icon('up')} ${floor === 2 ? 'Salida' : 'Escalera'}</span><span><i class="unknown-dot"></i> Oculta</span></div>
+        <div class="objective"><span class="eyebrow">OBJETIVO ACTUAL</span><p>${floor === 2 ? 'Derrota al Rector y cruza la última puerta.' : 'Encuentra la escalera y asciende al siguiente piso.'}</p></div>
+        <div class="map-tip">${icon('flame')}<span>Los pasillos cambian a los 2 y 4 minutos. El reloj no se detiene.</span></div>`;
+    }
+
+    sceneMarkup() {
+      const s = this.game.state;
+      const phase = s?.phase || 'explore';
+      const room = s?.map[s.current];
+      const floor = D.floors[s?.floor || 0];
+      const fight = phase === 'combat';
+      const enemy = s?.enemy;
+      const intent = fight ? this.game.intent() : null;
+      return `<section class="scene-panel panel">
+        <div class="scene-heading"><div><span class="eyebrow">PISO ${floor.roman} <span class="separator">/</span> ${floor.name}</span><h1>${room ? D.roomNames[room.type] : 'Mesa de disección'}</h1></div><span class="phase-badge ${fight ? 'combat-badge' : ''}">${icon(fight ? 'blade' : phase === 'loot' ? 'bag' : 'eye')}${fight ? `COMBATE · TURNO ${s.turn}` : phase === 'loot' ? 'COSECHA' : phase === 'dead' ? 'EL ESPÍRITU PERMANECE' : phase === 'won' ? 'LIBERTAD' : 'EXPLORACIÓN'}</span></div>
+        <div class="scene-wrap" id="scene-wrap"><canvas id="scene" width="512" height="276" aria-label="Laboratorio gótico en pixel art. Tu abominación cambia de aspecto con cada injerto."></canvas>
+          <div class="scene-topline"><span class="location-label">${icon('tower')} TORRE DE LA MISERICORDIA</span><span class="scene-coordinates">${String(s?.current ?? 12).padStart(2, '0')} : ${floor.roman}</span></div>
+          ${fight ? `<div class="combat-info"><div class="player-chip"><span>${icon('shield')} ${s.block} DEFENSA</span></div><div class="enemy-chip"><span class="enemy-kind">${D.enemies[enemy.id].tag}</span><h3>${D.enemies[enemy.id].name}</h3><div class="enemy-health"><i style="width:${enemy.hp / enemy.maxHp * 100}%"></i></div><div class="enemy-numbers"><span>${enemy.hp} / ${enemy.maxHp} PV</span><span>${enemy.block ? `◈ ${enemy.block}` : ''}${enemy.burn ? ` · ${enemy.burn} quemadura` : ''}${enemy.weak ? ' · débil' : ''}</span></div></div></div><div class="enemy-intent ${intent.kind}">${icon(intent.icon)}<span>${intent.label}</span></div>` : ''}
+          <div class="scene-bottomline"><span>${s ? `${s.stats.rooms} salas recorridas` : 'UN NUEVO CUERPO. UNA ÚLTIMA OPORTUNIDAD.'}</span><span>${s ? `SEMILLA ${s.seed.toString(16).slice(0, 6).toUpperCase()}` : '06:00'}</span></div>
+        </div>
+        ${this.eventMarkup()}
+      </section>`;
+    }
+
+    eventMarkup() {
+      const s = this.game.state;
+      if (!s) return `<div class="room-event"><div class="event-copy"><h3>Algo dentro de ti se niega a morir.</h3><p>Tu cuerpo es tu mazo. Cada injerto, una nueva posibilidad.</p></div>${this.button('start', 'Reanimar', 'bolt', 'primary')}</div>`;
+      if (s.phase === 'combat') {
+        const intent = this.game.intent();
+        const projected = ['attack', 'fury'].includes(intent.kind) ? Math.max(0, intent.value - s.block) : null;
+        return `<div class="combat-guidance"><span>${icon('eye')} <strong>Tu turno.</strong> Juega cartas; después, termina el turno.</span><span>${projected !== null ? `Recibirías <b class="${projected ? 'text-red' : 'text-green'}">${projected}</b> de daño.` : intent.kind === 'heat' ? 'El vapor puede romper tus injertos.' : intent.kind === 'stunned' ? 'La intención enemiga está cancelada.' : 'El enemigo prepara su defensa.'}</span></div>`;
+      }
+      if (s.phase === 'loot') {
+        const reward = s.reward;
+        return `<div class="room-event loot-event"><span class="event-emblem">${icon('bag')}</span><div class="event-copy"><span class="eyebrow text-green">ENEMIGO COSECHADO</span><h3>${D.parts[reward.id].name}</h3><p>En tu bolsa · +${reward.scraps} chatarra · +5 vida. El plano es permanente.</p></div><div class="event-actions">${this.button('bag', 'Injertar', 'bone', 'primary')}${this.button('continue-loot', reward.boss ? 'Hacia la salida' : 'Continuar', 'right')}</div></div>`;
+      }
+      if (s.phase === 'dead' || s.phase === 'won') {
+        return `<div class="room-event"><div class="event-copy"><h3>${s.phase === 'won' ? 'Has escapado de la torre.' : 'La carne falla. El espíritu no.'}</h3><p>${s.reason}</p></div>${this.button('end', 'Ver resultado', 'right')}</div>`;
+      }
+      const room = s.map[s.current];
+      if (s.phase === 'event') {
+        if (room.type === 'cache') return `<div class="room-event"><div class="event-copy"><span class="eyebrow text-gold">SUMINISTROS</span><h3>Alguien no llegó a usarlos.</h3><p>Un injerto, chatarra, suero y refrigerante. Todo puede servir.</p></div><div class="event-actions">${this.button('cache', 'Recoger todo', 'bag', 'primary')}</div></div>`;
+        if (room.type === 'archive') return `<div class="room-event"><div class="event-copy"><span class="eyebrow text-green">CONOCIMIENTO PERMANENTE</span><h3>El conocimiento sobrevive a la carne.</h3><p>Descubre un plano. Podrás fabricarlo en las estaciones de injertos.</p></div><div class="event-actions">${this.button('search-archive', 'Guardar plano', 'book', 'primary')}</div></div>`;
+        if (room.type === 'workshop') return `<div class="room-event workshop-event"><div class="event-copy"><span class="eyebrow text-green">ESTACIÓN DE INJERTOS</span><h3>La mesa aún está tibia.</h3><p>Fabrica planos o repara +40 de integridad y enfría todos tus injertos intactos.</p></div><div class="event-actions">${this.button('archive', 'Fabricar', 'flask', 'primary')}${this.button('repair', 'Reparar · 8 chatarra', 'gear')}${this.button('leave-workshop', 'Continuar', 'right', 'quiet')}</div></div>`;
+        if (room.type === 'trap') return `<div class="room-event trap-event"><div class="event-copy"><span class="eyebrow text-red">TRAMPA · VAPOR A PRESIÓN</span><h3>El pasillo está a punto de estallar.</h3><p>Desvía la válvula, fuerza tus piernas o acepta las quemaduras.</p></div><div class="event-actions">${this.button('trap-scraps', 'Desviar · 5 chatarra', 'gear', 'primary', s.scraps < 5 ? 'disabled' : '')}${this.button('trap-legs', 'Saltar · +30° / −12 integridad', 'foot', '', !s.body.legL.id && !s.body.legR.id ? 'disabled' : '')}${this.button('trap-cross', `Cruzar · −${9 + s.floor * 2} vida`, 'flame', 'danger-outline')}</div></div>`;
+      }
+      if (room.type === 'stairs') return `<div class="room-event"><div class="event-copy"><span class="eyebrow text-green">HACIA ARRIBA</span><h3>La salida está un poco más cerca.</h3><p>Subir enfría tus injertos 15°. No hay vuelta al piso anterior.</p></div><div class="event-actions">${this.button('ascend', `Subir al piso ${D.floors[s.floor + 1].roman}`, 'up', 'primary')}</div></div>${this.movementMarkup()}`;
+      if (room.type === 'boss' && room.resolved) return `<div class="room-event"><div class="event-copy"><span class="eyebrow text-green">LA PUERTA ESTÁ ABIERTA</span><h3>El aire de afuera no huele a muerte.</h3><p>Cruza antes de que el reloj llegue a cero.</p></div><div class="event-actions">${this.button('escape', 'Escapar de la torre', 'right', 'primary escape-button')}</div></div>`;
+      return `<div class="room-event exploration-event"><div class="event-copy"><h3>${room.type === 'start' ? 'Levántate. Todavía queda tiempo.' : room.type === 'workshop' ? 'Aún puedes usar la estación.' : 'Sigue avanzando.'}</h3><p>${room.type === 'workshop' ? 'Los planos descubiertos se fabrican con chatarra.' : 'Escoge un pasillo conectado. La escalera está marcada en el plano.'}</p></div>${room.type === 'workshop' ? this.button('archive', 'Fabricar', 'flask') : ''}</div>${this.movementMarkup()}`;
+    }
+
+    movementMarkup() {
+      const s = this.game.state;
+      const directions = [['north', 'Norte', 'up', -4], ['west', 'Oeste', 'left', -1], ['east', 'Este', 'right', 1], ['south', 'Sur', 'down', 4]];
+      return `<nav class="movement" aria-label="Pasillos disponibles">${directions.map(([id, label, symbol, delta]) => {
+        const target = s.current + delta;
+        const enabled = s.phase === 'explore' && s.map[s.current].links.includes(target);
+        return this.button('direction', label, symbol, 'direction-button', `data-direction="${id}" ${enabled ? '' : 'disabled'} aria-label="Ir al ${label.toLowerCase()}${enabled ? '' : ', no hay pasillo'}"`);
+      }).join('')}<span class="movement-hint">W A S D <span>/</span> FLECHAS</span></nav>`;
+    }
+
+    cardMarkup(card, index = 0, preview = false, detail = false) {
+      const def = D.cards[card.id];
+      const part = card.part ? D.parts[card.part] : null;
+      const slot = D.slots.find(v => v.id === card.slot);
+      const s = this.game.state;
+      const bodyPart = s?.body[card.slot];
+      const color = part?.color || '#bc8471';
+      const affordable = !s || def.cost <= s.energy;
+      const overheats = bodyPart?.id && (Math.max(0, bodyPart.heat - (def.cool || 0)) + def.heat >= 100
+        || bodyPart.integrity <= def.wear + (bodyPart.heat + def.heat >= 75 ? 7 : 0));
+      const tag = detail ? 'div' : 'button';
+      return `<${tag} ${detail ? '' : 'type="button"'} class="anatomy-card ${preview ? 'preview-card' : ''} ${overheats && !preview ? 'will-break' : ''} ${!part ? 'stump-card' : ''}" style="--part-color:${color}" ${detail ? '' : `data-action="play" data-id="${card.uid}" ${preview || !affordable ? 'disabled' : ''}`} ${detail ? '' : `aria-label="${def.name}. ${def.cost} energía. ${def.text} Calor más ${def.heat}, desgaste ${def.wear}.${overheats ? ' Atención: se romperá el injerto.' : ''}"`}>
+        <div class="card-top"><span class="energy-cost">${def.cost}</span><span class="card-origin">${slot?.short || kindLabel[part?.kind] || 'MUÑÓN'}</span><kbd>${index + 1}</kbd></div>
+        <div class="card-art">${pixelArt(def.icon, color)}</div>
+        <h3>${def.name}</h3><p>${def.text}</p>
+        <div class="card-bottom">${def.heat ? `<span>${icon('flame')} +${def.heat}°</span><span>${overheats && !preview ? '¡ROTURA!' : `−${def.wear}%`}</span>` : '<span>MUÑÓN</span><span>Sin injerto</span>'}</div>
+      </${tag}>`;
+    }
+
+    handMarkup() {
+      const s = this.game.state;
+      const combat = s?.phase === 'combat';
+      const body = s?.body || this.art.defaultBody();
+      const previews = ['armL', 'torso', 'head', 'armR', 'legR'].map(slot => {
+        const part = body[slot];
+        const fallback = { head: 'stumpHead', torso: 'stumpTorso', armL: 'stumpArm', armR: 'stumpArm', legR: 'stumpLeg' };
+        return { id: part.id ? D.parts[part.id].cards[0] : fallback[slot], part: part.id, slot, uid: 0 };
+      });
+      const cards = combat ? s.hand : previews;
+      return `<section class="hand-section" aria-label="${combat ? 'Tu mano de cartas' : 'Cartas de tu cuerpo'}">
+        <div class="hand-header"><div><h2>${combat ? 'Tu mano' : 'Tu cuerpo es tu mazo'}</h2><span>${combat ? `${s.hand.length} CARTAS · ROBA ${s.draw.length} · DESCARTE ${s.discard.length}` : 'CADA INJERTO CAMBIA TUS CARTAS'}</span></div><button type="button" data-action="deck" class="text-button">Ver mazo ${icon('book')}</button></div>
+        <div class="hand ${cards.length > 5 ? 'many-cards' : ''}">${cards.map((card, i) => this.cardMarkup(card, i, !combat)).join('') || '<div class="empty-hand">No quedan cartas en tu mano. Termina el turno para robar otras cinco.</div>'}</div>
+        <div class="turn-bar"><div class="energy-display">${icon('bolt')}<strong>${combat ? s.energy : '—'}<small> / 3</small></strong><div><b>ENERGÍA</b><span>${combat ? 'Se recupera al terminar el turno' : 'Disponible durante el combate'}</span></div></div>${this.button('end-turn', 'Terminar turno <kbd>ESPACIO</kbd>', 'right', combat ? 'primary turn-button' : 'turn-button', combat ? '' : 'disabled')}</div>
+      </section>`;
+    }
+
+    modalShell(title, eyebrow, body, extraClass = '') {
+      return `<div class="modal-backdrop" data-overlay="true"><section class="modal ${extraClass}" role="dialog" aria-modal="true" aria-labelledby="modal-title"><header class="modal-header"><div><span class="eyebrow">${eyebrow}</span><h2 id="modal-title">${title}</h2></div>${this.button('close', '', 'close', 'icon-only quiet', 'aria-label="Cerrar ventana"')}</header>${this.game.active() ? '<div class="modal-clock-note">El reloj sigue corriendo. <strong class="modal-live-clock"></strong></div>' : ''}<div class="modal-body">${body}</div></section></div>`;
+    }
+
+    modalMarkup() {
+      const s = this.game.state;
+      if (!this.modal) return '';
+      if (this.modal === 'intro') return `<div class="modal-backdrop intro-backdrop"><section class="intro-modal" role="dialog" aria-modal="true" aria-labelledby="intro-title"><div class="intro-kicker"><span></span> UN ROGUELIKE ANATÓMICO <span></span></div><div class="intro-sigil">${icon('skull')}</div><h2 id="intro-title">Un cuerpo prestado.<br><em>Seis minutos de vida.</em></h2><p>La torre arde. Cosecha a quienes te detengan.<br>Injerta sus extremidades. Escapa antes del colapso.</p><div class="intro-pillars"><span>${icon('bone')} TU CUERPO ES TU MAZO</span><span>${icon('clock')} 06:00 REALES</span></div>${this.button('start', 'Reanimar', 'bolt', 'primary intro-start')}<div class="intro-footer">${this.button('help', 'Cómo sobrevivir', 'help', 'quiet')}<span>Ratón · teclado · táctil · mando</span></div><small class="content-note">Horror anatómico estilizado · audio activado al interactuar</small></section></div>`;
+      if (this.modal === 'bag') {
+        const content = s?.inventory.length ? s.inventory.map(item => this.inventoryItem(item)).join('') : `<div class="empty-state">${icon('bag')}<h3>La bolsa está vacía.</h3><p>Derrota enemigos, recoge suministros o fabrica un plano en una estación de injertos.</p></div>`;
+        return this.modalShell('Bolsa de injertos', `${s?.inventory.length || 0} EXTREMIDADES RECUPERADAS`, `<p class="modal-intro">${s?.phase === 'combat' ? '<strong>Injertar cuesta 1 de energía.</strong> Las cartas del injerto anterior desaparecen de inmediato.' : 'Elige dónde injertar. La pieza que reemplaces vuelve a la bolsa con su calor y desgaste actuales.'}</p><div class="inventory-list">${content}</div>`);
+      }
+      if (this.modal === 'part') {
+        const slot = D.slots.find(v => v.id === this.part);
+        const part = (s?.body || this.art.defaultBody())[this.part];
+        const def = part.id ? D.parts[part.id] : null;
+        const fallback = { head: 'stumpHead', torso: 'stumpTorso', arm: 'stumpArm', leg: 'stumpLeg' };
+        const ids = def ? def.cards : [fallback[slot.kind]];
+        const available = s?.inventory.filter(p => D.parts[p.id].kind === slot.kind) || [];
+        return this.modalShell(def?.name || 'Solo queda un muñón', slot.label.toUpperCase(), `<p class="lore">${def?.lore || 'El injerto se ha roto. Todas sus cartas han desaparecido de tu mazo.'}</p><div class="part-stats"><span>${icon('flame')} Calor <b>${part.heat}° / 100°</b></span><span>${icon('shield')} Integridad <b>${part.integrity}%</b></span></div><p class="modal-intro">A 100° o 0% de integridad, el injerto se rompe. Desde 75°, cada uso causa 7 de desgaste adicional. Terminar turno enfría 12°; cambiar de sala, 7°.</p><div class="detail-cards">${ids.map((id, i) => this.cardMarkup({ id, slot: slot.id, part: part.id, uid: 0 }, i, true, true)).join('')}</div><h3 class="section-caption">Reemplazos disponibles</h3>${available.length ? available.map(item => this.inventoryItem(item, slot.id)).join('') : '<p class="muted">No tienes un reemplazo compatible. Busca enemigos o suministros.</p>'}`);
+      }
+      if (this.modal === 'body') return this.modalShell('Tu cuerpo', 'SEIS RANURAS · UN SOLO ESPÍRITU', `<div class="mobile-anatomy">${this.anatomyMarkup(true)}</div>`);
+      if (this.modal === 'map') return this.modalShell('Camino a la salida', 'LOS PASILLOS NUNCA SON LOS MISMOS', this.mapMarkup(true), 'map-modal');
+      if (this.modal === 'archive') {
+        const known = this.game.meta.blueprints.length;
+        const station = this.game.atWorkshop();
+        const entries = Object.entries(D.parts).filter(([, part]) => this.filter === 'all' || part.kind === this.filter);
+        return this.modalShell('Archivo anatómico', `${known} / ${Object.keys(D.parts).length} PLANOS DESCUBIERTOS`, `<p class="modal-intro">Los planos sobreviven a la muerte. ${station ? '<strong>Estás en una estación: puedes fabricar con chatarra.</strong>' : 'Para fabricar, visita una estación de injertos en la torre.'}</p><div class="filter-tabs" role="group" aria-label="Filtrar planos">${[['all', 'Todos'], ['head', 'Cabezas'], ['torso', 'Torsos'], ['arm', 'Brazos'], ['leg', 'Piernas']].map(([id, label]) => `<button type="button" class="${this.filter === id ? 'selected' : ''}" data-action="filter" data-filter="${id}" aria-pressed="${this.filter === id}">${label}</button>`).join('')}</div><div class="blueprint-grid">${entries.map(([id, part]) => {
+          const unlocked = this.game.meta.blueprints.includes(id);
+          const cost = 6 + part.tier * 5;
+          return `<article class="blueprint ${unlocked ? '' : 'locked'}"><div class="blueprint-top"><span class="tier tier-${part.tier}">${unlocked ? tierLabel[part.tier] : 'DESCONOCIDO'}</span>${icon(unlocked ? (part.kind === 'head' ? 'skull' : part.kind === 'torso' ? 'heart' : part.kind === 'arm' ? 'bone' : 'foot') : 'lock')}</div><h3>${unlocked ? part.name : part.expansion && !this.game.meta.expansion ? 'Plano del ala prohibida' : `${kindLabel[part.kind]} sin descubrir`}</h3><p>${unlocked ? part.cards.map(card => D.cards[card].name).join(' · ') : part.expansion && !this.game.meta.expansion ? 'Desbloquea el ala en el relicario.' : 'Explora, cosecha o consulta los archivos de la torre.'}</p>${unlocked ? this.button('craft', `Fabricar · ${cost}`, 'gear', 'small', `data-id="${id}" ${!station || s.scraps < cost ? 'disabled' : ''}`) : '<span class="locked-label">EL CONOCIMIENTO PERDURA</span>'}</article>`;
+        }).join('')}</div>`, 'wide-modal');
+      }
+      if (this.modal === 'deck') {
+        const body = s?.body || this.art.defaultBody();
+        const cards = D.slots.flatMap(slot => {
+          const part = body[slot.id];
+          const fallback = { head: 'stumpHead', torso: 'stumpTorso', arm: 'stumpArm', leg: 'stumpLeg' };
+          return (part.id ? D.parts[part.id].cards : [fallback[slot.kind]]).map(id => ({ id, slot: slot.id, part: part.id, uid: 0 }));
+        });
+        return this.modalShell('Tu mazo anatómico', `${cards.length} CARTAS · CADA UNA PERTENECE A UN INJERTO`, `<p class="modal-intro">Empiezas cada combate con 5 cartas y 3 de energía. Al terminar turno descartas la mano, enfrías 12° y robas 5. El descarte se baraja cuando se acaba el mazo. Máximo 7 cartas en mano.</p><div class="deck-grid">${cards.map((card, i) => this.cardMarkup(card, i, true, true)).join('')}</div>`, 'wide-modal');
+      }
+      if (this.modal === 'shop') return this.modalShell('El relicario', `${this.game.meta.souls} ECOS DEL ESPÍRITU`, `<div class="shop-notice">${icon('coin')}<p><strong>Sin compras con dinero real.</strong> Este prototipo usa ecos ganados al completar intentos. Los cosméticos no alteran tus estadísticas.</p></div><div class="skin-grid">${Object.entries(D.skins).map(([id, skin]) => {
+        const owned = this.game.meta.skins.includes(id);
+        const active = this.game.meta.skin === id;
+        return `<article class="skin-card"><div class="skin-swatch" style="--skin:${skin.color}">${pixelArt('heart', skin.color)}<span>${icon('skull')}</span></div><h3>${skin.name}</h3><p>${skin.description}</p>${this.button('buy', active ? 'Equipada' : owned ? 'Equipar' : `Desbloquear · ${skin.cost} ecos`, active ? 'check' : 'coin', active ? 'small equipped' : 'small', `data-id="${id}" ${active || (!owned && this.game.meta.souls < skin.cost) ? 'disabled' : ''}`)}</article>`;
+      }).join('')}</div><article class="expansion-card"><div><span class="eyebrow">CONTENIDO ADICIONAL</span><h3>El ala prohibida</h3><p>Abre los encuentros del Archivista de ceniza y su cráneo exclusivo, con dos nuevas cartas. Disponible en los próximos encuentros.</p></div>${this.button('buy', this.game.meta.expansion ? 'Ala desbloqueada' : 'Abrir · 30 ecos', this.game.meta.expansion ? 'check' : 'lock', 'primary small', `data-id="expansion" ${this.game.meta.expansion || this.game.meta.souls < 30 ? 'disabled' : ''}`)}</article>`, 'wide-modal');
+      if (this.modal === 'settings') return this.modalShell('Ajustes', 'LA TORRE NO ESPERA', `<div class="setting-row"><label for="volume">Volumen general<small>Música sintetizada y efectos viscerales.</small></label><div class="volume-control"><input type="range" id="volume" min="0" max="100" value="${Math.round(this.game.meta.volume * 100)}" data-preference="volume"><output id="volume-output">${Math.round(this.game.meta.volume * 100)}%</output></div></div><div class="setting-row"><label for="sfx">Efectos de sonido<small>Impactos, injertos y señales del laboratorio.</small></label><input type="checkbox" id="sfx" data-preference="sfx" ${this.game.meta.sfx ? 'checked' : ''}></div><div class="setting-row"><label for="motion">Animaciones ambientales<small>Desactiva movimiento, partículas animadas y sacudidas.</small></label><input type="checkbox" id="motion" data-preference="motion" ${this.game.meta.motion ? 'checked' : ''}></div><div class="setting-row"><div>Pantalla completa<small>Disponible cuando el navegador lo permite.</small></div>${this.button('fullscreen', 'Alternar', 'fullscreen', 'small')}</div><div class="save-note">${icon('check')} ${this.game.storageAvailable ? 'Guardado automático en este navegador. El reloj continúa al cerrar o recargar.' : 'El guardado está bloqueado. Puedes jugar, pero se perderá el progreso al cerrar.'}</div>${this.game.active() ? `<div class="abandon-row">${this.button('confirm-abandon', 'Abandonar este cuerpo', 'skull', 'danger-outline')}<p>Conservarás los planos descubiertos.</p></div>` : ''}`);
+      if (this.modal === 'confirm-abandon') return this.modalShell('¿Abandonar este cuerpo?', 'ESTE INTENTO TERMINARÁ', `<p class="modal-intro">Perderás tus injertos, suministros y chatarra de este intento. Los planos descubiertos y los ecos permanecen.</p><div class="confirm-actions">${this.button('close', 'Seguir luchando', 'shield', 'primary')}${this.button('abandon', 'Abandonar y volver a la mesa', 'skull', 'danger-outline')}</div>`);
+      if (this.modal === 'help') return this.modalShell('Cómo sobrevivir', 'EL RELOJ ANATÓMICO', `<div class="help-lead">No necesitas un mazo mejor.<br><em>Necesitas un cuerpo mejor.</em></div><div class="help-grid"><article><span>01</span><h3>Explora y asciende</h3><p>Recorre los pasillos conectados. Llega a la escalera del noreste en los pisos I y II. En el III, derrota al Rector y pulsa <strong>Escapar de la torre</strong>.</p></article><article><span>02</span><h3>Combate por turnos</h3><p>Tienes <strong>3 de energía</strong>. Las cartas muestran su coste arriba a la izquierda. La intención enemiga te dice qué ocurrirá al terminar turno. La defensa dura hasta entonces.</p></article><article><span>03</span><h3>Cosecha e injerta</h3><p>Los enemigos derrotados dejan extremidades en tu bolsa. Cada injerto aporta <strong>2 cartas</strong>. Cambiarlo quita las anteriores; en combate cuesta 1 de energía.</p></article><article><span>04</span><h3>No te consumas</h3><p>A <strong>100° o 0% de integridad</strong>, el injerto se rompe y solo te queda una carta de muñón. Desde 75°, cada uso añade 7 de desgaste. Enfría 12° por turno o 7° al moverte.</p></article><article><span>05</span><h3>Usa lo que encuentres</h3><p>Suero: +28 vida. Refrigerante: −38° y +12 integridad. Fabrica los planos descubiertos con chatarra en las estaciones de injertos.</p></article><article><span>06</span><h3>Muere, aprende, vuelve</h3><p>Son <strong>6 minutos de tiempo real</strong>, incluso en menús o fuera de la pestaña. Al morir vuelves a una mesa con otro cuerpo y otra torre. Los planos y ecos permanecen.</p></article></div><div class="controls-grid"><div>${icon('settings')}<h3>Teclado y ratón</h3><p>WASD / flechas: moverse<br>1–7: jugar carta · Espacio: terminar turno<br>Q: suero · E: refrigerante<br>I: injertos · M: mapa · Esc: cerrar</p></div><div>${icon('gamepad')}<h3>Táctil y mando</h3><p>Toca las cartas, pasillos y botones.<br>Mando estándar: cruceta / stick para moverte o elegir · A: confirmar · B: cerrar<br>RB: terminar turno · X / Y: suministros</p></div></div><p class="help-fineprint">Quemadura: daño al terminar turno, baja 1 por turno. Debilidad: reduce un 40% el ataque. Aturdimiento: cancela la siguiente intención. El tiempo no se pausa.</p>`,'wide-modal');
+      if (this.modal === 'log') return this.modalShell('Bitácora del cuerpo', 'LOS ÚLTIMOS 24 ACONTECIMIENTOS', `<ol class="journal-list">${(s?.log || ['Aún no has despertado.']).map(line => `<li>${escapeHtml(line)}</li>`).join('')}</ol>`);
+      if (this.modal === 'end' && s) {
+        const won = s.phase === 'won';
+        return `<div class="modal-backdrop end-backdrop"><section class="end-modal ${won ? 'won' : ''}" role="dialog" aria-modal="true" aria-labelledby="end-title"><div class="end-symbol">${icon(won ? 'tower' : 'skull')}</div><span class="eyebrow">${won ? 'EL CIELO TODAVÍA EXISTE' : 'EL ESPÍRITU HA ENCONTRADO OTRA MESA'}</span><h2 id="end-title">${won ? 'Este cuerpo es tuyo.' : 'La carne no era eterna.'}</h2><p>${s.reason}</p><div class="result-grid"><div><strong>${s.stats.kills}</strong><span>ENEMIGOS COSECHADOS</span></div><div><strong>${s.stats.grafts}</strong><span>INJERTOS REALIZADOS</span></div><div><strong>${s.stats.discovered}</strong><span>PLANOS DESCUBIERTOS</span></div><div><strong>+${s.earnedSouls || 0}</strong><span>ECOS CONSERVADOS</span></div></div><div class="result-clock">${icon('clock')} ${won ? `Escapaste en ${timeLabel(360000 - s.remainingAtEnd)} · ${timeLabel(s.remainingAtEnd)} restantes` : `Piso ${D.floors[s.floor].roman} · ${s.stats.rooms} salas recorridas`}</div><div class="end-actions">${this.button('start', 'Reanimar otro cuerpo', 'bolt', 'primary')}${this.button('shop', 'Abrir relicario', 'coin')}</div><small>Tus ${this.game.meta.blueprints.length} planos permanecen. Tu próxima torre será distinta.</small></section></div>`;
+      }
+      return '';
+    }
+
+    inventoryItem(item, onlySlot = null) {
+      const part = D.parts[item.id];
+      const slots = D.slots.filter(slot => slot.kind === part.kind && (!onlySlot || slot.id === onlySlot));
+      const energy = this.game.state?.phase !== 'combat' || this.game.state.energy >= 1;
+      return `<article class="inventory-item"><div class="inventory-symbol" style="color:${part.color}">${icon(part.kind === 'head' ? 'skull' : part.kind === 'torso' ? 'heart' : part.kind === 'arm' ? 'bone' : 'foot')}</div><div class="inventory-description"><span class="eyebrow">${kindLabel[part.kind]} · ${tierLabel[part.tier]} <span class="inventory-condition">${item.integrity}% / ${item.heat}°</span></span><h3>${part.name}</h3><p>${part.cards.map(id => D.cards[id].name).join(' · ')}</p><div class="inventory-actions">${slots.map(slot => this.button('equip', `Injertar: ${slot.short}`, 'bone', 'small', `data-id="${item.uid}" data-slot="${slot.id}" ${energy ? '' : 'disabled'}`)).join('')}${this.button('salvage', `Desguazar +${part.tier * 3}`, 'gear', 'small quiet', `data-id="${item.uid}"`)}</div></div></article>`;
+    }
+
+    render() {
+      const active = document.activeElement;
+      const focus = active?.dataset?.action ? { action: active.dataset.action, id: active.dataset.id, slot: active.dataset.slot, direction: active.dataset.direction, filter: active.dataset.filter } : null;
+      const oldModal = this.root.querySelector('.modal-body');
+      const scroll = oldModal?.scrollTop || 0;
+      const s = this.game.state;
+      document.body.classList.toggle('reduce-motion', !this.game.meta.motion);
+      document.body.classList.toggle('has-modal', Boolean(this.modal));
+      this.root.innerHTML = `${this.header()}<main class="game-shell" ${this.modal ? 'inert' : ''}>${this.statusBar()}<div class="game-grid"><aside class="panel anatomy-panel">${this.anatomyMarkup()}</aside><div class="center-column">${this.sceneMarkup()}${this.handMarkup()}</div><aside class="panel map-panel">${this.mapMarkup()}<div class="run-record"><span class="eyebrow">EL ESPÍRITU RECUERDA</span><div><span>Planos</span><strong>${this.game.meta.blueprints.length} / ${Object.keys(D.parts).length}</strong></div><div><span>Escapes</span><strong>${this.game.meta.wins}</strong></div>${this.game.meta.best ? `<div><span>Mejor tiempo</span><strong>${timeLabel(this.game.meta.best)}</strong></div>` : ''}</div></aside></div><footer class="game-footer"><button type="button" class="journal-preview" data-action="log">${icon('log')}<span>${escapeHtml(s?.log[0] || 'La muerte es solo el principio del procedimiento.')}</span>${icon('right')}</button><span class="version-label">PROTOTIPO 1.0 <i></i> GUARDADO ${this.game.storageAvailable ? 'LOCAL' : 'NO DISPONIBLE'}</span></footer></main><nav class="mobile-toolbar" aria-label="Paneles del juego" ${this.modal ? 'inert' : ''}>${this.button('body', 'Cuerpo', 'skull', 'quiet')}${this.button('bag', `Injertos${s?.inventory.length ? ` · ${s.inventory.length}` : ''}`, 'bag', 'quiet')}${this.button('map', 'Mapa', 'map', 'quiet')}${this.button('archive', 'Planos', 'book', 'quiet')}</nav>${this.modalMarkup()}`;
+      this.root.querySelector('.topbar')?.toggleAttribute('inert', Boolean(this.modal));
+      this.art.bind();
+      if (this.root.querySelector('#modal-body')) this.art.anatomy = this.root.querySelector('#modal-body');
+      this.updateClock();
+      const modalBody = this.root.querySelector('.modal-body');
+      if (modalBody && oldModal) modalBody.scrollTop = scroll;
+      if (focus) {
+        const candidates = [...this.root.querySelectorAll('[data-action]')];
+        const target = candidates.find(el => el.dataset.action === focus.action && el.dataset.id === focus.id
+          && el.dataset.slot === focus.slot && el.dataset.direction === focus.direction && el.dataset.filter === focus.filter
+          && !el.disabled && !el.closest('[inert]'));
+        if (target) target.focus({ preventScroll: true });
+      }
+    }
+
+    updateClock() {
+      const remaining = this.game.remaining();
+      const clock = document.getElementById('clock');
+      if (clock) clock.textContent = timeLabel(remaining);
+      const fill = document.getElementById('clock-fill');
+      if (fill) fill.style.width = `${Math.max(0, Math.min(100, remaining / 360000 * 100))}%`;
+      const clockBlock = document.getElementById('clock-block');
+      if (clockBlock) clockBlock.classList.toggle('critical', remaining < 60000 && this.game.active());
+      for (const element of document.querySelectorAll('.modal-live-clock')) element.textContent = timeLabel(remaining);
+      const header = this.root.querySelector('.header-middle');
+      if (header && !this.game.active() && this.game.state) header.innerHTML = `<span class="live-dot"></span> ${this.game.state.phase === 'won' ? 'HAS ESCAPADO DE LA TORRE' : 'EL ESPÍRITU PERMANECE'}`;
+    }
+
+    openModal(name) {
+      this.modal = name;
+      this.render();
+      const primary = this.root.querySelector('.modal-backdrop .primary:not(:disabled)');
+      (primary || this.root.querySelector('.modal-backdrop button'))?.focus({ preventScroll: true });
+    }
+
+    closeModal() {
+      this.modal = !this.game.state ? 'intro' : this.game.active() ? null : 'end';
+      this.render();
+    }
+
+    handleClick(event) {
+      const el = event.target.closest('[data-action]');
+      if (!el || el.disabled) return;
+      event.preventDefault();
+      this.audio.unlock();
+      const action = el.dataset.action;
+      const g = this.game;
+      if (action === 'start') { this.modal = null; g.start(); return; }
+      if (action === 'home') { this.openModal(g.state ? 'help' : 'intro'); return; }
+      if (action === 'close') { this.closeModal(); return; }
+      if (['bag', 'body', 'map', 'archive', 'shop', 'settings', 'help', 'deck', 'log', 'end', 'confirm-abandon'].includes(action)) { this.openModal(action); return; }
+      if (action === 'part') { this.part = el.dataset.slot; this.openModal('part'); return; }
+      if (action === 'filter') { this.filter = el.dataset.filter; this.render(); return; }
+      if (action === 'sound') {
+        if (g.meta.volume) { this.previousVolume = g.meta.volume; g.setPreference('volume', 0); }
+        else g.setPreference('volume', this.previousVolume || 0.3);
+        this.render(); return;
+      }
+      if (action === 'fullscreen') {
+        if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
+        else if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => this.toast({ text: 'Este navegador no permite pantalla completa aquí.' }));
+        else this.toast({ text: 'Este navegador no ofrece pantalla completa.' });
+        return;
+      }
+      if (action === 'buy') { g.buy(el.dataset.id); return; }
+      if (action === 'move') { if (g.active()) this.modal = null; g.move(Number(el.dataset.id)); return; }
+      if (action === 'direction') { g.moveDirection(el.dataset.direction); return; }
+      if (action === 'play') { g.play(Number(el.dataset.id)); return; }
+      if (action === 'equip') { g.equip(Number(el.dataset.id), el.dataset.slot); return; }
+      if (action === 'salvage') { g.salvage(Number(el.dataset.id)); return; }
+      if (action === 'craft') { g.craft(el.dataset.id); return; }
+      if (action === 'end-turn') { g.endTurn(); return; }
+      if (action === 'heal') { g.useItem('heal'); return; }
+      if (action === 'cool') { g.useItem('cool'); return; }
+      if (action === 'cache') { g.collectCache(); return; }
+      if (action === 'search-archive') { g.searchArchive(); return; }
+      if (action.startsWith('trap-')) { g.resolveTrap(action.slice(5)); return; }
+      if (action === 'repair') { g.repair(); return; }
+      if (action === 'leave-workshop') { g.leaveWorkshop(); return; }
+      if (action === 'continue-loot') { g.continueAfterLoot(); return; }
+      if (action === 'ascend') { g.ascend(); return; }
+      if (action === 'escape') { g.escape(); return; }
+      if (action === 'abandon') { this.modal = null; g.finish(false, 'Has dejado atrás este cuerpo. Tu espíritu encuentra otra mesa de disección.'); }
+    }
+
+    handleInput(event) {
+      const name = event.target.dataset.preference;
+      if (!name) return;
+      this.audio.unlock();
+      this.game.setPreference(name, name === 'volume' ? Number(event.target.value) / 100 : event.target.checked);
+      if (name === 'volume') document.getElementById('volume-output').textContent = `${event.target.value}%`;
+      if (name === 'motion') document.body.classList.toggle('reduce-motion', !event.target.checked);
+    }
+
+    handleKey(event) {
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(event.target.tagName)) return;
+      if (event.ctrlKey || event.metaKey || event.altKey || event.repeat) return;
+      const key = event.key.toLowerCase();
+      if (this.modal) {
+        if (key === 'escape') { event.preventDefault(); this.closeModal(); }
+        if (key === 'tab') {
+          const focusables = [...this.root.querySelectorAll('.modal-backdrop button:not(:disabled), .modal-backdrop input')].filter(el => el.getClientRects().length);
+          const first = focusables[0];
+          const last = focusables[focusables.length - 1];
+          if (event.shiftKey && (document.activeElement === first || !this.root.querySelector('.modal-backdrop')?.contains(document.activeElement))) { event.preventDefault(); last?.focus(); }
+          else if (!event.shiftKey && (document.activeElement === last || !this.root.querySelector('.modal-backdrop')?.contains(document.activeElement))) { event.preventDefault(); first?.focus(); }
+        }
+        return;
+      }
+      const directions = { w: 'north', arrowup: 'north', s: 'south', arrowdown: 'south', a: 'west', arrowleft: 'west', d: 'east', arrowright: 'east' };
+      if (directions[key] && this.game.state?.phase === 'explore') { event.preventDefault(); this.audio.unlock(); this.game.moveDirection(directions[key]); }
+      else if (/^[1-7]$/.test(key) && this.game.state?.phase === 'combat') {
+        event.preventDefault(); this.audio.unlock();
+        const card = this.game.state.hand[Number(key) - 1];
+        if (card) this.game.play(card.uid);
+      } else if (key === ' ' && this.game.state?.phase === 'combat') { event.preventDefault(); this.audio.unlock(); this.game.endTurn(); }
+      else if (key === 'q') { event.preventDefault(); this.game.useItem('heal'); }
+      else if (key === 'e') { event.preventDefault(); this.game.useItem('cool'); }
+      else if (key === 'i') this.openModal('bag');
+      else if (key === 'm') this.openModal('map');
+      else if (key === 'escape') this.openModal('settings');
+    }
+
+    setupGamepad() {
+      let previous = [];
+      let directionAt = 0;
+      let connected = false;
+      const navigate = direction => {
+        if (!this.modal && this.game.state?.phase === 'explore') { this.game.moveDirection(direction); return; }
+        const scope = this.modal ? '.modal-backdrop' : '.game-shell';
+        const buttons = [...this.root.querySelectorAll(`${scope} button:not(:disabled), ${scope} input`)]
+          .filter(el => el.getClientRects().length && !el.closest('[inert]'));
+        if (!buttons.length) return;
+        const focused = document.activeElement;
+        if (focused?.matches('input[type=range]') && ['east', 'west'].includes(direction)) {
+          direction === 'east' ? focused.stepUp(5) : focused.stepDown(5);
+          focused.dispatchEvent(new Event('input', { bubbles: true }));
+          return;
+        }
+        if (!buttons.includes(focused)) {
+          (this.root.querySelector(`${scope} .anatomy-card:not(:disabled)`) || buttons[0]).focus();
+          return;
+        }
+        const bounds = focused.getBoundingClientRect();
+        const x = bounds.x + bounds.width / 2;
+        const y = bounds.y + bounds.height / 2;
+        const candidates = buttons.filter(el => el !== focused).map(el => {
+          const r = el.getBoundingClientRect();
+          const dx = r.x + r.width / 2 - x;
+          const dy = r.y + r.height / 2 - y;
+          const primary = direction === 'east' ? dx : direction === 'west' ? -dx : direction === 'south' ? dy : -dy;
+          const secondary = direction === 'east' || direction === 'west' ? Math.abs(dy) : Math.abs(dx);
+          return { el, primary, score: primary + secondary * 2.2 };
+        }).filter(item => item.primary > 2).sort((a, b) => a.score - b.score);
+        (candidates[0]?.el || buttons[direction === 'north' || direction === 'west' ? buttons.length - 1 : 0]).focus();
+      };
+      const poll = now => {
+        let pads = [];
+        try { pads = navigator.getGamepads ? [...navigator.getGamepads()] : []; } catch (_) { /* Some embedded browsers disable this API. */ }
+        const pad = pads.find(Boolean);
+        if (pad) {
+          if (!connected) { connected = true; this.toast({ text: 'Mando conectado · A confirma · B cierra · RB termina turno', tone: 'good' }); }
+          const pressed = pad.buttons.map(button => button.pressed);
+          const edge = i => pressed[i] && !previous[i];
+          const axisX = pad.axes[0] || 0;
+          const axisY = pad.axes[1] || 0;
+          const direction = pressed[12] || axisY < -0.55 ? 'north' : pressed[13] || axisY > 0.55 ? 'south' : pressed[14] || axisX < -0.55 ? 'west' : pressed[15] || axisX > 0.55 ? 'east' : null;
+          if (direction && now - directionAt > 230) { directionAt = now; navigate(direction); }
+          if (edge(0)) {
+            this.audio.unlock();
+            const scope = this.modal ? '.modal-backdrop' : '.game-shell';
+            const focused = document.activeElement;
+            if (focused?.matches('button:not(:disabled), input') && focused.closest(scope)) focused.click();
+            else this.root.querySelector(`${scope} .primary:not(:disabled)`)?.click();
+          }
+          if (edge(1) && this.modal) this.closeModal();
+          if (edge(2) && !this.modal) this.game.useItem('heal');
+          if (edge(3) && !this.modal) this.game.useItem('cool');
+          if (edge(5) && !this.modal) this.game.endTurn();
+          if (edge(9)) this.modal ? this.closeModal() : this.openModal('settings');
+          previous = pressed;
+        } else { connected = false; previous = []; }
+        requestAnimationFrame(poll);
+      };
+      requestAnimationFrame(poll);
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    try {
+      new UI();
+    } catch (error) {
+      console.error('Deadlock Deck:', error);
+      const root = document.getElementById('app');
+      root.innerHTML = '<main class="boot-error"><h1>No se pudo reanimar el juego.</h1><p>Recarga la página en un navegador actualizado. No se han borrado tus planos.</p><button type="button" id="retry-boot">Recargar</button></main>';
+      document.getElementById('retry-boot').addEventListener('click', () => location.reload());
+    }
+  });
+})();
+
+</script>
+</head>
+<body>
+  <div id="app"></div>
+  <div id="notifications" aria-live="polite" aria-atomic="false"></div>
+  <noscript><main class="boot-error"><h1>Deadlock Deck</h1><p>Activa JavaScript para reanimar el juego. No se necesita conexión a internet.</p></main></noscript>
+</body>
+</html>

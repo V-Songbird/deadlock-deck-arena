@@ -1,0 +1,10 @@
+{
+  "name": "deadlock-deck",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Deadlock Deck: El Reloj Anatomico - anatomical deckbuilding roguelike",
+  "scripts": {
+    "start": "node server.mjs"
+  }
+}
