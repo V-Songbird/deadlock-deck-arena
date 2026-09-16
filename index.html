@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="es" data-lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0d0b12">
+<meta name="description" content="Five browser games built from one identical prompt by five different AI orchestrator/worker pairings. Play any of them, or open several side by side.">
+<title>Deadlock Deck Arena — cinco agentes, un prompt</title>
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/hub.css">
+<script>
+  // Set the language before first paint so the page never flashes the wrong one.
+  (function () {
+    var q = new URLSearchParams(location.search).get('lang');
+    var s = null;
+    try { s = localStorage.getItem('dd-arena-lang'); } catch (e) { /* private mode */ }
+    var l = q || s || ((navigator.language || 'es').slice(0, 2) === 'es' ? 'es' : 'en');
+    if (l !== 'es' && l !== 'en') l = 'es';
+    document.documentElement.setAttribute('data-lang', l);
+    document.documentElement.setAttribute('lang', l);
+  })();
+</script>
+</head>
+<body>
+
+<a class="skip-link" href="#builds"><span lang="es">Saltar a las construcciones</span><span lang="en">Skip to the builds</span></a>
+
+<header class="hud">
+  <span class="hud-clock" aria-hidden="true">6:00</span>
+  <span class="sr-only" lang="es">Cada partida dura seis minutos.</span>
+  <span class="sr-only" lang="en">Every run lasts six minutes.</span>
+  <div class="hud-bar" aria-hidden="true">
+    <span class="hud-bar-text">1 PROMPT · 5 BUILDS</span>
+  </div>
+  <div class="lang" role="group" aria-label="Idioma / Language">
+    <button type="button" data-lang="es" aria-pressed="true">ES</button>
+    <button type="button" data-lang="en" aria-pressed="false">EN</button>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="hero">
+    <h1>
+      <canvas id="title-art" width="252" height="56" role="img"
+              aria-label="Deadlock Deck: El Reloj Anatómico" hidden></canvas>
+      <span class="title-fallback">DEADLOCK DECK ARENA</span>
+    </h1>
+    <p class="hero-kicker">
+      <span lang="es">Un prompt · Cinco parejas de agentes · Cinco juegos</span>
+      <span lang="en">One prompt · Five agent pairings · Five games</span>
+    </p>
+    <p class="hero-lede">
+      <span lang="es">El mismo concepto de juego se entregó cinco veces, palabra por palabra, a cinco
+      combinaciones distintas de modelo orquestador y modelo trabajador. Nadie intervino durante
+      la construcción. Esto es lo que devolvió cada una.</span>
+      <span lang="en">The same game concept was handed over five times, word for word, to five different
+      combinations of orchestrator model and worker model. Nobody stepped in while they built.
+      This is what each one handed back.</span>
+    </p>
+    <p class="hero-actions">
+      <a class="btn btn-primary" href="play.html?g=a,b,c,d,e">
+        <span lang="es">Comparar las cinco</span><span lang="en">Compare all five</span>
+      </a>
+      <a class="btn" href="#method">
+        <span lang="es">Cómo se hizo</span><span lang="en">How it was run</span>
+      </a>
+    </p>
+  </section>
+
+  <div class="rule"></div>
+
+  <section class="panel" id="method">
+    <h2><span lang="es">Condiciones idénticas</span><span lang="en">Identical conditions</span></h2>
+    <ul class="conditions">
+      <li>
+        <strong><span lang="es">El mismo prompt</span><span lang="en">The same prompt</span></strong>
+        <span lang="es">Sin una coma de diferencia entre las cinco tiradas.</span>
+        <span lang="en">Not one comma differed between the five runs.</span>
+      </li>
+      <li>
+        <strong><span lang="es">Esfuerzo máximo</span><span lang="en">Maximum effort</span></strong>
+        <span lang="es">Cada orquestador corrió en xhigh, o el tope disponible en DeepSeek.</span>
+        <span lang="en">Every orchestrator ran at xhigh, or DeepSeek's own ceiling.</span>
+      </li>
+      <li>
+        <strong><span lang="es">Sin dueño</span><span lang="en">No owner</span></strong>
+        <span lang="es">El orquestador dirigió a sus trabajadores solo, de principio a fin.</span>
+        <span lang="en">The orchestrator drove its workers alone, start to finish.</span>
+      </li>
+      <li>
+        <strong><span lang="es">Mismo encargo</span><span lang="en">Same brief</span></strong>
+        <span lang="es">Mazo anatómico, degradación térmica, torre procedural, seis minutos.</span>
+        <span lang="en">Anatomical deck, heat decay, procedural tower, six minutes.</span>
+      </li>
+      <li>
+        <strong><span lang="es">Sin dependencias</span><span lang="en">No dependencies</span></strong>
+        <span lang="es">Los cinco salieron como HTML, CSS y JavaScript sin compilar.</span>
+        <span lang="en">All five came out as plain HTML, CSS and JavaScript, no build step.</span>
+      </li>
+    </ul>
+
+    <details class="prompt" id="prompt">
+      <summary>
+        <span lang="es">Leer el prompt completo</span><span lang="en">Read the full prompt</span>
+      </summary>
+      <p class="build-role prompt-note">
+        <span lang="es">Texto original, sin traducir: es la evidencia del experimento.</span>
+        <span lang="en">Original text, untranslated — it is the experiment's evidence.</span>
+      </p>
+      <pre>Eres el orquestador principal de este proyecto, vas a usar trabajadores X (el effort que tu elijas) para construirlo, el juego debe ser sencillo, no incluyas tests ni cosas complejas, sigue el concepto del juego al pie de la letra sin omitir nada. Tu seras quien este pendiente de los trabajadores, decirles que hacer, y organizarlos apropiadamente. Funcionaras de manera totalmente autonoma sin interaccion ni intervencion del dueño.
+
+**Deadlock Deck: El Reloj Anatómico**
+
+**Sinopsis:**
+Asume el papel de una abominación recién reanimada en un laboratorio alquímico al borde del colapso. Tienes exactamente 6 minutos para escapar de la torre en llamas. El laboratorio es un laberinto en constante cambio, lleno de monstruosidades y científicos corruptos que buscan detenerte. Tu única esperanza de supervivencia radica en recolectar partes del cuerpo de tus enemigos caídos e injertarlas en ti mismo para obtener nuevas habilidades y escapar antes de que el tiempo se acabe.
+
+**Mecánicas Principales:**
+
+* **Construcción de Mazos Anatómica:** Tu mazo de cartas no es un mazo tradicional; es tu cuerpo. Cada extremidad que injertes (cabeza, torso, 2 brazos, 2 piernas) tiene un conjunto único de cartas asociadas. Cambiar tus extremidades cambia drásticamente tu estilo de juego.
+* **Degradación Térmica:** Usar cartas poderosas sobrecalienta y desgasta tus extremidades. Si una extremidad se rompe, pierdes las cartas asociadas y debes luchar con un muñón hasta que puedas encontrar un reemplazo.
+* **Bucle de Muerte y Reinicio de 6 Minutos:** Tienes 6 minutos para escapar. Si mueres o se acaba el tiempo, tu espíritu se transporta a una nueva mesa de disección con un nuevo cuerpo base. Retienes los planos anatómicos descubiertos, pero la torre se regenera de forma procesal.
+
+**Objetivos del Jugador:**
+
+1. **Explorar:** Navegar por los pasillos procesales de la torre, recolectando recursos y evitando trampas.
+2. **Combatir:** Participar en combates rápidos y por turnos utilizando cartas basadas en tus extremidades.
+3. **Cosechar:** Derrotar enemigos y recolectar sus extremidades para mejorar tu mazo.
+4. **Escapar:** Llegar a la salida de la torre antes de que el reloj marque las 6 minutos.
+
+**Estilo Visual:**
+
+* **Gótico Alquímico:** Una estética oscura y atmosférica que combina elementos del horror gótico con la alquimia y el steampunk.
+* **Pixel Art:** Un estilo de arte de píxeles detallado y expresivo que captura la esencia de los juegos retro.
+
+**Sonido:**
+
+* **Banda Sonora Sintetizada Ominosa:** Una banda sonora que combina elementos de música electrónica y orquestal para crear una atmósfera de misterio y tensión.
+* **Efectos de Sonido Guturales:** Efectos de sonido realistas y viscerales que sumergen al jugador en el mundo del juego.
+
+**Plataformas:**
+
+* PC, consolas de última generación y dispositivos móviles.
+
+**Público Objetivo:**
+
+* Fans de los juegos de construcción de mazos, roguelikes y juegos de supervivencia.
+
+**Potencial de Monetización:**
+
+* Juego gratuito con microtransacciones para cosméticos y desbloqueo de contenido.
+
+**Estado del Desarrollo:**
+
+* Concepto en fase de preproducción.
+
+**Pasos Siguientes:**
+
+1. **Desarrollar un prototipo de combate:** Crear una versión básica del sistema de combate de construcción de mazos anatómica.
+2. **Diseñar los planos anatómicos:** Crear un conjunto variado de extremidades y cartas para que los jugadores experimenten.
+3. **Generar la torre de forma procesal:** Implementar un sistema para generar la torre de forma procesal.
+4. **Implementar el sistema de tiempo:** Integrar el reloj de 6 minutos en el juego.
+5. **Crear arte y sonido:** Desarrollar los activos visuales y de audio para el juego.
+
+**Conclusión:**
+
+**Deadlock Deck: El Reloj Anatómico** es un juego de construcción de mazos innovador y desafiante que combina mecánicas de roguelike y supervivencia con un giro único y macabro. Con su estética gótica alquímica y su jugabilidad adictiva, Deadlock Deck tiene el potencial de ser un éxito entre los fans de los juegos independientes.</pre>
+    </details>
+  </section>
+
+  <h2 class="hero-kicker section-head" id="builds">
+    <span lang="es">Las cinco construcciones</span><span lang="en">The five builds</span>
+  </h2>
+
+  <ul class="grid">
+
+    <li class="build">
+      <div class="build-shot">
+        <img src="assets/shots/a.png" width="800" height="450" loading="lazy" decoding="async"
+             alt="Pantalla de arranque de la construcción A: título en pixel art sobre un muro oscuro.">
+        <span class="build-letter" aria-hidden="true">A</span>
+      </div>
+      <div class="build-body">
+        <p class="build-role"><span lang="es">Orquestador → Trabajador</span><span lang="en">Orchestrator → Worker</span></p>
+        <p class="build-pairing"><b>DeepSeek</b> <span class="arrow">→</span> <b>Opus 5</b></p>
+        <p class="build-note">
+          <span lang="es">La más grande de las cinco: 39 archivos de código y casi 11 000 líneas. Un solo
+          canvas de 640×360 lleva todo el juego, con tienda de cosméticos, códex de planos y un aviso de
+          contenido antes de empezar.</span>
+          <span lang="en">The largest of the five: 39 code files and nearly 11,000 lines. A single 640×360
+          canvas carries the whole game, plus a cosmetics shop, a blueprint codex and a content warning
+          before the run starts.</span>
+        </p>
+        <ul class="stats">
+          <li>44 <span lang="es">archivos</span><span lang="en">files</span></li>
+          <li>10 957 <span lang="es">líneas</span><span lang="en">lines</span></li>
+          <li>canvas 640×360</li>
+        </ul>
+        <div class="build-actions">
+          <a class="btn btn-primary" href="play.html?g=a"><span lang="es">Jugar<span class="sr-only"> la construcción A</span></span><span lang="en">Play<span class="sr-only"> build A</span></span></a>
+          <label class="pick">
+            <input type="checkbox" value="a">
+            <span lang="es">Comparar<span class="sr-only"> la construcción A</span></span><span lang="en">Compare<span class="sr-only"> build A</span></span>
+          </label>
+        </div>
+        <p class="build-links">
+          <a href="games/a-deepseek-x-opus/index.html"><span lang="es">Abrir sola<span class="sr-only"> la construcción A</span></span><span lang="en">Open alone<span class="sr-only"> build A</span></span></a>
+          <a href="https://github.com/V-Songbird/deadlock-deck-arena/tree/main/games/a-deepseek-x-opus"><span lang="es">Código<span class="sr-only"> de la construcción A</span></span><span lang="en">Source<span class="sr-only"> of build A</span></span></a>
+        </p>
+      </div>
+    </li>
+
+    <li class="build">
+      <div class="build-shot">
+        <img src="assets/shots/b.png" width="800" height="450" loading="lazy" decoding="async"
+             alt="Construcción B: escena en canvas con el título, enmarcada por un reloj y ranuras anatómicas.">
+        <span class="build-letter" aria-hidden="true">B</span>
+      </div>
+      <div class="build-body">
+        <p class="build-role"><span lang="es">Orquestador → Trabajador</span><span lang="en">Orchestrator → Worker</span></p>
+        <p class="build-pairing"><b>Opus 5</b> <span class="arrow">→</span> <b>DeepSeek</b></p>
+        <p class="build-note">
+          <span lang="es">Escena en canvas de 384×216 metida dentro de un HUD hecho de DOM: el reloj, la barra
+          de vida y las seis ranuras anatómicas son elementos reales de la página. De aquí salen la paleta y
+          los botones de este sitio.</span>
+          <span lang="en">A 384×216 canvas scene set inside a HUD made of DOM: the clock, the health bar and
+          the six anatomy slots are real page elements. This hub's palette and buttons come from here.</span>
+        </p>
+        <ul class="stats">
+          <li>14 <span lang="es">archivos</span><span lang="en">files</span></li>
+          <li>4 460 <span lang="es">líneas</span><span lang="en">lines</span></li>
+          <li>canvas + DOM</li>
+        </ul>
+        <div class="build-actions">
+          <a class="btn btn-primary" href="play.html?g=b"><span lang="es">Jugar<span class="sr-only"> la construcción B</span></span><span lang="en">Play<span class="sr-only"> build B</span></span></a>
+          <label class="pick">
+            <input type="checkbox" value="b">
+            <span lang="es">Comparar<span class="sr-only"> la construcción B</span></span><span lang="en">Compare<span class="sr-only"> build B</span></span>
+          </label>
+        </div>
+        <p class="build-links">
+          <a href="games/b-opus-x-deepseek/index.html"><span lang="es">Abrir sola<span class="sr-only"> la construcción B</span></span><span lang="en">Open alone<span class="sr-only"> build B</span></span></a>
+          <a href="https://github.com/V-Songbird/deadlock-deck-arena/tree/main/games/b-opus-x-deepseek"><span lang="es">Código<span class="sr-only"> de la construcción B</span></span><span lang="en">Source<span class="sr-only"> of build B</span></span></a>
+        </p>
+      </div>
+    </li>
+
+    <li class="build">
+      <div class="build-shot">
+        <img src="assets/shots/c.png" width="800" height="450" loading="lazy" decoding="async"
+             alt="Construcción C: título en tipografía monoespaciada sobre una mesa de disección y llamas.">
+        <span class="build-letter" aria-hidden="true">C</span>
+      </div>
+      <div class="build-body">
+        <p class="build-role"><span lang="es">Orquestador → Trabajadores</span><span lang="en">Orchestrator → Workers</span></p>
+        <p class="build-pairing"><b>Fable 5.1</b> <span class="arrow">→</span> <b>DeepSeek + Opus 5</b></p>
+        <p class="build-note">
+          <span lang="es">La única tirada con dos modelos de trabajador a la vez. Canvas de 320×180 para la
+          escena y DOM para todo lo demás; los sprites se generan en memoria al arrancar, sin un solo
+          archivo de imagen.</span>
+          <span lang="en">The only run with two worker models at once. A 320×180 canvas for the scene, DOM for
+          everything else; sprites are generated in memory at boot, without a single image file.</span>
+        </p>
+        <ul class="stats">
+          <li>14 <span lang="es">archivos</span><span lang="en">files</span></li>
+          <li>3 964 <span lang="es">líneas</span><span lang="en">lines</span></li>
+          <li>canvas 320×180</li>
+        </ul>
+        <div class="build-actions">
+          <a class="btn btn-primary" href="play.html?g=c"><span lang="es">Jugar<span class="sr-only"> la construcción C</span></span><span lang="en">Play<span class="sr-only"> build C</span></span></a>
+          <label class="pick">
+            <input type="checkbox" value="c">
+            <span lang="es">Comparar<span class="sr-only"> la construcción C</span></span><span lang="en">Compare<span class="sr-only"> build C</span></span>
+          </label>
+        </div>
+        <p class="build-links">
+          <a href="games/c-fable-x-deepseek-opus/index.html"><span lang="es">Abrir sola<span class="sr-only"> la construcción C</span></span><span lang="en">Open alone<span class="sr-only"> build C</span></span></a>
+          <a href="https://github.com/V-Songbird/deadlock-deck-arena/tree/main/games/c-fable-x-deepseek-opus"><span lang="es">Código<span class="sr-only"> de la construcción C</span></span><span lang="en">Source<span class="sr-only"> of build C</span></span></a>
+        </p>
+      </div>
+    </li>
+
+    <li class="build">
+      <div class="build-shot">
+        <img src="assets/shots/d.png" width="800" height="450" loading="lazy" decoding="async"
+             alt="Construcción D: sala de ladrillo púrpura en pixel art con un panel de texto y un botón de latón.">
+        <span class="build-letter" aria-hidden="true">D</span>
+      </div>
+      <div class="build-body">
+        <p class="build-role"><span lang="es">Orquestador → Trabajador</span><span lang="en">Orchestrator → Worker</span></p>
+        <p class="build-pairing"><b>Opus 5</b> <span class="arrow">→</span> <b>Opus 5</b></p>
+        <p class="build-note">
+          <span lang="es">La única construcción sobre módulos ES, y la única que trae su propio servidor
+          estático. Un canvas se escala en múltiplos enteros para que el píxel nunca se deforme.</span>
+          <span lang="en">The only build on ES modules, and the only one that ships its own static server.
+          One canvas scales in whole multiples so the pixels never smear.</span>
+        </p>
+        <ul class="stats">
+          <li>17 <span lang="es">archivos</span><span lang="en">files</span></li>
+          <li>5 206 <span lang="es">líneas</span><span lang="en">lines</span></li>
+          <li><span lang="es">módulos ES</span><span lang="en">ES modules</span></li>
+        </ul>
+        <div class="build-actions">
+          <a class="btn btn-primary" href="play.html?g=d"><span lang="es">Jugar<span class="sr-only"> la construcción D</span></span><span lang="en">Play<span class="sr-only"> build D</span></span></a>
+          <label class="pick">
+            <input type="checkbox" value="d">
+            <span lang="es">Comparar<span class="sr-only"> la construcción D</span></span><span lang="en">Compare<span class="sr-only"> build D</span></span>
+          </label>
+        </div>
+        <p class="build-links">
+          <a href="games/d-opus-x-opus/index.html"><span lang="es">Abrir sola<span class="sr-only"> la construcción D</span></span><span lang="en">Open alone<span class="sr-only"> build D</span></span></a>
+          <a href="https://github.com/V-Songbird/deadlock-deck-arena/tree/main/games/d-opus-x-opus"><span lang="es">Código<span class="sr-only"> de la construcción D</span></span><span lang="en">Source<span class="sr-only"> of build D</span></span></a>
+        </p>
+      </div>
+    </li>
+
+    <li class="build">
+      <div class="build-shot">
+        <img src="assets/shots/e.png" width="800" height="450" loading="lazy" decoding="async"
+             alt="Construcción E: interfaz oscura en verde con tipografía serif y paneles laterales.">
+        <span class="build-letter" aria-hidden="true">E</span>
+      </div>
+      <div class="build-body">
+        <p class="build-role"><span lang="es">Orquestador → Trabajador</span><span lang="en">Orchestrator → Worker</span></p>
+        <p class="build-pairing"><b>Astra</b> <span class="arrow">→</span> <b>Astra</b></p>
+        <p class="build-note">
+          <span lang="es">La que se sale del pixel art: una interfaz oscura y verde con tipografía serif, más
+          cerca de una aplicación que de un juego retro. También entrega el juego entero dentro de un único
+          archivo HTML.</span>
+          <span lang="en">The one that breaks with the pixel art: a dark green interface with serif type,
+          closer to an app than to a retro game. It also ships the whole game inside one single HTML
+          file.</span>
+        </p>
+        <ul class="stats">
+          <li>10 <span lang="es">archivos</span><span lang="en">files</span></li>
+          <li>2 978 <span lang="es">líneas</span><span lang="en">lines</span></li>
+          <li><span lang="es">sin canvas en la página</span><span lang="en">no canvas on the page</span></li>
+        </ul>
+        <div class="build-actions">
+          <a class="btn btn-primary" href="play.html?g=e"><span lang="es">Jugar<span class="sr-only"> la construcción E</span></span><span lang="en">Play<span class="sr-only"> build E</span></span></a>
+          <label class="pick">
+            <input type="checkbox" value="e">
+            <span lang="es">Comparar<span class="sr-only"> la construcción E</span></span><span lang="en">Compare<span class="sr-only"> build E</span></span>
+          </label>
+        </div>
+        <p class="build-links">
+          <a href="games/e-astra/index.html"><span lang="es">Abrir sola<span class="sr-only"> la construcción E</span></span><span lang="en">Open alone<span class="sr-only"> build E</span></span></a>
+          <a href="https://github.com/V-Songbird/deadlock-deck-arena/tree/main/games/e-astra"><span lang="es">Código<span class="sr-only"> de la construcción E</span></span><span lang="en">Source<span class="sr-only"> of build E</span></span></a>
+        </p>
+      </div>
+    </li>
+
+  </ul>
+
+  <p class="footnote">
+    <span lang="es">Las cuentas de archivos y líneas son de los archivos JS, CSS y HTML de cada carpeta,
+    medidas el 16 de septiembre de 2026. Son tamaño, no calidad.</span>
+    <span lang="en">File and line counts cover the JS, CSS and HTML files in each folder, measured on
+    16 September 2026. They are size, not quality.</span>
+  </p>
+
+  <div class="tray" id="tray" hidden>
+    <p class="tray-count" id="tray-count" aria-live="polite"></p>
+    <a class="btn btn-primary" id="tray-open" href="play.html"></a>
+    <button class="btn" type="button" id="tray-clear">
+      <span lang="es">Limpiar</span><span lang="en">Clear</span>
+    </button>
+  </div>
+
+</main>
+
+<footer>
+  <nav class="anatomy" aria-label="Sobre el experimento / About the experiment">
+    <div class="slot">
+      <span class="slot-label"><span lang="es">Cabeza</span><span lang="en">Head</span></span>
+      <a href="https://github.com/V-Songbird/deadlock-deck-arena">GitHub</a>
+    </div>
+    <div class="slot">
+      <span class="slot-label">Torso</span>
+      <a href="#prompt"><span lang="es">El prompt</span><span lang="en">The prompt</span></a>
+    </div>
+    <div class="slot">
+      <span class="slot-label"><span lang="es">Brazo izq.</span><span lang="en">Left arm</span></span>
+      <a href="#method"><span lang="es">Condiciones</span><span lang="en">Conditions</span></a>
+    </div>
+    <div class="slot">
+      <span class="slot-label"><span lang="es">Brazo der.</span><span lang="en">Right arm</span></span>
+      <a href="https://github.com/V-Songbird/deadlock-deck-arena/blob/main/docs/experiment.md"><span lang="es">Método</span><span lang="en">Method</span></a>
+    </div>
+    <div class="slot">
+      <span class="slot-label"><span lang="es">Pierna izq.</span><span lang="en">Left leg</span></span>
+      <a href="https://github.com/V-Songbird/deadlock-deck-arena/releases/tag/as-built-2026-09"><span lang="es">Tal como salió</span><span lang="en">As built</span></a>
+    </div>
+    <div class="slot">
+      <span class="slot-label"><span lang="es">Pierna der.</span><span lang="en">Right leg</span></span>
+      <a href="https://github.com/V-Songbird/deadlock-deck-arena/blob/main/LICENSE"><span lang="es">Licencia MIT</span><span lang="en">MIT licence</span></a>
+    </div>
+  </nav>
+  <p class="colophon">
+    <span lang="es">Sin analítica, sin cookies, sin peticiones a terceros. Todo se sirve desde este repositorio.</span>
+    <span lang="en">No analytics, no cookies, no third-party requests. Everything is served from this repository.</span>
+  </p>
+</footer>
+
+<script src="assets/pixel-font.js"></script>
+<script src="assets/hub.js"></script>
+</body>
+</html>

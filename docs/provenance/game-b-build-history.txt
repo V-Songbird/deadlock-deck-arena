@@ -1,0 +1,5 @@
+e07f380 2026-09-16 Add build and QA findings doc
+7283ab7 2026-09-16 Phase 3: review fixes and README
+b06a1f8 2026-09-15 Phase 2: UI layer and game loop
+c500e87 2026-09-15 Phase 1: data, body, combat, tower, render, audio modules
+130321c 2026-09-15 Contract: PRODUCT.md, CLAUDE.md, index.html, stubs

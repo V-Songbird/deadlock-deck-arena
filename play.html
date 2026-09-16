@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="es" data-lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0d0b12">
+<meta name="robots" content="noindex">
+<title>Deadlock Deck Arena — reproductor</title>
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/hub.css">
+<script>
+  (function () {
+    var q = new URLSearchParams(location.search).get('lang');
+    var s = null;
+    try { s = localStorage.getItem('dd-arena-lang'); } catch (e) { /* private mode */ }
+    var l = q || s || ((navigator.language || 'es').slice(0, 2) === 'es' ? 'es' : 'en');
+    if (l !== 'es' && l !== 'en') l = 'es';
+    document.documentElement.setAttribute('data-lang', l);
+    document.documentElement.setAttribute('lang', l);
+  })();
+</script>
+</head>
+<body class="player">
+
+<header class="hud">
+  <a class="hud-home btn btn-small" href="index.html">
+    <span aria-hidden="true">&#8592;</span>&nbsp;<span lang="es">Arena</span><span lang="en">Arena</span>
+  </a>
+  <span class="hud-clock" aria-hidden="true">6:00</span>
+  <div class="hud-bar" aria-hidden="true">
+    <span class="hud-bar-text" id="hud-label"></span>
+  </div>
+  <button class="btn btn-small" type="button" id="reload-all" hidden>
+    <span lang="es">Reiniciar todo</span><span lang="en">Restart all</span>
+  </button>
+  <div class="lang" role="group" aria-label="Idioma / Language">
+    <button type="button" data-lang="es" aria-pressed="true">ES</button>
+    <button type="button" data-lang="en" aria-pressed="false">EN</button>
+  </div>
+</header>
+
+<div class="panes" id="panes" data-n="1"></div>
+
+<p class="player-hint">
+  <span lang="es">Haz clic en un panel para darle el teclado. Cada juego lleva su propio reloj de seis
+  minutos. Cambiar de idioma reinicia las partidas abiertas.</span>
+  <span lang="en">Click a pane to give it the keyboard. Each game runs its own six-minute clock.
+  Switching language restarts the open runs.</span>
+</p>
+
+<script src="assets/pixel-font.js"></script>
+<script src="assets/hub.js"></script>
+<script src="assets/play.js"></script>
+</body>
+</html>
