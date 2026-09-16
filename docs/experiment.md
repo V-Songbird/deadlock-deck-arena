@@ -13,18 +13,18 @@ model pairing. Builds A to E were run first; F and G were added afterwards.
 
 | Build | Orchestrator | Worker | Folder |
 |---|---|---|---|
-| A | DeepSeek | Opus 5 | `games/a-deepseek-x-opus/` |
-| B | Opus 5 | DeepSeek | `games/b-opus-x-deepseek/` |
-| C | Fable 5.1 | DeepSeek + Opus 5 | `games/c-fable-x-deepseek-opus/` |
+| A | DeepSeek-V4.1-Flash | Opus 5 | `games/a-deepseek-x-opus/` |
+| B | Opus 5 | DeepSeek-V4.1-Flash | `games/b-opus-x-deepseek/` |
+| C | Fable 5.1 | DeepSeek-V4.1-Flash + Opus 5 | `games/c-fable-x-deepseek-opus/` |
 | D | Opus 5 | Opus 5 | `games/d-opus-x-opus/` |
-| E | Astra | Astra | `games/e-astra/` |
+| E | Astra 6 Pro (Web) | Astra 6 Pro (Web) | `games/e-astra/` |
 | F | Fable 5.1 | Fable 5.1 | `games/f-fable-x-fable/` |
 | G | Fable 5.1 | Opus 5 | `games/g-fable-x-opus/` |
 
 Constant across all seven runs:
 
 - the same prompt, word for word (reproduced in §5);
-- the orchestrator at maximum reasoning effort — `xhigh`, or DeepSeek's own ceiling;
+- the orchestrator at maximum reasoning effort — `xhigh`, or DeepSeek-V4.1-Flash's own ceiling;
 - fully autonomous operation, with no owner input during the build;
 - no dependencies, no build step, no tests.
 

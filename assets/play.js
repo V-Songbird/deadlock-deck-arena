@@ -6,11 +6,11 @@
   'use strict';
 
   var GAMES = {
-    a: { slug: 'a-deepseek-x-opus', orch: 'DeepSeek', work: 'Opus 5' },
-    b: { slug: 'b-opus-x-deepseek', orch: 'Opus 5', work: 'DeepSeek' },
-    c: { slug: 'c-fable-x-deepseek-opus', orch: 'Fable 5.1', work: 'DeepSeek + Opus 5' },
+    a: { slug: 'a-deepseek-x-opus', orch: 'DeepSeek-V4.1-Flash', work: 'Opus 5' },
+    b: { slug: 'b-opus-x-deepseek', orch: 'Opus 5', work: 'DeepSeek-V4.1-Flash' },
+    c: { slug: 'c-fable-x-deepseek-opus', orch: 'Fable 5.1', work: 'DeepSeek-V4.1-Flash + Opus 5' },
     d: { slug: 'd-opus-x-opus', orch: 'Opus 5', work: 'Opus 5' },
-    e: { slug: 'e-astra', orch: 'Astra', work: 'Astra' },
+    e: { slug: 'e-astra', orch: 'Astra 6 Pro (Web)', work: 'Astra 6 Pro (Web)' },
     f: { slug: 'f-fable-x-fable', orch: 'Fable 5.1', work: 'Fable 5.1' },
     g: { slug: 'g-fable-x-opus', orch: 'Fable 5.1', work: 'Opus 5' }
   };

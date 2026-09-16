@@ -15,11 +15,11 @@ this repository, unedited apart from the language layer described below.
 
 | | Orchestrator | Worker | Files | Lines | Rendering |
 |---|---|---|---|---|---|
-| **A** | DeepSeek | Opus 5 | 44 | 10 957 | one 640×360 canvas |
-| **B** | Opus 5 | DeepSeek | 14 | 4 460 | 384×216 canvas inside a DOM HUD |
-| **C** | Fable 5.1 | DeepSeek + Opus 5 | 14 | 3 964 | 320×180 canvas, DOM for everything else |
+| **A** | DeepSeek-V4.1-Flash | Opus 5 | 44 | 10 957 | one 640×360 canvas |
+| **B** | Opus 5 | DeepSeek-V4.1-Flash | 14 | 4 460 | 384×216 canvas inside a DOM HUD |
+| **C** | Fable 5.1 | DeepSeek-V4.1-Flash + Opus 5 | 14 | 3 964 | 320×180 canvas, DOM for everything else |
 | **D** | Opus 5 | Opus 5 | 17 | 5 206 | one canvas, ES modules |
-| **E** | Astra | Astra | 10 | 2 978 | no canvas on the page |
+| **E** | Astra 6 Pro (Web) | Astra 6 Pro (Web) | 10 | 2 978 | no canvas on the page |
 | **F** | Fable 5.1 | Fable 5.1 | 17 | 3 524 | one 640×360 canvas |
 | **G** | Fable 5.1 | Opus 5 | 13 | 4 466 | one 480×270 canvas |
 
@@ -52,7 +52,7 @@ All seven runs had the same conditions:
 
 - **The same prompt**, word for word. It is reproduced in full on the hub, in the original
   Spanish, and in [docs/experiment.md](docs/experiment.md).
-- **Maximum reasoning effort** on every orchestrator: `xhigh`, or DeepSeek's own ceiling.
+- **Maximum reasoning effort** on every orchestrator: `xhigh`, or DeepSeek-V4.1-Flash's own ceiling.
 - **No owner in the loop.** Each orchestrator planned the work, dispatched its workers and
   integrated the result on its own.
 - **No dependencies allowed.** Every build came out as plain HTML, CSS and JavaScript.
