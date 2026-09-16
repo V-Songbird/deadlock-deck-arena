@@ -40,11 +40,22 @@ body {
   font-family: var(--font);
   font-size: 14px;
   line-height: 1.45;
+  background: var(--void);
+  -webkit-text-size-adjust: 100%;
+}
+
+/* The glow and scanlines sit on a fixed layer of their own rather than on a
+   background-attachment: fixed body, which repaints the whole page on every
+   scroll and can leave a stale frame after a jump to an anchor. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
   background:
     radial-gradient(120% 60% at 50% 0%, #221b2c 0%, var(--void) 62%),
     repeating-linear-gradient(0deg, rgba(217, 205, 180, .014) 0 1px, transparent 1px 3px);
-  background-attachment: fixed;
-  -webkit-text-size-adjust: 100%;
 }
 
 /* ------------------------------------------------------------- language */
