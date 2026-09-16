@@ -1,6 +1,8 @@
 /* Reglas, torre procedural, reloj y guardado local. */
 'use strict';
 
+const T = window.DDLang.t;
+
 window.DDGame = class extends EventTarget {
   constructor() {
     super();
@@ -61,7 +63,7 @@ window.DDGame = class extends EventTarget {
     } catch (_) {
       if (this.storageAvailable) {
         this.storageAvailable = false;
-        this.notice('El navegador no permite guardar. Esta sesión sigue siendo jugable.', 'warning');
+        this.notice(T('El navegador no permite guardar. Esta sesión sigue siendo jugable.'), 'warning');
       }
     }
   }
@@ -106,7 +108,7 @@ window.DDGame = class extends EventTarget {
   guard() {
     if (!this.active()) return false;
     if (this.remaining() <= 0) {
-      this.finish(false, 'La torre se derrumbó. El reloj no concede segundas oportunidades; tu espíritu, sí.');
+      this.finish(false, T('La torre se derrumbó. El reloj no concede segundas oportunidades; tu espíritu, sí.'));
       return false;
     }
     return true;
@@ -128,9 +130,9 @@ window.DDGame = class extends EventTarget {
       log: [], origin: '', awarded: false
     };
     const bases = [
-      { name: 'El ensamblado', hp: 80, arm: 'scalpel', torso: 'sutures', head: 'skull', leg: 'legs' },
-      { name: 'El estibador', hp: 88, arm: 'bone', torso: 'iron', head: 'skull', leg: 'legs' },
-      { name: 'El hambriento', hp: 76, arm: 'bone', torso: 'sutures', head: 'jaw', leg: 'funeral' }
+      { name: T('El ensamblado'), hp: 80, arm: 'scalpel', torso: 'sutures', head: 'skull', leg: 'legs' },
+      { name: T('El estibador'), hp: 88, arm: 'bone', torso: 'iron', head: 'skull', leg: 'legs' },
+      { name: T('El hambriento'), hp: 76, arm: 'bone', torso: 'sutures', head: 'jaw', leg: 'funeral' }
     ];
     const base = this.meta.runs === 1 ? bases[0] : this.pick(bases);
     this.state.origin = base.name;
@@ -143,8 +145,8 @@ window.DDGame = class extends EventTarget {
     }
     this.state.map = this.generateFloor(0);
     this.reveal(12);
-    this.log('Has despertado. Encuentra la escalera al noreste. El reloj ya corre.');
-    this.log(`${base.name}: otro cuerpo para un espíritu que se niega a morir.`);
+    this.log(T('Has despertado. Encuentra la escalera al noreste. El reloj ya corre.'));
+    this.log(T('{name}: otro cuerpo para un espíritu que se niega a morir.', { name: base.name }));
     this.sound('revive');
     this.change();
   }
@@ -258,8 +260,8 @@ window.DDGame = class extends EventTarget {
       }
     }
     this.reveal(this.state.current);
-    this.log('¡El derrumbe ha cambiado los pasillos! La salida sigue siendo accesible.');
-    this.notice('La torre se retuerce. Los pasillos han cambiado.', 'warning');
+    this.log(T('¡El derrumbe ha cambiado los pasillos! La salida sigue siendo accesible.'));
+    this.notice(T('La torre se retuerce. Los pasillos han cambiado.'), 'warning');
     this.sound('collapse');
     this.emit('effect', { type: 'shake' });
     this.change();
@@ -275,7 +277,7 @@ window.DDGame = class extends EventTarget {
     if (!this.guard()) return;
     const s = this.state;
     if (s.phase !== 'explore') {
-      this.notice(s.phase === 'combat' ? 'Resuelve el combate para seguir explorando.' : 'Resuelve esta sala antes de avanzar.');
+      this.notice(s.phase === 'combat' ? T('Resuelve el combate para seguir explorando.') : T('Resuelve esta sala antes de avanzar.'));
       return;
     }
     if (!s.map[s.current].links.includes(index)) return;
@@ -313,7 +315,7 @@ window.DDGame = class extends EventTarget {
     s.stats.rooms++;
     this.reveal(12);
     for (const part of Object.values(s.body)) part.heat = Math.max(0, part.heat - 15);
-    this.log(`Has alcanzado ${DDData.floors[s.floor].name}.`);
+    this.log(T('Has alcanzado {name}.', { name: DDData.floors[s.floor].name }));
     this.sound('stairs');
     this.change();
   }
@@ -323,8 +325,8 @@ window.DDGame = class extends EventTarget {
     this.meta.blueprints.push(id);
     if (this.state) this.state.stats.discovered++;
     if (notify) {
-      this.notice(`Plano descubierto: ${DDData.parts[id].name}. Lo conservarás al morir.`, 'good');
-      this.log(`Plano permanente descubierto: ${DDData.parts[id].name}.`);
+      this.notice(T('Plano descubierto: {name}. Lo conservarás al morir.', { name: DDData.parts[id].name }), 'good');
+      this.log(T('Plano permanente descubierto: {name}.', { name: DDData.parts[id].name }));
     }
     return true;
   }
@@ -347,8 +349,8 @@ window.DDGame = class extends EventTarget {
     s.coolants++;
     const ids = s.floor === 0 ? ['claw', 'scalpel', 'spider', 'iron'] : ['cannon', 'pistons', 'boiler', 'oracle'];
     const item = this.addPart(this.pick(ids));
-    this.log(`Recoges ${amount} de chatarra, un suero, un refrigerante y ${DDData.parts[item.id].name}.`);
-    this.notice(`+${amount} chatarra · +1 suero · +1 refrigerante · injerto en la bolsa`, 'good');
+    this.log(T('Recoges {amount} de chatarra, un suero, un refrigerante y {name}.', { amount, name: DDData.parts[item.id].name }));
+    this.notice(T('+{amount} chatarra · +1 suero · +1 refrigerante · injerto en la bolsa', { amount }), 'good');
     room.resolved = true;
     s.phase = 'explore';
     this.sound('loot');
@@ -361,22 +363,22 @@ window.DDGame = class extends EventTarget {
     const room = s.map[s.current];
     if (s.phase !== 'event' || room.type !== 'trap' || room.resolved) return;
     if (choice === 'scraps') {
-      if (s.scraps < 5) { this.notice('Necesitas 5 de chatarra.'); return; }
+      if (s.scraps < 5) { this.notice(T('Necesitas 5 de chatarra.')); return; }
       s.scraps -= 5;
-      this.log('Desvías el vapor con una válvula improvisada.');
+      this.log(T('Desvías el vapor con una válvula improvisada.'));
     } else if (choice === 'legs') {
       const legs = ['legL', 'legR'].filter(key => s.body[key].id);
-      if (!legs.length) { this.notice('Necesitas al menos una pierna intacta.'); return; }
+      if (!legs.length) { this.notice(T('Necesitas al menos una pierna intacta.')); return; }
       for (const key of legs) this.stress(key, 30, 12);
-      this.log('Saltas sobre el vapor. Tus piernas absorben el esfuerzo.');
+      this.log(T('Saltas sobre el vapor. Tus piernas absorben el esfuerzo.'));
     } else if (choice === 'cross') {
       s.hp -= 9 + s.floor * 2;
-      this.log('Atraviesas el vapor. Tu carne paga el precio.');
+      this.log(T('Atraviesas el vapor. Tu carne paga el precio.'));
       this.sound('hurt');
     } else return;
     room.resolved = true;
     s.phase = 'explore';
-    if (s.hp <= 0) this.finish(false, 'El vapor ha deshecho tus últimas suturas.');
+    if (s.hp <= 0) this.finish(false, T('El vapor ha deshecho tus últimas suturas.'));
     else this.change();
   }
 
@@ -390,7 +392,7 @@ window.DDGame = class extends EventTarget {
     if (unknown.length) this.discover(this.pick(unknown));
     else {
       s.scraps += 10;
-      this.notice('Ya conoces estos planos. Recuperas 10 de chatarra.', 'good');
+      this.notice(T('Ya conoces estos planos. Recuperas 10 de chatarra.'), 'good');
     }
     room.resolved = true;
     s.phase = 'explore';
@@ -413,30 +415,30 @@ window.DDGame = class extends EventTarget {
   }
 
   craft(id) {
-    if (!this.guard() || !this.atWorkshop()) { this.notice('Solo puedes fabricar en una estación de injertos.'); return; }
+    if (!this.guard() || !this.atWorkshop()) { this.notice(T('Solo puedes fabricar en una estación de injertos.')); return; }
     const def = DDData.parts[id];
     if (!def || !this.meta.blueprints.includes(id) || (def.expansion && !this.meta.expansion)) return;
     const cost = 6 + def.tier * 5;
-    if (this.state.scraps < cost) { this.notice(`Necesitas ${cost} de chatarra.`, 'warning'); return; }
+    if (this.state.scraps < cost) { this.notice(T('Necesitas {cost} de chatarra.', { cost }), 'warning'); return; }
     this.state.scraps -= cost;
     this.addPart(id);
-    this.log(`Has fabricado ${def.name}. Está en tu bolsa de injertos.`);
-    this.notice(`${def.name} añadido a la bolsa.`, 'good');
+    this.log(T('Has fabricado {name}. Está en tu bolsa de injertos.', { name: def.name }));
+    this.notice(T('{name} añadido a la bolsa.', { name: def.name }), 'good');
     this.sound('graft');
     this.change();
   }
 
   repair() {
     if (!this.guard() || !this.atWorkshop()) return;
-    if (this.state.scraps < 8) { this.notice('Necesitas 8 de chatarra.'); return; }
+    if (this.state.scraps < 8) { this.notice(T('Necesitas 8 de chatarra.')); return; }
     const parts = Object.values(this.state.body).filter(p => p.id);
-    if (!parts.some(p => p.integrity < 100 || p.heat > 0)) { this.notice('Tus injertos intactos ya están en perfecto estado.'); return; }
+    if (!parts.some(p => p.integrity < 100 || p.heat > 0)) { this.notice(T('Tus injertos intactos ya están en perfecto estado.')); return; }
     this.state.scraps -= 8;
     for (const part of parts) {
       part.integrity = Math.min(100, part.integrity + 40);
       part.heat = 0;
     }
-    this.log('La estación repara 40 de integridad y enfría tus injertos intactos.');
+    this.log(T('La estación repara 40 de integridad y enfría tus injertos intactos.'));
     this.sound('graft');
     this.change();
   }
@@ -449,7 +451,7 @@ window.DDGame = class extends EventTarget {
     if (index < 0 || !slot) return;
     const item = s.inventory[index];
     if (DDData.parts[item.id].kind !== slot.kind) return;
-    if (s.phase === 'combat' && s.energy < 1) { this.notice('Injertar durante el combate cuesta 1 de energía.'); return; }
+    if (s.phase === 'combat' && s.energy < 1) { this.notice(T('Injertar durante el combate cuesta 1 de energía.')); return; }
     const old = s.body[slotId];
     s.inventory.splice(index, 1);
     if (old.id) s.inventory.push({ ...old, uid: ++s.uid });
@@ -463,8 +465,8 @@ window.DDGame = class extends EventTarget {
       }
     }
     s.stats.grafts++;
-    this.log(`Injertas ${DDData.parts[item.id].name} en ${slot.label.toLowerCase()}.`);
-    this.notice('Injerto conectado. Tu cuerpo y tu mazo han cambiado.', 'good');
+    this.log(T('Injertas {name} en {slot}.', { name: DDData.parts[item.id].name, slot: slot.label.toLowerCase() }));
+    this.notice(T('Injerto conectado. Tu cuerpo y tu mazo han cambiado.'), 'good');
     this.sound('graft');
     this.change();
   }
@@ -477,7 +479,7 @@ window.DDGame = class extends EventTarget {
     const item = s.inventory.splice(index, 1)[0];
     const amount = DDData.parts[item.id].tier * 3;
     s.scraps += amount;
-    this.notice(`Injerto desguazado: +${amount} de chatarra.`, 'good');
+    this.notice(T('Injerto desguazado: +{amount} de chatarra.', { amount }), 'good');
     this.sound('loot');
     this.change();
   }
@@ -486,16 +488,16 @@ window.DDGame = class extends EventTarget {
     if (!this.guard()) return;
     const s = this.state;
     if (kind === 'heal') {
-      if (s.potions <= 0) { this.notice('No te quedan sueros.'); return; }
-      if (s.hp >= s.maxHp) { this.notice('Tu vida ya está al máximo.'); return; }
+      if (s.potions <= 0) { this.notice(T('No te quedan sueros.')); return; }
+      if (s.hp >= s.maxHp) { this.notice(T('Tu vida ya está al máximo.')); return; }
       s.potions--;
       s.hp = Math.min(s.maxHp, s.hp + 28);
-      this.log('Suero vital: recuperas hasta 28 de vida.');
+      this.log(T('Suero vital: recuperas hasta 28 de vida.'));
       this.sound('heal');
     } else if (kind === 'cool') {
-      if (s.coolants <= 0) { this.notice('No te queda refrigerante.'); return; }
+      if (s.coolants <= 0) { this.notice(T('No te queda refrigerante.')); return; }
       if (!Object.values(s.body).some(p => p.id && (p.heat > 0 || p.integrity < 100))) {
-        this.notice('No necesitas enfriar ni reparar ningún injerto.'); return;
+        this.notice(T('No necesitas enfriar ni reparar ningún injerto.')); return;
       }
       s.coolants--;
       for (const part of Object.values(s.body)) {
@@ -503,7 +505,7 @@ window.DDGame = class extends EventTarget {
         part.heat = Math.max(0, part.heat - 38);
         part.integrity = Math.min(100, part.integrity + 12);
       }
-      this.log('Refrigerante: −38° y +12 de integridad en todos los injertos intactos.');
+      this.log(T('Refrigerante: −38° y +12 de integridad en todos los injertos intactos.'));
       this.sound('cool');
     } else return;
     this.change();
@@ -538,8 +540,8 @@ window.DDGame = class extends EventTarget {
       this.state.stats.broken++;
       this.purgeSlot(slotId);
       if (this.state.phase === 'combat') this.state.draw.push(...this.cardsForSlot(slotId));
-      this.notice(`¡${name} se ha roto! Sus cartas desaparecen. Injerta un reemplazo.`, 'danger');
-      this.log(`${name} se rompe. Solo queda un muñón.`);
+      this.notice(T('¡{name} se ha roto! Sus cartas desaparecen. Injerta un reemplazo.', { name }), 'danger');
+      this.log(T('{name} se rompe. Solo queda un muñón.', { name }));
       this.sound('break');
       this.emit('effect', { type: 'break', slot: slotId });
     }
@@ -562,7 +564,7 @@ window.DDGame = class extends EventTarget {
     s.discard = [];
     s.draw = this.shuffle(this.fullDeck());
     this.drawCards(5);
-    this.log(`${def.name} te bloquea el paso. La intención enemiga está a la vista.`);
+    this.log(T('{name} te bloquea el paso. La intención enemiga está a la vista.', { name: def.name }));
     this.sound(boss ? 'boss' : 'combat');
   }
 
@@ -586,10 +588,10 @@ window.DDGame = class extends EventTarget {
     const kind = def.pattern[e.move % def.pattern.length];
     const base = def.attack + (def.boss ? 0 : s.floor * 2) + (this.remaining() < 120000 ? 2 : 0);
     const damage = Math.floor(base * (kind === 'fury' ? 1.6 : 1) * (e.weak > 0 ? 0.6 : 1));
-    if (e.stun > 0) return { kind: 'stunned', label: 'Aturdido · no actuará', value: 0, icon: 'bolt' };
-    if (kind === 'guard') return { kind, label: 'Se protegerá · 12 defensa', value: 12, icon: 'shield' };
-    if (kind === 'heat') return { kind, label: 'Vapor · +22° a un injerto', value: 22, icon: 'flame' };
-    return { kind, label: `${kind === 'fury' ? 'Golpe brutal' : 'Atacará'} · ${damage} de daño`, value: damage, icon: 'blade' };
+    if (e.stun > 0) return { kind: 'stunned', label: T('Aturdido · no actuará'), value: 0, icon: 'bolt' };
+    if (kind === 'guard') return { kind, label: T('Se protegerá · 12 defensa'), value: 12, icon: 'shield' };
+    if (kind === 'heat') return { kind, label: T('Vapor · +22° a un injerto'), value: 22, icon: 'flame' };
+    return { kind, label: T('{move} · {damage} de daño', { move: T(kind === 'fury' ? 'Golpe brutal' : 'Atacará'), damage }), value: damage, icon: 'blade' };
   }
 
   play(uid) {
@@ -600,7 +602,7 @@ window.DDGame = class extends EventTarget {
     const card = s.hand[index];
     if (s.body[card.slot].id !== card.part) { this.purgeSlot(card.slot); this.change(); return; }
     const def = DDData.cards[card.id];
-    if (def.cost > s.energy) { this.notice('No tienes suficiente energía. Termina el turno para recuperar 3.'); return; }
+    if (def.cost > s.energy) { this.notice(T('No tienes suficiente energía. Termina el turno para recuperar 3.')); return; }
     s.energy -= def.cost;
     s.hand.splice(index, 1);
     if (def.damage) {
@@ -639,34 +641,34 @@ window.DDGame = class extends EventTarget {
     if (e.burn > 0) {
       e.hp = Math.max(0, e.hp - e.burn);
       this.emit('effect', { type: 'hit', target: 'enemy', amount: e.burn });
-      this.log(`La quemadura inflige ${e.burn} de daño.`);
+      this.log(T('La quemadura inflige {amount} de daño.', { amount: e.burn }));
       e.burn = Math.max(0, e.burn - 1);
       if (e.hp <= 0) { this.victory(); this.change(); return; }
     }
     const intent = this.intent();
     if (intent.kind === 'stunned') {
-      this.log('El enemigo está aturdido. Su intención queda cancelada.');
+      this.log(T('El enemigo está aturdido. Su intención queda cancelada.'));
       e.stun = 0;
     } else if (intent.kind === 'guard') {
       e.block = Math.min(24, e.block + intent.value);
-      this.log('El enemigo se protege con 12 de defensa.');
+      this.log(T('El enemigo se protege con 12 de defensa.'));
       this.sound('guard');
     } else if (intent.kind === 'heat') {
       const slots = DDData.slots.filter(slot => s.body[slot.id].id);
       if (slots.length) {
         const slot = this.pick(slots);
         this.stress(slot.id, intent.value, 3);
-        this.log(`Una descarga de vapor recalienta tu ${slot.label.toLowerCase()}.`);
+        this.log(T('Una descarga de vapor recalienta tu {slot}.', { slot: slot.label.toLowerCase() }));
         this.sound('burn');
       }
     } else {
       const damage = Math.max(0, intent.value - s.block);
       s.hp = Math.max(0, s.hp - damage);
-      this.log(`El enemigo inflige ${damage} de daño; tu defensa absorbe ${Math.min(s.block, intent.value)}.`);
+      this.log(T('El enemigo inflige {damage} de daño; tu defensa absorbe {blocked}.', { damage, blocked: Math.min(s.block, intent.value) }));
       this.emit('effect', { type: 'hit', target: 'player', amount: damage });
       this.sound(damage ? 'hurt' : 'guard');
     }
-    if (s.hp <= 0) { this.finish(false, 'Tus suturas han cedido. La carne se queda; el espíritu continúa.'); return; }
+    if (s.hp <= 0) { this.finish(false, T('Tus suturas han cedido. La carne se queda; el espíritu continúa.')); return; }
     e.move++;
     e.weak = Math.max(0, e.weak - 1);
     for (const part of Object.values(s.body)) part.heat = Math.max(0, part.heat - 12);
@@ -691,7 +693,7 @@ window.DDGame = class extends EventTarget {
     s.reward = { id: item.id, uid: item.uid, scraps: amount, enemy: def.name, boss: Boolean(def.boss) };
     s.phase = 'loot';
     s.block = 0;
-    this.log(`${def.name} cae. Cosechas ${DDData.parts[item.id].name}, ${amount} de chatarra y 5 de vida.`);
+    this.log(T('{enemy} cae. Cosechas {name}, {amount} de chatarra y 5 de vida.', { enemy: def.name, name: DDData.parts[item.id].name, amount }));
     this.sound('victory');
   }
 
@@ -708,7 +710,7 @@ window.DDGame = class extends EventTarget {
     if (!this.guard()) return;
     const s = this.state;
     if (s.floor !== 2 || s.current !== 3 || !s.map[3].resolved || s.phase !== 'explore') return;
-    this.finish(true, 'Sales de la torre mientras el cielo se llena de ceniza. Este cuerpo, por fin, te pertenece.');
+    this.finish(true, T('Sales de la torre mientras el cielo se llena de ceniza. Este cuerpo, por fin, te pertenece.'));
   }
 
   finish(won, reason) {
@@ -735,20 +737,20 @@ window.DDGame = class extends EventTarget {
   buy(id) {
     if (id === 'expansion') {
       if (this.meta.expansion) return;
-      if (this.meta.souls < 30) { this.notice('Necesitas 30 ecos. Los obtienes al terminar cada intento.'); return; }
+      if (this.meta.souls < 30) { this.notice(T('Necesitas 30 ecos. Los obtienes al terminar cada intento.')); return; }
       this.meta.souls -= 30;
       this.meta.expansion = true;
-      this.notice('Ala prohibida abierta. Su archivista puede aparecer en los próximos encuentros.', 'good');
+      this.notice(T('Ala prohibida abierta. Su archivista puede aparecer en los próximos encuentros.'), 'good');
     } else {
       const skin = DDData.skins[id];
       if (!skin) return;
       if (!this.meta.skins.includes(id)) {
-        if (this.meta.souls < skin.cost) { this.notice(`Necesitas ${skin.cost} ecos.`); return; }
+        if (this.meta.souls < skin.cost) { this.notice(T('Necesitas {cost} ecos.', { cost: skin.cost })); return; }
         this.meta.souls -= skin.cost;
         this.meta.skins.push(id);
       }
       this.meta.skin = id;
-      this.notice(`Apariencia equipada: ${skin.name}.`, 'good');
+      this.notice(T('Apariencia equipada: {name}.', { name: skin.name }), 'good');
     }
     this.sound('discover');
     this.change();

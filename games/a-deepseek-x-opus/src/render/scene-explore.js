@@ -485,10 +485,10 @@
     var w = 320, h = 34, x = (VW - w) / 2, y = 150;
     DD.Pixel.dim(x, y, w, h, 0.72 * pulse, '#1a0308');
     DD.Pixel.frame(x, y, w, h, DD.C.bloodHi);
-    DD.Pixel.text('LA TORRE SE REORDENA', VW / 2, y + 16, {
+    DD.Pixel.text(DD.t('LA TORRE SE REORDENA'), VW / 2, y + 16, {
       scale: 2, align: 'center', color: DD.C.bloodHi
     });
-    DD.Pixel.text('no te quedes quieto', VW / 2, y + 30, {
+    DD.Pixel.text(DD.t('no te quedes quieto'), VW / 2, y + 30, {
       align: 'center', color: DD.C.textDim
     });
   }
@@ -541,7 +541,7 @@
     var map = st && st.map;
     DD.Pixel.panel(x, y, w, h, { alpha: 0.86 });
     if (!map || !map.tiles || !map.w || !map.h) {
-      DD.Pixel.text('sin mapa', x + w / 2, y + h / 2, { align: 'center', color: DD.C.textFaint });
+      DD.Pixel.text(DD.t('sin mapa'), x + w / 2, y + h / 2, { align: 'center', color: DD.C.textFaint });
       return;
     }
     ensureSeen(st, map);
@@ -634,7 +634,7 @@
     var tapped = I.button('vact', act.x, act.y, act.w, act.h);
     var ast = I.btns && I.btns.vact;
     padButton(act, !!(ast && (ast.held || ast.active)));
-    DD.Pixel.text('ACTUAR', act.x + act.w / 2, act.y + act.h / 2 + 3, {
+    DD.Pixel.text(DD.t('ACTUAR'), act.x + act.w / 2, act.y + act.h / 2 + 3, {
       align: 'center', scale: 1, color: DD.C.text
     });
     if (tapped) {
@@ -649,15 +649,15 @@
   function prompt(st, map, px, py) {
     var text = null;
     var id = tileAt(map, px, py);
-    if (id === DD.TILE_STAIRS) text = 'E - Subir';
-    else if (id === DD.TILE_EXIT) text = 'E - ESCAPAR';
+    if (id === DD.TILE_STAIRS) text = DD.t('E - Subir');
+    else if (id === DD.TILE_EXIT) text = DD.t('E - ESCAPAR');
     else {
       /* DD.Explore lets an altar be used from any adjacent tile. */
       var list = map.entities;
       for (var i = 0; list && i < list.length; i++) {
         var e = list[i];
         if (e && !e.dead && e.kind === 'altar' &&
-            Math.abs(e.x - px) <= 1 && Math.abs(e.y - py) <= 1) { text = 'E - Usar altar'; break; }
+            Math.abs(e.x - px) <= 1 && Math.abs(e.y - py) <= 1) { text = DD.t('E - Usar altar'); break; }
       }
     }
     if (!text) return;
@@ -670,7 +670,7 @@
   function empty() {
     DD.Pixel.rect(0, 0, VW, VH, DD.C.void);
     edges(DD.C.void, 0.6);
-    DD.Pixel.text('La torre aún no existe.', VW / 2, VH / 2, {
+    DD.Pixel.text(DD.t('La torre aún no existe.'), VW / 2, VH / 2, {
       align: 'center', color: DD.C.textFaint
     });
   }

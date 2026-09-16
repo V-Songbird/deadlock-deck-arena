@@ -10,7 +10,7 @@
   DD.Data.traps = [
     {
       id: 'spike',
-      name: 'Pinchos Oxidados',
+      name: DD.t('Pinchos Oxidados'),
       sprite: 'trap_spike',
       spriteOn: 'trap_spike_on',
       minFloor: 0,
@@ -20,11 +20,11 @@
       cooldown: 2.0,
       telegraph: 0.45,
       destructible: true,
-      flavor: 'Tela de araña, mierda y tétanos. Sobre todo tétanos.'
+      flavor: DD.t('Tela de araña, mierda y tétanos. Sobre todo tétanos.')
     },
     {
       id: 'bone_spike',
-      name: 'Pinchos de Osario',
+      name: DD.t('Pinchos de Osario'),
       sprite: 'trap_spike',
       spriteOn: 'trap_spike_on',
       minFloor: 1,
@@ -34,11 +34,11 @@
       cooldown: 3.0,
       telegraph: 0.6,
       destructible: false,
-      flavor: 'Fémures afilados hacia arriba. Alguien los colocó a propósito.'
+      flavor: DD.t('Fémures afilados hacia arriba. Alguien los colocó a propósito.')
     },
     {
       id: 'steam_vent',
-      name: 'Rejilla de Vapor',
+      name: DD.t('Rejilla de Vapor'),
       sprite: 'trap_vent',
       spriteOn: 'trap_vent_on',
       minFloor: 0,
@@ -48,11 +48,11 @@
       cooldown: 3.5,
       telegraph: 0.4,
       destructible: true,
-      flavor: 'La caldera respira por aquí. No hace daño: solo hierve lo que llevas puesto.'
+      flavor: DD.t('La caldera respira por aquí. No hace daño: solo hierve lo que llevas puesto.')
     },
     {
       id: 'frost_vent',
-      name: 'Rejilla de Escarcha',
+      name: DD.t('Rejilla de Escarcha'),
       sprite: 'trap_vent',
       spriteOn: 'trap_vent_on',
       minFloor: 1,
@@ -62,11 +62,11 @@
       cooldown: 2.8,
       telegraph: 0.5,
       destructible: false,
-      flavor: 'Un tubo de criogenia roto. El frío no mata: agrieta.'
+      flavor: DD.t('Un tubo de criogenia roto. El frío no mata: agrieta.')
     },
     {
       id: 'acid_vat',
-      name: 'Cuba de Ácido',
+      name: DD.t('Cuba de Ácido'),
       sprite: 'trap_acid',
       spriteOn: 'trap_acid_on',
       minFloor: 1,
@@ -76,11 +76,11 @@
       cooldown: 3.0,
       telegraph: 0.6,
       destructible: true,
-      flavor: 'Rebosa cada pocos segundos y se come el borde de la losa.'
+      flavor: DD.t('Rebosa cada pocos segundos y se come el borde de la losa.')
     },
     {
       id: 'acid_jet',
-      name: 'Chorro de Ácido',
+      name: DD.t('Chorro de Ácido'),
       sprite: 'trap_acid',
       spriteOn: 'trap_acid_on',
       minFloor: 2,
@@ -90,7 +90,7 @@
       cooldown: 4.0,
       telegraph: 0.75,
       destructible: false,
-      flavor: 'La válvula de la planta alta. Cuando salta, sale todo.'
+      flavor: DD.t('La válvula de la planta alta. Cuando salta, sale todo.')
     }
   ];
 

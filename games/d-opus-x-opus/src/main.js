@@ -3,6 +3,7 @@ import { initCanvas, toGame, clear, W, H, PAL } from './render.js';
 import { state, loadMeta, toast, RUN_SECONDS } from './state.js';
 import { shuffleTower } from './tower.js';
 import { audio } from './audio.js';
+import { t } from './lang.js';
 import * as explore from './explore.js';
 import * as combat from './combat.js';
 import * as ui from './ui.js';
@@ -11,6 +12,11 @@ const canvas = document.getElementById('game');
 const ctx = initCanvas(canvas);
 
 loadMeta();
+
+// index.html's own player-facing text goes through the language layer too.
+document.title = t('Deadlock Deck: El Reloj Anatómico');
+const hint = document.getElementById('hint');
+if (hint) hint.textContent = t('RATÓN / 1-6 MOVER · F BAJAR · ESPACIO FIN DE TURNO · M SILENCIO');
 
 // ---------------------------------------------------------------- input pump
 
@@ -52,7 +58,7 @@ window.addEventListener('keydown', (ev) => {
   if (!state.input.keys.has(k)) state.input.pressed.add(k);
   state.input.keys.add(k);
   audio.init();
-  if (k === 'm') toast(audio.toggleMute() ? 'SILENCIO' : 'SONIDO');
+  if (k === 'm') toast(t(audio.toggleMute() ? 'SILENCIO' : 'SONIDO'));
 });
 window.addEventListener('keyup', (ev) => {
   const k = ev.key.length === 1 ? ev.key.toLowerCase() : ev.key;
@@ -78,7 +84,7 @@ function tickClock(dt) {
   if (run.timeLeft <= run.shuffleAt && run.timeLeft > 0) {
     run.shuffleAt -= 45;
     shuffleTower(run.tower, run.rng, run.roomId);
-    toast('LA TORRE SE REORDENA', 2.6);
+    toast(t('LA TORRE SE REORDENA'), 2.6);
     audio.sfx('trap');
   }
 

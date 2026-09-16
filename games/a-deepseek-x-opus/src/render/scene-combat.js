@@ -429,29 +429,29 @@
     if (!e || !e.k) return '';
     var v = num(e.v);
     switch (e.k) {
-      case 'damage': return v + (e.all ? ' a todos' : ' daño');
-      case 'block': return v + ' bloq';
-      case 'draw': return '+' + v + ' cartas';
-      case 'energy': return '+' + v + ' energ.';
-      case 'heal': return '+' + v + ' vida';
-      case 'heat': return v + ' calor';
-      case 'cool': return '-' + v + ' calor';
-      case 'integrity': return '+' + v + ' integ.';
-      case 'bleed': return v + ' sangr.';
-      case 'weak': return v + ' débil';
-      case 'vulnerable': return v + ' vuln.';
-      case 'frail': return v + ' frágil';
-      case 'poison': return v + ' veneno';
-      case 'stun': return v + ' aturde';
-      case 'selfDamage': return '-' + v + ' vida';
-      case 'lifesteal': return '+' + v + ' robo';
-      case 'residue': return '+' + v + ' resid.';
-      case 'discardRandom': return 'desc. ' + v;
-      case 'exhaustSelf': return 'agota';
-      case 'gainBlockPerHeat': return 'bloq/calor';
-      case 'damagePerHeat': return 'daño/calor';
-      case 'damagePerMissingLimb': return 'daño/muñón';
-      case 'scavenge': return 'botín';
+      case 'damage': return v + (e.all ? DD.t(' a todos') : DD.t(' daño'));
+      case 'block': return v + DD.t(' bloq');
+      case 'draw': return '+' + v + DD.t(' cartas');
+      case 'energy': return '+' + v + DD.t(' energ.');
+      case 'heal': return '+' + v + DD.t(' vida');
+      case 'heat': return v + DD.t(' calor');
+      case 'cool': return '-' + v + DD.t(' calor');
+      case 'integrity': return '+' + v + DD.t(' integ.');
+      case 'bleed': return v + DD.t(' sangr.');
+      case 'weak': return v + DD.t(' débil');
+      case 'vulnerable': return v + DD.t(' vuln.');
+      case 'frail': return v + DD.t(' frágil');
+      case 'poison': return v + DD.t(' veneno');
+      case 'stun': return v + DD.t(' aturde');
+      case 'selfDamage': return '-' + v + DD.t(' vida');
+      case 'lifesteal': return '+' + v + DD.t(' robo');
+      case 'residue': return '+' + v + DD.t(' resid.');
+      case 'discardRandom': return DD.t('desc. ') + v;
+      case 'exhaustSelf': return DD.t('agota');
+      case 'gainBlockPerHeat': return DD.t('bloq/calor');
+      case 'damagePerHeat': return DD.t('daño/calor');
+      case 'damagePerMissingLimb': return DD.t('daño/muñón');
+      case 'scavenge': return DD.t('botín');
     }
     return '';
   }
@@ -591,8 +591,8 @@
     }
 
     /* draw and discard piles on the right, outside the hand's block */
-    pile(L.pileX, num((e.drawPile || []).length), 'Robo', 'left');
-    pile(L.pileX2, num((e.discardPile || []).length), 'Descarte', 'right');
+    pile(L.pileX, num((e.drawPile || []).length), DD.t('Robo'), 'left');
+    pile(L.pileX2, num((e.discardPile || []).length), DD.t('Descarte'), 'right');
   }
 
   function pile(x, count, label, align) {

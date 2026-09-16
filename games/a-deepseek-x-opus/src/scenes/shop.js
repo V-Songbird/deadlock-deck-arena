@@ -141,7 +141,7 @@
       }
       U.shop(selected, scroll);
       if (DD.Pixel && DD.Pixel.text) {
-        DD.Pixel.text('ENTER: elegir - ESC: volver', HEAD_HINT.x, HEAD_HINT.y, {
+        DD.Pixel.text(DD.t('ENTER: elegir - ESC: volver'), HEAD_HINT.x, HEAD_HINT.y, {
           align: 'center', color: DD.C.textDim
         });
       }

@@ -6,9 +6,9 @@
 
   var AUTO = 9;                 // seconds the card lives before it advances alone
 
-  var WARN_A ='Aviso: horror corporal. Aquí se cosen miembros y se desmontan cuerpos.';
-  var WARN_B = 'Tienes seis minutos para escapar de la torre. El reloj no se detiene.';
-  var PROMPT = 'PULSA CUALQUIER TECLA';
+  var WARN_A = DD.t('Aviso: horror corporal. Aquí se cosen miembros y se desmontan cuerpos.');
+  var WARN_B = DD.t('Tienes seis minutos para escapar de la torre. El reloj no se detiene.');
+  var PROMPT = DD.t('PULSA CUALQUIER TECLA');
 
   var t = 0;
   var done = false;

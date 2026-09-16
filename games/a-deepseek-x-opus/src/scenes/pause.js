@@ -4,7 +4,7 @@
   'use strict';
   var DD = window.DD;
 
-  var ITEMS = ['CONTINUAR', 'CÓDIGO ANATÓMICO', 'ABANDONAR LA TORRE'];
+  var ITEMS = [DD.t('CONTINUAR'), DD.t('CÓDIGO ANATÓMICO'), DD.t('ABANDONAR LA TORRE')];
   var KEYS = ['Escape', 'Backspace', 'Enter', 'ArrowUp', 'ArrowDown', 'KeyW', 'KeyS'];
 
   /* Mirrors DD.View.ui.pause: the panel, and the row box DD.View.ui.menu draws
@@ -108,7 +108,7 @@
       var s = DD.Run && DD.Run.state;
       var left = (s && DD.clock) ? DD.clock(s.timeLeft) : '--:--';
       DD.Pixel.dim(PANEL.x, CLOCK_Y, PANEL.w, 16, 0.8, DD.C.void);
-      DD.Pixel.text('El reloj no se detiene - quedan ' + left, DD.VW / 2, CLOCK_Y + 5, {
+      DD.Pixel.text(DD.t('El reloj no se detiene - quedan ') + left, DD.VW / 2, CLOCK_Y + 5, {
         align: 'center', color: DD.C.gold
       });
     },

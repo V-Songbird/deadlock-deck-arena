@@ -776,110 +776,717 @@ kbd { font: 9px/1 var(--sans); color: var(--muted); padding: 4px 5px; border: 1p
 
 </style>
   <script>
+/* Language layer. Spanish is the source text; English lives in the dictionary. */
+'use strict';
+
+window.DDLang = (() => {
+  const KEY = 'dd-lang';
+
+  /* Every player-facing Spanish literal in the build, mapped to English.
+     Placeholders in {braces} are filled by the caller, so numbers and names survive. */
+  const dictionary = {
+    /* data.js — slots */
+    'Cabeza': 'Head',
+    'Torso': 'Torso',
+    'Brazo izquierdo': 'Left arm',
+    'Brazo I': 'Arm L',
+    'Brazo derecho': 'Right arm',
+    'Brazo D': 'Arm R',
+    'Pierna izquierda': 'Left leg',
+    'Pierna I': 'Leg L',
+    'Pierna derecha': 'Right leg',
+    'Pierna D': 'Leg R',
+
+    /* data.js — cards */
+    'Lucidez prestada': 'Borrowed Lucidity',
+    'Roba 2 cartas.': 'Draw 2 cards.',
+    'Susurro impuro': 'Impure Whisper',
+    '7 de daño. Debilita 1 turno.': 'Deal 7 damage. Weaken for 1 turn.',
+    'Diagnóstico': 'Diagnosis',
+    'Roba 2 cartas. Recupera 5 de vida.': 'Draw 2 cards. Heal 5 health.',
+    'Incisión precisa': 'Precise Incision',
+    '12 de daño. Ignora la defensa.': 'Deal 12 damage. Ignores block.',
+    'Mal augurio': 'Ill Omen',
+    '15 de daño. Cancela la intención enemiga.': 'Deal 15 damage. Cancels the enemy intent.',
+    'Visión imposible': 'Impossible Vision',
+    'Roba 3 cartas.': 'Draw 3 cards.',
+    'Hambre de tumba': 'Grave Hunger',
+    '11 de daño. Recupera 4 de vida.': 'Deal 11 damage. Heal 4 health.',
+    'Grito sin lengua': 'Tongueless Scream',
+    'Debilita 2 turnos. Roba 1 carta.': 'Weaken for 2 turns. Draw 1 card.',
+    'Sutura de urgencia': 'Emergency Suture',
+    'Recupera 9 de vida.': 'Heal 9 health.',
+    'Costillas cerradas': 'Closed Ribs',
+    'Obtén 11 de defensa.': 'Gain 11 block.',
+    'Combustión interna': 'Internal Combustion',
+    '25 de daño. Aplica 3 de quemadura.': 'Deal 25 damage. Apply 3 burn.',
+    'Válvula de escape': 'Escape Valve',
+    'Enfría todos tus injertos 28°.': 'Cool all your grafts by 28°.',
+    'Bastión de hierro': 'Iron Bastion',
+    'Obtén 19 de defensa.': 'Gain 19 block.',
+    'Retroceso blindado': 'Armoured Recoil',
+    '8 de daño. Obtén 9 de defensa.': 'Deal 8 damage. Gain 9 block.',
+    'Sangre de mercurio': 'Mercury Blood',
+    'Recupera 15 de vida.': 'Heal 15 health.',
+    'Segundo corazón': 'Second Heart',
+    'Obtén 2 de energía.': 'Gain 2 energy.',
+    'Tajo de hueso': 'Bone Slash',
+    '10 de daño.': 'Deal 10 damage.',
+    'Fractura expuesta': 'Open Fracture',
+    '19 de daño.': 'Deal 19 damage.',
+    'Corte quirúrgico': 'Surgical Cut',
+    '13 de daño.': 'Deal 13 damage.',
+    'Disección viva': 'Live Dissection',
+    '21 de daño. Debilita 1 turno.': 'Deal 21 damage. Weaken for 1 turn.',
+    'Desgarro necrótico': 'Necrotic Tear',
+    '10 de daño. Aplica 4 de quemadura.': 'Deal 10 damage. Apply 4 burn.',
+    'Cosecha carmesí': 'Crimson Harvest',
+    '19 de daño. Recupera 7 de vida.': 'Deal 19 damage. Heal 7 health.',
+    'Descarga galvánica': 'Galvanic Discharge',
+    '26 de daño.': 'Deal 26 damage.',
+    'Arco paralizante': 'Paralysing Arc',
+    '8 de daño. Cancela la intención enemiga.': 'Deal 8 damage. Cancels the enemy intent.',
+    'Puño de pistón': 'Piston Fist',
+    '16 de daño.': 'Deal 16 damage.',
+    'Prensa hidráulica': 'Hydraulic Press',
+    '43 de daño. Un precio terrible.': 'Deal 43 damage. A terrible price.',
+    'Patada de cadáver': 'Corpse Kick',
+    '8 de daño. Obtén 3 de defensa.': 'Deal 8 damage. Gain 3 block.',
+    'Paso torcido': 'Crooked Step',
+    'Obtén 10 de defensa.': 'Gain 10 block.',
+    'Salto arácnido': 'Spider Leap',
+    '9 de daño. Obtén 9 de defensa.': 'Deal 9 damage. Gain 9 block.',
+    'Seda de sutura': 'Suture Silk',
+    'Rodilla de acero': 'Steel Knee',
+    '24 de daño.': 'Deal 24 damage.',
+    'Inercia prohibida': 'Forbidden Momentum',
+    'Obtén 1 de energía. Roba 1 carta.': 'Gain 1 energy. Draw 1 card.',
+    'Quietud de mármol': 'Marble Stillness',
+    '15 de defensa. Enfría todos los injertos 10°.': '15 block. Cool all grafts by 10°.',
+    'Paso entre tumbas': 'Step Among Graves',
+    '6 de defensa. Roba 2 cartas.': '6 block. Draw 2 cards.',
+    'Liturgia de ceniza': 'Liturgy of Ash',
+    '18 de daño. Aplica 8 de quemadura.': 'Deal 18 damage. Apply 8 burn.',
+    'Coro de los muertos': 'Choir of the Dead',
+    'Roba 2 cartas. Obtén 1 de energía.': 'Draw 2 cards. Gain 1 energy.',
+    'Eco del espíritu': 'Echo of the Spirit',
+    '3 de daño. Necesitas una cabeza.': 'Deal 3 damage. You need a head.',
+    'Último latido': 'Last Heartbeat',
+    '4 de defensa. Necesitas un torso.': '4 block. You need a torso.',
+    'Golpe de muñón': 'Stump Blow',
+    '4 de daño. Necesitas un brazo.': 'Deal 4 damage. You need an arm.',
+    'Arrastrarse': 'Crawl',
+    '3 de defensa. Necesitas una pierna.': '3 block. You need a leg.',
+
+    /* data.js — parts */
+    'Cráneo cosido': 'Stitched Skull',
+    'Alguien dejó un recuerdo dentro.': 'Someone left a memory inside.',
+    'Máscara del cirujano': "Surgeon's Mask",
+    'El último rostro que vieron sus pacientes.': 'The last face his patients ever saw.',
+    'Oráculo de vidrio': 'Glass Oracle',
+    'Ve futuros que no deberían existir.': 'It sees futures that should not exist.',
+    'Mandíbula de fosa': 'Grave-Pit Jaw',
+    'La muerte no le quitó el apetito.': 'Death did not take its appetite.',
+    'Torso de suturas': 'Sutured Torso',
+    'Seis vidas. Una mala costura.': 'Six lives. One bad seam.',
+    'Caldera torácica': 'Thoracic Boiler',
+    'La llama ocupa el lugar del corazón.': 'Flame sits where the heart should be.',
+    'Caja de hierro': 'Iron Cage',
+    'Ningún pulmón. Ninguna duda.': 'No lungs. No doubts.',
+    'Corazón de mercurio': 'Mercury Heart',
+    'Una segunda vida, a interés compuesto.': 'A second life, at compound interest.',
+    'Brazo de hueso': 'Bone Arm',
+    'Todavía recuerda cómo romper cosas.': 'It still remembers how to break things.',
+    'Brazo de bisturís': 'Scalpel Arm',
+    'La precisión también puede ser crueldad.': 'Precision can be cruelty too.',
+    'Garra de la morgue': 'Morgue Claw',
+    'Nada que toque vuelve a estar entero.': 'Nothing it touches is ever whole again.',
+    'Cañón galvánico': 'Galvanic Cannon',
+    'Un trueno encerrado en carne.': 'Thunder locked inside flesh.',
+    'Puño hidráulico': 'Hydraulic Fist',
+    'Diseñado para trabajar. Adaptado para sobrevivir.': 'Designed to work. Adapted to survive.',
+    'Pierna reanimada': 'Reanimated Leg',
+    'Un paso más lejos de la mesa.': 'One step further from the table.',
+    'Zanca arácnida': 'Spider Shank',
+    'Demasiadas articulaciones. Ningún tropiezo.': 'Too many joints. Never a stumble.',
+    'Pierna de pistón': 'Piston Leg',
+    'El hierro tampoco quiere arder.': 'Iron has no wish to burn either.',
+    'Pie funerario': 'Funeral Foot',
+    'Aprendió a caminar entre los muertos.': 'It learned to walk among the dead.',
+    'Cráneo de ceniza': 'Ash Skull',
+    'El archivo prohibido habla a través de ti.': 'The forbidden archive speaks through you.',
+
+    /* data.js — enemies */
+    'Celador de la morgue': 'Morgue Orderly',
+    'ABOMINACIÓN': 'ABOMINATION',
+    'Cirujano apóstata': 'Apostate Surgeon',
+    'CIENTÍFICO CORRUPTO': 'CORRUPTED SCIENTIST',
+    'El mal cosido': 'The Badly Stitched',
+    'Custodio de la caldera': 'Boiler Custodian',
+    'AUTÓMATA ALQUÍMICO': 'ALCHEMICAL AUTOMATON',
+    'Anatomista sin ojos': 'Eyeless Anatomist',
+    'Archivista de ceniza': 'Ash Archivist',
+    'ALA PROHIBIDA': 'FORBIDDEN WING',
+    'El Rector de Carne': 'The Rector of Flesh',
+    'GUARDIÁN DE LA SALIDA': 'GUARDIAN OF THE EXIT',
+
+    /* data.js — floors and rooms */
+    'Laboratorios de sutura': 'Suture Laboratories',
+    'Laboratorio': 'Laboratory',
+    'Donde la muerte es apenas un procedimiento.': 'Where death is barely a procedure.',
+    'Fundición de los réprobos': 'Foundry of the Damned',
+    'Fundición': 'Foundry',
+    'El humo ya conoce tu nombre.': 'The smoke already knows your name.',
+    'Observatorio del Rector': "The Rector's Observatory",
+    'Observatorio': 'Observatory',
+    'La última puerta todavía respira.': 'The last door is still breathing.',
+    'Mesa de disección': 'Dissection Table',
+    'Pasillo de ceniza': 'Ash Corridor',
+    'Sala de contención': 'Containment Room',
+    'Suministros abandonados': 'Abandoned Supplies',
+    'Estación de injertos': 'Graft Station',
+    'Conducto de vapor': 'Steam Duct',
+    'Escalera de caracol': 'Spiral Staircase',
+    'El umbral del Rector': "The Rector's Threshold",
+    'Archivo anatómico': 'Anatomical Archive',
+
+    /* data.js — skins */
+    'Piel de suturas': 'Suture Skin',
+    'Carne prestada. Puntadas imperfectas.': 'Borrowed flesh. Imperfect stitches.',
+    'Óxido y cobre': 'Rust and Copper',
+    'Pátina cobriza para tu nuevo cuerpo.': 'A coppery patina for your new body.',
+    'Espíritu de éter': 'Ether Spirit',
+    'Un resplandor espectral entre las costuras.': 'A spectral glow between the seams.',
+    'Luto carmesí': 'Crimson Mourning',
+    'El color de lo que no has olvidado.': 'The colour of what you have not forgotten.',
+
+    /* engine.js */
+    'El navegador no permite guardar. Esta sesión sigue siendo jugable.': 'This browser will not allow saving. This session is still playable.',
+    'La torre se derrumbó. El reloj no concede segundas oportunidades; tu espíritu, sí.': 'The tower has collapsed. The clock grants no second chances; your spirit does.',
+    'El ensamblado': 'The Assembled',
+    'El estibador': 'The Stevedore',
+    'El hambriento': 'The Starving',
+    'Has despertado. Encuentra la escalera al noreste. El reloj ya corre.': 'You have woken. Find the staircase to the north-east. The clock is already running.',
+    '{name}: otro cuerpo para un espíritu que se niega a morir.': '{name}: another body for a spirit that refuses to die.',
+    '¡El derrumbe ha cambiado los pasillos! La salida sigue siendo accesible.': 'The collapse has changed the corridors! The exit is still reachable.',
+    'La torre se retuerce. Los pasillos han cambiado.': 'The tower twists. The corridors have changed.',
+    'Resuelve el combate para seguir explorando.': 'Finish the fight before you explore any further.',
+    'Resuelve esta sala antes de avanzar.': 'Resolve this room before moving on.',
+    'Has alcanzado {name}.': 'You have reached {name}.',
+    'Plano descubierto: {name}. Lo conservarás al morir.': 'Blueprint discovered: {name}. You keep it when you die.',
+    'Plano permanente descubierto: {name}.': 'Permanent blueprint discovered: {name}.',
+    'Recoges {amount} de chatarra, un suero, un refrigerante y {name}.': 'You collect {amount} scrap, a serum, a coolant and {name}.',
+    '+{amount} chatarra · +1 suero · +1 refrigerante · injerto en la bolsa': '+{amount} scrap · +1 serum · +1 coolant · graft in the bag',
+    'Necesitas 5 de chatarra.': 'You need 5 scrap.',
+    'Desvías el vapor con una válvula improvisada.': 'You divert the steam with an improvised valve.',
+    'Necesitas al menos una pierna intacta.': 'You need at least one intact leg.',
+    'Saltas sobre el vapor. Tus piernas absorben el esfuerzo.': 'You leap over the steam. Your legs absorb the strain.',
+    'Atraviesas el vapor. Tu carne paga el precio.': 'You cross through the steam. Your flesh pays the price.',
+    'El vapor ha deshecho tus últimas suturas.': 'The steam has undone your last sutures.',
+    'Ya conoces estos planos. Recuperas 10 de chatarra.': 'You already know these blueprints. You recover 10 scrap.',
+    'Solo puedes fabricar en una estación de injertos.': 'You can only craft at a graft station.',
+    'Necesitas {cost} de chatarra.': 'You need {cost} scrap.',
+    'Has fabricado {name}. Está en tu bolsa de injertos.': 'You crafted {name}. It is in your graft bag.',
+    '{name} añadido a la bolsa.': '{name} added to the bag.',
+    'Necesitas 8 de chatarra.': 'You need 8 scrap.',
+    'Tus injertos intactos ya están en perfecto estado.': 'Your intact grafts are already in perfect condition.',
+    'La estación repara 40 de integridad y enfría tus injertos intactos.': 'The station repairs 40 integrity and cools your intact grafts.',
+    'Injertar durante el combate cuesta 1 de energía.': 'Grafting during combat costs 1 energy.',
+    'Injertas {name} en {slot}.': 'You graft {name} onto your {slot}.',
+    'Injerto conectado. Tu cuerpo y tu mazo han cambiado.': 'Graft connected. Your body and your deck have changed.',
+    'Injerto desguazado: +{amount} de chatarra.': 'Graft scrapped: +{amount} scrap.',
+    'No te quedan sueros.': 'You have no serums left.',
+    'Tu vida ya está al máximo.': 'Your health is already full.',
+    'Suero vital: recuperas hasta 28 de vida.': 'Vital serum: you recover up to 28 health.',
+    'No te queda refrigerante.': 'You have no coolant left.',
+    'No necesitas enfriar ni reparar ningún injerto.': 'No graft needs cooling or repair.',
+    'Refrigerante: −38° y +12 de integridad en todos los injertos intactos.': 'Coolant: −38° and +12 integrity on every intact graft.',
+    '¡{name} se ha roto! Sus cartas desaparecen. Injerta un reemplazo.': '{name} has broken! Its cards are gone. Graft a replacement.',
+    '{name} se rompe. Solo queda un muñón.': '{name} breaks. Only a stump is left.',
+    '{name} te bloquea el paso. La intención enemiga está a la vista.': '{name} blocks your way. The enemy intent is in plain sight.',
+    'Aturdido · no actuará': 'Stunned · will not act',
+    'Se protegerá · 12 defensa': 'Will guard · 12 block',
+    'Vapor · +22° a un injerto': 'Steam · +22° to a graft',
+    'Golpe brutal': 'Brutal blow',
+    'Atacará': 'Will attack',
+    '{move} · {damage} de daño': '{move} · {damage} damage',
+    'No tienes suficiente energía. Termina el turno para recuperar 3.': 'Not enough energy. End the turn to get 3 back.',
+    'La quemadura inflige {amount} de daño.': 'The burn deals {amount} damage.',
+    'El enemigo está aturdido. Su intención queda cancelada.': 'The enemy is stunned. Its intent is cancelled.',
+    'El enemigo se protege con 12 de defensa.': 'The enemy guards with 12 block.',
+    'Una descarga de vapor recalienta tu {slot}.': 'A burst of steam overheats your {slot}.',
+    'El enemigo inflige {damage} de daño; tu defensa absorbe {blocked}.': 'The enemy deals {damage} damage; your block absorbs {blocked}.',
+    'Tus suturas han cedido. La carne se queda; el espíritu continúa.': 'Your sutures gave way. The flesh stays; the spirit goes on.',
+    '{enemy} cae. Cosechas {name}, {amount} de chatarra y 5 de vida.': '{enemy} falls. You harvest {name}, {amount} scrap and 5 health.',
+    'Sales de la torre mientras el cielo se llena de ceniza. Este cuerpo, por fin, te pertenece.': 'You walk out of the tower as the sky fills with ash. This body, at last, belongs to you.',
+    'Necesitas 30 ecos. Los obtienes al terminar cada intento.': 'You need 30 echoes. You earn them by finishing each run.',
+    'Ala prohibida abierta. Su archivista puede aparecer en los próximos encuentros.': 'Forbidden wing opened. Its archivist may appear in the encounters ahead.',
+    'Necesitas {cost} ecos.': 'You need {cost} echoes.',
+    'Apariencia equipada: {name}.': 'Skin equipped: {name}.',
+
+    /* audio.js */
+    'El audio no está disponible en este navegador. El juego puede continuar.': 'Audio is not available in this browser. The game can continue.',
+
+    /* ui.js — labels and header */
+    'Brazo': 'Arm',
+    'Pierna': 'Leg',
+    'Común': 'Common',
+    'Inusual': 'Uncommon',
+    'Singular': 'Singular',
+    'Partida restaurada. El reloj siguió corriendo mientras no estabas.': 'Run restored. The clock kept running while you were away.',
+    'El guardado local no está disponible en este navegador.': 'Local saving is not available in this browser.',
+    'Deadlock Deck: inicio': 'Deadlock Deck: home',
+    'EL RELOJ ANATÓMICO': 'THE ANATOMICAL CLOCK',
+    'LA TORRE ESTÁ ARDIENDO': 'THE TOWER IS BURNING',
+    'Menú del juego': 'Game menu',
+    'Archivo': 'Archive',
+    'Relicario': 'Reliquary',
+    'Silenciar sonido': 'Mute sound',
+    'Activar sonido': 'Unmute sound',
+    'Sonido': 'Sound',
+    'Cómo jugar y controles': 'How to play and controls',
+    'Cómo jugar': 'How to play',
+    'Ajustes': 'Settings',
+    'Español': 'Spanish',
+    'Inglés': 'English',
+
+    /* ui.js — status bar */
+    'Estado del intento': 'Run status',
+    'SUJETO REANIMADO': 'REANIMATED SUBJECT',
+    'N.º {number}': 'No. {number}',
+    'VITALIDAD': 'VITALITY',
+    'TIEMPO HASTA EL COLAPSO': 'TIME UNTIL COLLAPSE',
+    'Tiempo restante': 'Time remaining',
+    'CHATARRA': 'SCRAP',
+    'ECOS': 'ECHOES',
+
+    /* ui.js — anatomy panel */
+    'Tu anatomía': 'Your anatomy',
+    '{count} CARTAS': '{count} CARDS',
+    'Tu cuerpo con los seis injertos actuales': 'Your body with its six current grafts',
+    '{slot}: {part}. Calor {heat} grados. Integridad {integrity} por ciento.': '{slot}: {part}. Heat {heat} degrees. Integrity {integrity} per cent.',
+    'Muñón': 'Stump',
+    'ROTO': 'BROKEN',
+    'Muñón · busca un reemplazo': 'Stump · find a replacement',
+    'Integridad': 'Integrity',
+    'Calor': 'Heat',
+    'Bolsa de injertos': 'Graft bag',
+    'Recupera 28 de vida · Q': 'Heals 28 health · Q',
+    'Suero': 'Serum',
+    '+28 vida': '+28 health',
+    '−38° y +12 integridad en todos los injertos intactos · E': '−38° and +12 integrity on every intact graft · E',
+    'Refrigerante': 'Coolant',
+    '−38° · repara': '−38° · repairs',
+
+    /* ui.js — map panel */
+    'La torre': 'The tower',
+    'PLANO DEL PISO {roman}': 'FLOOR {roman} PLAN',
+    'Plano de pasillos. Puedes entrar en las salas conectadas a tu posición.': 'Corridor plan. You can enter the rooms connected to your position.',
+    'Sala desconocida': 'Unknown room',
+    ', estás aquí': ', you are here',
+    ', entrar': ', enter',
+    'Tú': 'You',
+    'Salida': 'Exit',
+    'Escalera': 'Staircase',
+    'Oculta': 'Hidden',
+    'OBJETIVO ACTUAL': 'CURRENT OBJECTIVE',
+    'Derrota al Rector y cruza la última puerta.': 'Defeat the Rector and cross the last door.',
+    'Encuentra la escalera y asciende al siguiente piso.': 'Find the staircase and climb to the next floor.',
+    'Los pasillos cambian a los 2 y 4 minutos. El reloj no se detiene.': 'The corridors change at 2 and 4 minutes. The clock never stops.',
+
+    /* ui.js — scene */
+    'PISO': 'FLOOR',
+    'COMBATE · TURNO {turn}': 'COMBAT · TURN {turn}',
+    'COSECHA': 'HARVEST',
+    'EL ESPÍRITU PERMANECE': 'THE SPIRIT REMAINS',
+    'LIBERTAD': 'FREEDOM',
+    'EXPLORACIÓN': 'EXPLORATION',
+    'Laboratorio gótico en pixel art. Tu abominación cambia de aspecto con cada injerto.': 'Gothic pixel-art laboratory. Your abomination changes shape with every graft.',
+    'TORRE DE LA MISERICORDIA': 'TOWER OF MERCY',
+    'DEFENSA': 'BLOCK',
+    'PV': 'HP',
+    'quemadura': 'burn',
+    'débil': 'weak',
+    '{rooms} salas recorridas': '{rooms} rooms explored',
+    'UN NUEVO CUERPO. UNA ÚLTIMA OPORTUNIDAD.': 'A NEW BODY. ONE LAST CHANCE.',
+    'SEMILLA': 'SEED',
+
+    /* ui.js — room events */
+    'Algo dentro de ti se niega a morir.': 'Something inside you refuses to die.',
+    'Tu cuerpo es tu mazo. Cada injerto, una nueva posibilidad.': 'Your body is your deck. Every graft, a new possibility.',
+    'Reanimar': 'Reanimate',
+    'Tu turno.': 'Your turn.',
+    'Juega cartas; después, termina el turno.': 'Play cards, then end the turn.',
+    'Recibirías {damage} de daño.': 'You would take {damage} damage.',
+    'El vapor puede romper tus injertos.': 'The steam can break your grafts.',
+    'La intención enemiga está cancelada.': 'The enemy intent is cancelled.',
+    'El enemigo prepara su defensa.': 'The enemy is preparing its guard.',
+    'ENEMIGO COSECHADO': 'ENEMY HARVESTED',
+    'En tu bolsa · +{scraps} chatarra · +5 vida. El plano es permanente.': 'In your bag · +{scraps} scrap · +5 health. The blueprint is permanent.',
+    'Injertar': 'Graft',
+    'Hacia la salida': 'Towards the exit',
+    'Continuar': 'Continue',
+    'Has escapado de la torre.': 'You have escaped the tower.',
+    'La carne falla. El espíritu no.': 'The flesh fails. The spirit does not.',
+    'Ver resultado': 'See the result',
+    'SUMINISTROS': 'SUPPLIES',
+    'Alguien no llegó a usarlos.': 'Someone never got to use them.',
+    'Un injerto, chatarra, suero y refrigerante. Todo puede servir.': 'A graft, scrap, serum and coolant. All of it may help.',
+    'Recoger todo': 'Take everything',
+    'CONOCIMIENTO PERMANENTE': 'PERMANENT KNOWLEDGE',
+    'El conocimiento sobrevive a la carne.': 'Knowledge outlives the flesh.',
+    'Descubre un plano. Podrás fabricarlo en las estaciones de injertos.': 'Discover a blueprint. You can craft it at graft stations.',
+    'Guardar plano': 'Save the blueprint',
+    'ESTACIÓN DE INJERTOS': 'GRAFT STATION',
+    'La mesa aún está tibia.': 'The table is still warm.',
+    'Fabrica planos o repara +40 de integridad y enfría todos tus injertos intactos.': 'Craft blueprints, or repair +40 integrity and cool every intact graft.',
+    'Fabricar': 'Craft',
+    'Reparar · 8 chatarra': 'Repair · 8 scrap',
+    'TRAMPA · VAPOR A PRESIÓN': 'TRAP · PRESSURISED STEAM',
+    'El pasillo está a punto de estallar.': 'The corridor is about to burst.',
+    'Desvía la válvula, fuerza tus piernas o acepta las quemaduras.': 'Divert the valve, strain your legs or accept the burns.',
+    'Desviar · 5 chatarra': 'Divert · 5 scrap',
+    'Saltar · +30° / −12 integridad': 'Leap · +30° / −12 integrity',
+    'Cruzar · −{damage} vida': 'Cross · −{damage} health',
+    'HACIA ARRIBA': 'UPWARD',
+    'La salida está un poco más cerca.': 'The exit is a little closer.',
+    'Subir enfría tus injertos 15°. No hay vuelta al piso anterior.': 'Climbing cools your grafts by 15°. There is no way back to the floor below.',
+    'Subir al piso {roman}': 'Climb to floor {roman}',
+    'LA PUERTA ESTÁ ABIERTA': 'THE DOOR IS OPEN',
+    'El aire de afuera no huele a muerte.': 'The air outside does not smell of death.',
+    'Cruza antes de que el reloj llegue a cero.': 'Cross before the clock reaches zero.',
+    'Escapar de la torre': 'Escape the tower',
+    'Levántate. Todavía queda tiempo.': 'Get up. There is still time.',
+    'Aún puedes usar la estación.': 'You can still use the station.',
+    'Sigue avanzando.': 'Keep moving.',
+    'Los planos descubiertos se fabrican con chatarra.': 'Discovered blueprints are crafted with scrap.',
+    'Escoge un pasillo conectado. La escalera está marcada en el plano.': 'Choose a connected corridor. The staircase is marked on the plan.',
+
+    /* ui.js — movement */
+    'Norte': 'North',
+    'Oeste': 'West',
+    'Este': 'East',
+    'Sur': 'South',
+    'Pasillos disponibles': 'Available corridors',
+    'Ir al {direction}': 'Go {direction}',
+    ', no hay pasillo': ', no corridor',
+
+    /* ui.js — cards and hand */
+    '{name}. {cost} energía. {text} Calor más {heat}, desgaste {wear}.': '{name}. {cost} energy. {text} Heat plus {heat}, wear {wear}.',
+    ' Atención: se romperá el injerto.': ' Warning: this will break the graft.',
+    'MUÑÓN': 'STUMP',
+    '¡ROTURA!': 'BREAKS!',
+    'Sin injerto': 'No graft',
+    'Tu mano de cartas': 'Your hand of cards',
+    'Cartas de tu cuerpo': 'Cards from your body',
+    'Tu mano': 'Your hand',
+    'Tu cuerpo es tu mazo': 'Your body is your deck',
+    '{hand} CARTAS · ROBA {draw} · DESCARTE {discard}': '{hand} CARDS · DRAW {draw} · DISCARD {discard}',
+    'CADA INJERTO CAMBIA TUS CARTAS': 'EVERY GRAFT CHANGES YOUR CARDS',
+    'Ver mazo': 'View deck',
+    'No quedan cartas en tu mano. Termina el turno para robar otras cinco.': 'No cards left in your hand. End the turn to draw five more.',
+    'ENERGÍA': 'ENERGY',
+    'Se recupera al terminar el turno': 'Restored when you end the turn',
+    'Disponible durante el combate': 'Available during combat',
+    'Terminar turno': 'End turn',
+    'ESPACIO': 'SPACE',
+
+    /* ui.js — modals */
+    'Cerrar ventana': 'Close window',
+    'El reloj sigue corriendo.': 'The clock is still running.',
+    'UN ROGUELIKE ANATÓMICO': 'AN ANATOMICAL ROGUELIKE',
+    'Un cuerpo prestado.': 'A borrowed body.',
+    'Seis minutos de vida.': 'Six minutes of life.',
+    'La torre arde. Cosecha a quienes te detengan.': 'The tower is burning. Harvest whoever stops you.',
+    'Injerta sus extremidades. Escapa antes del colapso.': 'Graft their limbs. Escape before the collapse.',
+    'TU CUERPO ES TU MAZO': 'YOUR BODY IS YOUR DECK',
+    '06:00 REALES': '06:00 REAL MINUTES',
+    'Cómo sobrevivir': 'How to survive',
+    'Ratón · teclado · táctil · mando': 'Mouse · keyboard · touch · gamepad',
+    'Horror anatómico estilizado · audio activado al interactuar': 'Stylised anatomical horror · audio starts when you interact',
+    '{count} EXTREMIDADES RECUPERADAS': '{count} LIMBS RECOVERED',
+    'La bolsa está vacía.': 'The bag is empty.',
+    'Derrota enemigos, recoge suministros o fabrica un plano en una estación de injertos.': 'Defeat enemies, collect supplies or craft a blueprint at a graft station.',
+    'Injertar cuesta 1 de energía.': 'Grafting costs 1 energy.',
+    'Las cartas del injerto anterior desaparecen de inmediato.': 'The cards of the previous graft vanish at once.',
+    'Elige dónde injertar. La pieza que reemplaces vuelve a la bolsa con su calor y desgaste actuales.': 'Choose where to graft. The piece you replace returns to the bag with its current heat and wear.',
+    'Solo queda un muñón': 'Only a stump is left',
+    'El injerto se ha roto. Todas sus cartas han desaparecido de tu mazo.': 'The graft has broken. All of its cards are gone from your deck.',
+    'A 100° o 0% de integridad, el injerto se rompe. Desde 75°, cada uso causa 7 de desgaste adicional. Terminar turno enfría 12°; cambiar de sala, 7°.': 'At 100° or 0% integrity the graft breaks. From 75°, every use causes 7 extra wear. Ending a turn cools 12°; changing room, 7°.',
+    'Reemplazos disponibles': 'Available replacements',
+    'No tienes un reemplazo compatible. Busca enemigos o suministros.': 'You have no compatible replacement. Look for enemies or supplies.',
+    'Tu cuerpo': 'Your body',
+    'SEIS RANURAS · UN SOLO ESPÍRITU': 'SIX SLOTS · ONE SINGLE SPIRIT',
+    'Camino a la salida': 'The way out',
+    'LOS PASILLOS NUNCA SON LOS MISMOS': 'THE CORRIDORS ARE NEVER THE SAME',
+    '{known} / {total} PLANOS DESCUBIERTOS': '{known} / {total} BLUEPRINTS DISCOVERED',
+    'Los planos sobreviven a la muerte.': 'Blueprints outlive death.',
+    'Estás en una estación: puedes fabricar con chatarra.': 'You are at a station: you can craft with scrap.',
+    'Para fabricar, visita una estación de injertos en la torre.': 'To craft, visit a graft station in the tower.',
+    'Filtrar planos': 'Filter blueprints',
+    'Todos': 'All',
+    'Cabezas': 'Heads',
+    'Torsos': 'Torsos',
+    'Brazos': 'Arms',
+    'Piernas': 'Legs',
+    'DESCONOCIDO': 'UNKNOWN',
+    'Plano del ala prohibida': 'Forbidden wing blueprint',
+    '{kind} sin descubrir': 'Undiscovered {kind}',
+    'Desbloquea el ala en el relicario.': 'Unlock the wing in the reliquary.',
+    'Explora, cosecha o consulta los archivos de la torre.': 'Explore, harvest or search the tower archives.',
+    'EL CONOCIMIENTO PERDURA': 'KNOWLEDGE ENDURES',
+    'Tu mazo anatómico': 'Your anatomical deck',
+    '{count} CARTAS · CADA UNA PERTENECE A UN INJERTO': '{count} CARDS · EACH ONE BELONGS TO A GRAFT',
+    'Empiezas cada combate con 5 cartas y 3 de energía. Al terminar turno descartas la mano, enfrías 12° y robas 5. El descarte se baraja cuando se acaba el mazo. Máximo 7 cartas en mano.': 'You start every fight with 5 cards and 3 energy. Ending a turn discards your hand, cools 12° and draws 5. The discard pile is shuffled when the deck runs out. Maximum 7 cards in hand.',
+    'El relicario': 'The reliquary',
+    '{souls} ECOS DEL ESPÍRITU': '{souls} ECHOES OF THE SPIRIT',
+    'Sin compras con dinero real.': 'No real-money purchases.',
+    'Este prototipo usa ecos ganados al completar intentos. Los cosméticos no alteran tus estadísticas.': 'This prototype uses echoes earned by finishing runs. Cosmetics do not change your stats.',
+    'Equipada': 'Equipped',
+    'Equipar': 'Equip',
+    'Desbloquear · {cost} ecos': 'Unlock · {cost} echoes',
+    'CONTENIDO ADICIONAL': 'ADDITIONAL CONTENT',
+    'El ala prohibida': 'The forbidden wing',
+    'Abre los encuentros del Archivista de ceniza y su cráneo exclusivo, con dos nuevas cartas. Disponible en los próximos encuentros.': 'Opens the Ash Archivist encounters and its exclusive skull, with two new cards. Available in the encounters ahead.',
+    'Ala desbloqueada': 'Wing unlocked',
+    'Abrir · 30 ecos': 'Open · 30 echoes',
+    'LA TORRE NO ESPERA': 'THE TOWER DOES NOT WAIT',
+    'Volumen general': 'Master volume',
+    'Música sintetizada y efectos viscerales.': 'Synthesised music and visceral effects.',
+    'Efectos de sonido': 'Sound effects',
+    'Impactos, injertos y señales del laboratorio.': 'Impacts, grafts and laboratory signals.',
+    'Animaciones ambientales': 'Ambient animations',
+    'Desactiva movimiento, partículas animadas y sacudidas.': 'Turns off motion, animated particles and shakes.',
+    'Pantalla completa': 'Fullscreen',
+    'Disponible cuando el navegador lo permite.': 'Available when the browser allows it.',
+    'Alternar': 'Toggle',
+    'Guardado automático en este navegador. El reloj continúa al cerrar o recargar.': 'Automatic saving in this browser. The clock keeps running when you close or reload.',
+    'El guardado está bloqueado. Puedes jugar, pero se perderá el progreso al cerrar.': 'Saving is blocked. You can play, but progress is lost when you close.',
+    'Abandonar este cuerpo': 'Abandon this body',
+    'Conservarás los planos descubiertos.': 'You keep the blueprints you discovered.',
+    '¿Abandonar este cuerpo?': 'Abandon this body?',
+    'ESTE INTENTO TERMINARÁ': 'THIS RUN WILL END',
+    'Perderás tus injertos, suministros y chatarra de este intento. Los planos descubiertos y los ecos permanecen.': 'You will lose the grafts, supplies and scrap from this run. Discovered blueprints and echoes remain.',
+    'Seguir luchando': 'Keep fighting',
+    'Abandonar y volver a la mesa': 'Abandon and return to the table',
+
+    /* ui.js — help */
+    'No necesitas un mazo mejor.': 'You do not need a better deck.',
+    'Necesitas un cuerpo mejor.': 'You need a better body.',
+    'Explora y asciende': 'Explore and climb',
+    'Recorre los pasillos conectados. Llega a la escalera del noreste en los pisos I y II. En el III, derrota al Rector y pulsa {action}.': 'Walk the connected corridors. Reach the north-east staircase on floors I and II. On III, defeat the Rector and press {action}.',
+    'Combate por turnos': 'Turn-based combat',
+    '3 de energía': '3 energy',
+    'Tienes {energy}. Las cartas muestran su coste arriba a la izquierda. La intención enemiga te dice qué ocurrirá al terminar turno. La defensa dura hasta entonces.': 'You have {energy}. Cards show their cost in the top left corner. The enemy intent tells you what happens when you end the turn. Block lasts until then.',
+    'Cosecha e injerta': 'Harvest and graft',
+    '2 cartas': '2 cards',
+    'Los enemigos derrotados dejan extremidades en tu bolsa. Cada injerto aporta {cards}. Cambiarlo quita las anteriores; en combate cuesta 1 de energía.': 'Defeated enemies leave limbs in your bag. Every graft contributes {cards}. Replacing it removes the old ones; in combat it costs 1 energy.',
+    'No te consumas': 'Do not burn out',
+    '100° o 0% de integridad': '100° or 0% integrity',
+    'A {limit}, el injerto se rompe y solo te queda una carta de muñón. Desde 75°, cada uso añade 7 de desgaste. Enfría 12° por turno o 7° al moverte.': 'At {limit} the graft breaks and only a stump card is left. From 75°, every use adds 7 wear. You cool 12° per turn, or 7° when you move.',
+    'Usa lo que encuentres': 'Use what you find',
+    'Suero: +28 vida. Refrigerante: −38° y +12 integridad. Fabrica los planos descubiertos con chatarra en las estaciones de injertos.': 'Serum: +28 health. Coolant: −38° and +12 integrity. Craft discovered blueprints with scrap at graft stations.',
+    'Muere, aprende, vuelve': 'Die, learn, return',
+    '6 minutos de tiempo real': '6 minutes of real time',
+    'Son {time}, incluso en menús o fuera de la pestaña. Al morir vuelves a una mesa con otro cuerpo y otra torre. Los planos y ecos permanecen.': 'That is {time}, even in menus or on another tab. When you die you wake on a table with another body and another tower. Blueprints and echoes remain.',
+    'Teclado y ratón': 'Keyboard and mouse',
+    'WASD / flechas: moverse': 'WASD / arrows: move',
+    '1–7: jugar carta · Espacio: terminar turno': '1–7: play a card · Space: end turn',
+    'Q: suero · E: refrigerante': 'Q: serum · E: coolant',
+    'I: injertos · M: mapa · Esc: cerrar': 'I: grafts · M: map · Esc: close',
+    'Táctil y mando': 'Touch and gamepad',
+    'Toca las cartas, pasillos y botones.': 'Tap the cards, corridors and buttons.',
+    'Mando estándar: cruceta / stick para moverte o elegir · A: confirmar · B: cerrar': 'Standard gamepad: d-pad / stick to move or choose · A: confirm · B: close',
+    'RB: terminar turno · X / Y: suministros': 'RB: end turn · X / Y: supplies',
+    'Quemadura: daño al terminar turno, baja 1 por turno. Debilidad: reduce un 40% el ataque. Aturdimiento: cancela la siguiente intención. El tiempo no se pausa.': 'Burn: damage when the turn ends, drops by 1 each turn. Weakness: cuts attacks by 40%. Stun: cancels the next intent. Time never pauses.',
+
+    /* ui.js — log, results and footer */
+    'Bitácora del cuerpo': 'Body logbook',
+    'LOS ÚLTIMOS 24 ACONTECIMIENTOS': 'THE LAST 24 EVENTS',
+    'Aún no has despertado.': 'You have not woken yet.',
+    'EL CIELO TODAVÍA EXISTE': 'THE SKY STILL EXISTS',
+    'EL ESPÍRITU HA ENCONTRADO OTRA MESA': 'THE SPIRIT HAS FOUND ANOTHER TABLE',
+    'Este cuerpo es tuyo.': 'This body is yours.',
+    'La carne no era eterna.': 'The flesh was not eternal.',
+    'ENEMIGOS COSECHADOS': 'ENEMIES HARVESTED',
+    'INJERTOS REALIZADOS': 'GRAFTS PERFORMED',
+    'PLANOS DESCUBIERTOS': 'BLUEPRINTS DISCOVERED',
+    'ECOS CONSERVADOS': 'ECHOES KEPT',
+    'Escapaste en {time} · {left} restantes': 'You escaped in {time} · {left} left',
+    'Piso {roman} · {rooms} salas recorridas': 'Floor {roman} · {rooms} rooms explored',
+    'Reanimar otro cuerpo': 'Reanimate another body',
+    'Abrir relicario': 'Open the reliquary',
+    'Tus {count} planos permanecen. Tu próxima torre será distinta.': 'Your {count} blueprints remain. Your next tower will be different.',
+    'Desguazar': 'Scrap',
+    'EL ESPÍRITU RECUERDA': 'THE SPIRIT REMEMBERS',
+    'Planos': 'Blueprints',
+    'Escapes': 'Escapes',
+    'Mejor tiempo': 'Best time',
+    'La muerte es solo el principio del procedimiento.': 'Death is only the beginning of the procedure.',
+    'PROTOTIPO 1.0': 'PROTOTYPE 1.0',
+    'GUARDADO': 'SAVE',
+    'LOCAL': 'LOCAL',
+    'NO DISPONIBLE': 'UNAVAILABLE',
+    'Paneles del juego': 'Game panels',
+    'Cuerpo': 'Body',
+    'Injertos': 'Grafts',
+    'Mapa': 'Map',
+    'HAS ESCAPADO DE LA TORRE': 'YOU HAVE ESCAPED THE TOWER',
+    'Este navegador no permite pantalla completa aquí.': 'This browser will not allow fullscreen here.',
+    'Este navegador no ofrece pantalla completa.': 'This browser does not offer fullscreen.',
+    'Has dejado atrás este cuerpo. Tu espíritu encuentra otra mesa de disección.': 'You have left this body behind. Your spirit finds another dissection table.',
+    'Mando conectado · A confirma · B cierra · RB termina turno': 'Gamepad connected · A confirms · B closes · RB ends the turn',
+    'No se pudo reanimar el juego.': 'The game could not be reanimated.',
+    'Recarga la página en un navegador actualizado. No se han borrado tus planos.': 'Reload the page in an up-to-date browser. Your blueprints have not been deleted.',
+    'Recargar': 'Reload',
+
+    /* index.html — document head */
+    'Deadlock Deck — El Reloj Anatómico': 'Deadlock Deck — The Anatomical Clock',
+    'Deadlock Deck: El Reloj Anatómico. Un roguelike de cartas en el que tu cuerpo es tu mazo. Seis minutos para escapar de una torre alquímica en llamas.': 'Deadlock Deck: The Anatomical Clock. A card roguelike where your body is your deck. Six minutes to escape a burning alchemical tower.'
+  };
+
+  const normalize = value => (value === 'es' || value === 'en' ? value : null);
+
+  const stored = () => {
+    try { return localStorage.getItem(KEY); } catch (_) { return null; }
+  };
+
+  // URL first, then the stored choice. The browser language only ever selects
+  // Spanish here, so anything else falls through to the same Spanish default.
+  const active = normalize(new URLSearchParams(location.search).get('lang')) || normalize(stored()) || 'es';
+
+  const lang = () => active;
+
+  const t = (text, vars) => {
+    const value = active === 'en' && dictionary[text] ? dictionary[text] : text;
+    return vars ? value.replace(/\{(\w+)\}/g, (match, key) => (key in vars ? vars[key] : match)) : value;
+  };
+
+  const set = value => {
+    const next = normalize(value);
+    if (!next || next === active) return;
+    try { localStorage.setItem(KEY, next); } catch (_) { /* A blocked store still allows the URL below. */ }
+    const url = new URL(location.href);
+    url.searchParams.delete('lang');
+    location.replace(url.toString());
+  };
+
+  document.documentElement.lang = active;
+  document.title = t(document.title);
+  const description = document.querySelector('meta[name="description"]');
+  if (description) description.content = t(description.content);
+
+  return { lang, t, set };
+})();
+
+</script>
+  <script>
 /* Deadlock Deck — contenido original. Sin dependencias. */
 'use strict';
 
 window.DDData = (() => {
+  const T = window.DDLang.t;
+
   const slots = [
-    { id: 'head', label: 'Cabeza', short: 'Cabeza', kind: 'head' },
-    { id: 'torso', label: 'Torso', short: 'Torso', kind: 'torso' },
-    { id: 'armL', label: 'Brazo izquierdo', short: 'Brazo I', kind: 'arm' },
-    { id: 'armR', label: 'Brazo derecho', short: 'Brazo D', kind: 'arm' },
-    { id: 'legL', label: 'Pierna izquierda', short: 'Pierna I', kind: 'leg' },
-    { id: 'legR', label: 'Pierna derecha', short: 'Pierna D', kind: 'leg' }
+    { id: 'head', label: T('Cabeza'), short: T('Cabeza'), kind: 'head' },
+    { id: 'torso', label: T('Torso'), short: T('Torso'), kind: 'torso' },
+    { id: 'armL', label: T('Brazo izquierdo'), short: T('Brazo I'), kind: 'arm' },
+    { id: 'armR', label: T('Brazo derecho'), short: T('Brazo D'), kind: 'arm' },
+    { id: 'legL', label: T('Pierna izquierda'), short: T('Pierna I'), kind: 'leg' },
+    { id: 'legR', label: T('Pierna derecha'), short: T('Pierna D'), kind: 'leg' }
   ];
 
   const cards = {
-    focus: { name: 'Lucidez prestada', cost: 0, draw: 2, heat: 16, wear: 3, icon: 'eye', text: 'Roba 2 cartas.' },
-    whisper: { name: 'Susurro impuro', cost: 1, damage: 7, weak: 1, heat: 14, wear: 3, icon: 'eye', text: '7 de daño. Debilita 1 turno.' },
-    diagnose: { name: 'Diagnóstico', cost: 1, draw: 2, heal: 5, heat: 15, wear: 3, icon: 'eye', text: 'Roba 2 cartas. Recupera 5 de vida.' },
-    incision: { name: 'Incisión precisa', cost: 1, damage: 12, pierce: true, heat: 22, wear: 5, icon: 'blade', text: '12 de daño. Ignora la defensa.' },
-    omen: { name: 'Mal augurio', cost: 2, damage: 15, stun: 1, heat: 34, wear: 8, icon: 'eye', text: '15 de daño. Cancela la intención enemiga.' },
-    vision: { name: 'Visión imposible', cost: 0, draw: 3, heat: 27, wear: 6, icon: 'eye', text: 'Roba 3 cartas.' },
-    bite: { name: 'Hambre de tumba', cost: 1, damage: 11, heal: 4, heat: 23, wear: 5, icon: 'fang', text: '11 de daño. Recupera 4 de vida.' },
-    scream: { name: 'Grito sin lengua', cost: 1, weak: 2, draw: 1, heat: 19, wear: 4, icon: 'fang', text: 'Debilita 2 turnos. Roba 1 carta.' },
-    stitch: { name: 'Sutura de urgencia', cost: 1, heal: 9, heat: 17, wear: 4, icon: 'heart', text: 'Recupera 9 de vida.' },
-    brace: { name: 'Costillas cerradas', cost: 1, block: 11, heat: 12, wear: 3, icon: 'shield', text: 'Obtén 11 de defensa.' },
-    eruption: { name: 'Combustión interna', cost: 2, damage: 25, burn: 3, heat: 42, wear: 11, icon: 'flame', text: '25 de daño. Aplica 3 de quemadura.' },
-    vent: { name: 'Válvula de escape', cost: 1, cool: 28, heat: 4, wear: 2, icon: 'snow', text: 'Enfría todos tus injertos 28°.' },
-    ironwall: { name: 'Bastión de hierro', cost: 1, block: 19, heat: 20, wear: 5, icon: 'shield', text: 'Obtén 19 de defensa.' },
-    recoil: { name: 'Retroceso blindado', cost: 1, damage: 8, block: 9, heat: 22, wear: 5, icon: 'shield', text: '8 de daño. Obtén 9 de defensa.' },
-    transfusion: { name: 'Sangre de mercurio', cost: 1, heal: 15, heat: 27, wear: 6, icon: 'heart', text: 'Recupera 15 de vida.' },
-    surge: { name: 'Segundo corazón', cost: 0, energy: 2, heat: 36, wear: 9, icon: 'bolt', text: 'Obtén 2 de energía.' },
-    slash: { name: 'Tajo de hueso', cost: 1, damage: 10, heat: 16, wear: 4, icon: 'blade', text: '10 de daño.' },
-    heavy: { name: 'Fractura expuesta', cost: 2, damage: 19, heat: 28, wear: 6, icon: 'bone', text: '19 de daño.' },
-    scalpel: { name: 'Corte quirúrgico', cost: 1, damage: 13, heat: 22, wear: 5, icon: 'blade', text: '13 de daño.' },
-    dissect: { name: 'Disección viva', cost: 2, damage: 21, weak: 1, heat: 33, wear: 8, icon: 'blade', text: '21 de daño. Debilita 1 turno.' },
-    rip: { name: 'Desgarro necrótico', cost: 1, damage: 10, burn: 4, heat: 24, wear: 5, icon: 'fang', text: '10 de daño. Aplica 4 de quemadura.' },
-    reap: { name: 'Cosecha carmesí', cost: 2, damage: 19, heal: 7, heat: 32, wear: 7, icon: 'fang', text: '19 de daño. Recupera 7 de vida.' },
-    discharge: { name: 'Descarga galvánica', cost: 2, damage: 26, heat: 41, wear: 10, icon: 'bolt', text: '26 de daño.' },
-    arc: { name: 'Arco paralizante', cost: 1, damage: 8, stun: 1, heat: 34, wear: 8, icon: 'bolt', text: '8 de daño. Cancela la intención enemiga.' },
-    punch: { name: 'Puño de pistón', cost: 1, damage: 16, heat: 28, wear: 6, icon: 'bone', text: '16 de daño.' },
-    crusher: { name: 'Prensa hidráulica', cost: 3, damage: 43, heat: 52, wear: 14, icon: 'bone', text: '43 de daño. Un precio terrible.' },
-    kick: { name: 'Patada de cadáver', cost: 1, damage: 8, block: 3, heat: 13, wear: 3, icon: 'foot', text: '8 de daño. Obtén 3 de defensa.' },
-    dodge: { name: 'Paso torcido', cost: 1, block: 10, heat: 12, wear: 3, icon: 'foot', text: 'Obtén 10 de defensa.' },
-    leap: { name: 'Salto arácnido', cost: 1, damage: 9, block: 9, heat: 23, wear: 5, icon: 'foot', text: '9 de daño. Obtén 9 de defensa.' },
-    silk: { name: 'Seda de sutura', cost: 1, weak: 2, draw: 1, heat: 20, wear: 4, icon: 'shield', text: 'Debilita 2 turnos. Roba 1 carta.' },
-    impact: { name: 'Rodilla de acero', cost: 2, damage: 24, heat: 31, wear: 7, icon: 'foot', text: '24 de daño.' },
-    momentum: { name: 'Inercia prohibida', cost: 0, energy: 1, draw: 1, heat: 25, wear: 6, icon: 'bolt', text: 'Obtén 1 de energía. Roba 1 carta.' },
-    grave: { name: 'Quietud de mármol', cost: 1, block: 15, cool: 10, heat: 14, wear: 3, icon: 'shield', text: '15 de defensa. Enfría todos los injertos 10°.' },
-    silent: { name: 'Paso entre tumbas', cost: 1, block: 6, draw: 2, heat: 20, wear: 4, icon: 'foot', text: '6 de defensa. Roba 2 cartas.' },
-    forbidden: { name: 'Liturgia de ceniza', cost: 2, damage: 18, burn: 8, heat: 39, wear: 10, icon: 'flame', text: '18 de daño. Aplica 8 de quemadura.' },
-    echoes: { name: 'Coro de los muertos', cost: 1, draw: 2, energy: 1, heat: 31, wear: 7, icon: 'eye', text: 'Roba 2 cartas. Obtén 1 de energía.' },
-    stumpHead: { name: 'Eco del espíritu', cost: 1, damage: 3, heat: 0, wear: 0, icon: 'eye', text: '3 de daño. Necesitas una cabeza.' },
-    stumpTorso: { name: 'Último latido', cost: 1, block: 4, heat: 0, wear: 0, icon: 'heart', text: '4 de defensa. Necesitas un torso.' },
-    stumpArm: { name: 'Golpe de muñón', cost: 1, damage: 4, heat: 0, wear: 0, icon: 'bone', text: '4 de daño. Necesitas un brazo.' },
-    stumpLeg: { name: 'Arrastrarse', cost: 1, block: 3, heat: 0, wear: 0, icon: 'foot', text: '3 de defensa. Necesitas una pierna.' }
+    focus: { name: T('Lucidez prestada'), cost: 0, draw: 2, heat: 16, wear: 3, icon: 'eye', text: T('Roba 2 cartas.') },
+    whisper: { name: T('Susurro impuro'), cost: 1, damage: 7, weak: 1, heat: 14, wear: 3, icon: 'eye', text: T('7 de daño. Debilita 1 turno.') },
+    diagnose: { name: T('Diagnóstico'), cost: 1, draw: 2, heal: 5, heat: 15, wear: 3, icon: 'eye', text: T('Roba 2 cartas. Recupera 5 de vida.') },
+    incision: { name: T('Incisión precisa'), cost: 1, damage: 12, pierce: true, heat: 22, wear: 5, icon: 'blade', text: T('12 de daño. Ignora la defensa.') },
+    omen: { name: T('Mal augurio'), cost: 2, damage: 15, stun: 1, heat: 34, wear: 8, icon: 'eye', text: T('15 de daño. Cancela la intención enemiga.') },
+    vision: { name: T('Visión imposible'), cost: 0, draw: 3, heat: 27, wear: 6, icon: 'eye', text: T('Roba 3 cartas.') },
+    bite: { name: T('Hambre de tumba'), cost: 1, damage: 11, heal: 4, heat: 23, wear: 5, icon: 'fang', text: T('11 de daño. Recupera 4 de vida.') },
+    scream: { name: T('Grito sin lengua'), cost: 1, weak: 2, draw: 1, heat: 19, wear: 4, icon: 'fang', text: T('Debilita 2 turnos. Roba 1 carta.') },
+    stitch: { name: T('Sutura de urgencia'), cost: 1, heal: 9, heat: 17, wear: 4, icon: 'heart', text: T('Recupera 9 de vida.') },
+    brace: { name: T('Costillas cerradas'), cost: 1, block: 11, heat: 12, wear: 3, icon: 'shield', text: T('Obtén 11 de defensa.') },
+    eruption: { name: T('Combustión interna'), cost: 2, damage: 25, burn: 3, heat: 42, wear: 11, icon: 'flame', text: T('25 de daño. Aplica 3 de quemadura.') },
+    vent: { name: T('Válvula de escape'), cost: 1, cool: 28, heat: 4, wear: 2, icon: 'snow', text: T('Enfría todos tus injertos 28°.') },
+    ironwall: { name: T('Bastión de hierro'), cost: 1, block: 19, heat: 20, wear: 5, icon: 'shield', text: T('Obtén 19 de defensa.') },
+    recoil: { name: T('Retroceso blindado'), cost: 1, damage: 8, block: 9, heat: 22, wear: 5, icon: 'shield', text: T('8 de daño. Obtén 9 de defensa.') },
+    transfusion: { name: T('Sangre de mercurio'), cost: 1, heal: 15, heat: 27, wear: 6, icon: 'heart', text: T('Recupera 15 de vida.') },
+    surge: { name: T('Segundo corazón'), cost: 0, energy: 2, heat: 36, wear: 9, icon: 'bolt', text: T('Obtén 2 de energía.') },
+    slash: { name: T('Tajo de hueso'), cost: 1, damage: 10, heat: 16, wear: 4, icon: 'blade', text: T('10 de daño.') },
+    heavy: { name: T('Fractura expuesta'), cost: 2, damage: 19, heat: 28, wear: 6, icon: 'bone', text: T('19 de daño.') },
+    scalpel: { name: T('Corte quirúrgico'), cost: 1, damage: 13, heat: 22, wear: 5, icon: 'blade', text: T('13 de daño.') },
+    dissect: { name: T('Disección viva'), cost: 2, damage: 21, weak: 1, heat: 33, wear: 8, icon: 'blade', text: T('21 de daño. Debilita 1 turno.') },
+    rip: { name: T('Desgarro necrótico'), cost: 1, damage: 10, burn: 4, heat: 24, wear: 5, icon: 'fang', text: T('10 de daño. Aplica 4 de quemadura.') },
+    reap: { name: T('Cosecha carmesí'), cost: 2, damage: 19, heal: 7, heat: 32, wear: 7, icon: 'fang', text: T('19 de daño. Recupera 7 de vida.') },
+    discharge: { name: T('Descarga galvánica'), cost: 2, damage: 26, heat: 41, wear: 10, icon: 'bolt', text: T('26 de daño.') },
+    arc: { name: T('Arco paralizante'), cost: 1, damage: 8, stun: 1, heat: 34, wear: 8, icon: 'bolt', text: T('8 de daño. Cancela la intención enemiga.') },
+    punch: { name: T('Puño de pistón'), cost: 1, damage: 16, heat: 28, wear: 6, icon: 'bone', text: T('16 de daño.') },
+    crusher: { name: T('Prensa hidráulica'), cost: 3, damage: 43, heat: 52, wear: 14, icon: 'bone', text: T('43 de daño. Un precio terrible.') },
+    kick: { name: T('Patada de cadáver'), cost: 1, damage: 8, block: 3, heat: 13, wear: 3, icon: 'foot', text: T('8 de daño. Obtén 3 de defensa.') },
+    dodge: { name: T('Paso torcido'), cost: 1, block: 10, heat: 12, wear: 3, icon: 'foot', text: T('Obtén 10 de defensa.') },
+    leap: { name: T('Salto arácnido'), cost: 1, damage: 9, block: 9, heat: 23, wear: 5, icon: 'foot', text: T('9 de daño. Obtén 9 de defensa.') },
+    silk: { name: T('Seda de sutura'), cost: 1, weak: 2, draw: 1, heat: 20, wear: 4, icon: 'shield', text: T('Debilita 2 turnos. Roba 1 carta.') },
+    impact: { name: T('Rodilla de acero'), cost: 2, damage: 24, heat: 31, wear: 7, icon: 'foot', text: T('24 de daño.') },
+    momentum: { name: T('Inercia prohibida'), cost: 0, energy: 1, draw: 1, heat: 25, wear: 6, icon: 'bolt', text: T('Obtén 1 de energía. Roba 1 carta.') },
+    grave: { name: T('Quietud de mármol'), cost: 1, block: 15, cool: 10, heat: 14, wear: 3, icon: 'shield', text: T('15 de defensa. Enfría todos los injertos 10°.') },
+    silent: { name: T('Paso entre tumbas'), cost: 1, block: 6, draw: 2, heat: 20, wear: 4, icon: 'foot', text: T('6 de defensa. Roba 2 cartas.') },
+    forbidden: { name: T('Liturgia de ceniza'), cost: 2, damage: 18, burn: 8, heat: 39, wear: 10, icon: 'flame', text: T('18 de daño. Aplica 8 de quemadura.') },
+    echoes: { name: T('Coro de los muertos'), cost: 1, draw: 2, energy: 1, heat: 31, wear: 7, icon: 'eye', text: T('Roba 2 cartas. Obtén 1 de energía.') },
+    stumpHead: { name: T('Eco del espíritu'), cost: 1, damage: 3, heat: 0, wear: 0, icon: 'eye', text: T('3 de daño. Necesitas una cabeza.') },
+    stumpTorso: { name: T('Último latido'), cost: 1, block: 4, heat: 0, wear: 0, icon: 'heart', text: T('4 de defensa. Necesitas un torso.') },
+    stumpArm: { name: T('Golpe de muñón'), cost: 1, damage: 4, heat: 0, wear: 0, icon: 'bone', text: T('4 de daño. Necesitas un brazo.') },
+    stumpLeg: { name: T('Arrastrarse'), cost: 1, block: 3, heat: 0, wear: 0, icon: 'foot', text: T('3 de defensa. Necesitas una pierna.') }
   };
 
   const parts = {
-    skull: { name: 'Cráneo cosido', kind: 'head', tier: 1, color: '#8fa58e', cards: ['focus', 'whisper'], lore: 'Alguien dejó un recuerdo dentro.' },
-    surgeon: { name: 'Máscara del cirujano', kind: 'head', tier: 2, color: '#bda8b7', cards: ['diagnose', 'incision'], lore: 'El último rostro que vieron sus pacientes.' },
-    oracle: { name: 'Oráculo de vidrio', kind: 'head', tier: 3, color: '#79b9b6', cards: ['omen', 'vision'], lore: 'Ve futuros que no deberían existir.' },
-    jaw: { name: 'Mandíbula de fosa', kind: 'head', tier: 2, color: '#bc7e78', cards: ['bite', 'scream'], lore: 'La muerte no le quitó el apetito.' },
-    sutures: { name: 'Torso de suturas', kind: 'torso', tier: 1, color: '#8fa58e', cards: ['stitch', 'brace'], lore: 'Seis vidas. Una mala costura.' },
-    boiler: { name: 'Caldera torácica', kind: 'torso', tier: 3, color: '#ce9759', cards: ['eruption', 'vent'], lore: 'La llama ocupa el lugar del corazón.' },
-    iron: { name: 'Caja de hierro', kind: 'torso', tier: 2, color: '#859498', cards: ['ironwall', 'recoil'], lore: 'Ningún pulmón. Ninguna duda.' },
-    mercury: { name: 'Corazón de mercurio', kind: 'torso', tier: 3, color: '#a3c1cb', cards: ['transfusion', 'surge'], lore: 'Una segunda vida, a interés compuesto.' },
-    bone: { name: 'Brazo de hueso', kind: 'arm', tier: 1, color: '#c4bca2', cards: ['slash', 'heavy'], lore: 'Todavía recuerda cómo romper cosas.' },
-    scalpel: { name: 'Brazo de bisturís', kind: 'arm', tier: 2, color: '#adb8b0', cards: ['scalpel', 'dissect'], lore: 'La precisión también puede ser crueldad.' },
-    claw: { name: 'Garra de la morgue', kind: 'arm', tier: 2, color: '#bd8178', cards: ['rip', 'reap'], lore: 'Nada que toque vuelve a estar entero.' },
-    cannon: { name: 'Cañón galvánico', kind: 'arm', tier: 3, color: '#c99e60', cards: ['discharge', 'arc'], lore: 'Un trueno encerrado en carne.' },
-    piston: { name: 'Puño hidráulico', kind: 'arm', tier: 3, color: '#b39979', cards: ['punch', 'crusher'], lore: 'Diseñado para trabajar. Adaptado para sobrevivir.' },
-    legs: { name: 'Pierna reanimada', kind: 'leg', tier: 1, color: '#8fa58e', cards: ['kick', 'dodge'], lore: 'Un paso más lejos de la mesa.' },
-    spider: { name: 'Zanca arácnida', kind: 'leg', tier: 2, color: '#9c93b9', cards: ['leap', 'silk'], lore: 'Demasiadas articulaciones. Ningún tropiezo.' },
-    pistons: { name: 'Pierna de pistón', kind: 'leg', tier: 3, color: '#c19860', cards: ['impact', 'momentum'], lore: 'El hierro tampoco quiere arder.' },
-    funeral: { name: 'Pie funerario', kind: 'leg', tier: 2, color: '#879caf', cards: ['grave', 'silent'], lore: 'Aprendió a caminar entre los muertos.' },
-    ash: { name: 'Cráneo de ceniza', kind: 'head', tier: 3, color: '#d09262', cards: ['forbidden', 'echoes'], lore: 'El archivo prohibido habla a través de ti.', expansion: true }
+    skull: { name: T('Cráneo cosido'), kind: 'head', tier: 1, color: '#8fa58e', cards: ['focus', 'whisper'], lore: T('Alguien dejó un recuerdo dentro.') },
+    surgeon: { name: T('Máscara del cirujano'), kind: 'head', tier: 2, color: '#bda8b7', cards: ['diagnose', 'incision'], lore: T('El último rostro que vieron sus pacientes.') },
+    oracle: { name: T('Oráculo de vidrio'), kind: 'head', tier: 3, color: '#79b9b6', cards: ['omen', 'vision'], lore: T('Ve futuros que no deberían existir.') },
+    jaw: { name: T('Mandíbula de fosa'), kind: 'head', tier: 2, color: '#bc7e78', cards: ['bite', 'scream'], lore: T('La muerte no le quitó el apetito.') },
+    sutures: { name: T('Torso de suturas'), kind: 'torso', tier: 1, color: '#8fa58e', cards: ['stitch', 'brace'], lore: T('Seis vidas. Una mala costura.') },
+    boiler: { name: T('Caldera torácica'), kind: 'torso', tier: 3, color: '#ce9759', cards: ['eruption', 'vent'], lore: T('La llama ocupa el lugar del corazón.') },
+    iron: { name: T('Caja de hierro'), kind: 'torso', tier: 2, color: '#859498', cards: ['ironwall', 'recoil'], lore: T('Ningún pulmón. Ninguna duda.') },
+    mercury: { name: T('Corazón de mercurio'), kind: 'torso', tier: 3, color: '#a3c1cb', cards: ['transfusion', 'surge'], lore: T('Una segunda vida, a interés compuesto.') },
+    bone: { name: T('Brazo de hueso'), kind: 'arm', tier: 1, color: '#c4bca2', cards: ['slash', 'heavy'], lore: T('Todavía recuerda cómo romper cosas.') },
+    scalpel: { name: T('Brazo de bisturís'), kind: 'arm', tier: 2, color: '#adb8b0', cards: ['scalpel', 'dissect'], lore: T('La precisión también puede ser crueldad.') },
+    claw: { name: T('Garra de la morgue'), kind: 'arm', tier: 2, color: '#bd8178', cards: ['rip', 'reap'], lore: T('Nada que toque vuelve a estar entero.') },
+    cannon: { name: T('Cañón galvánico'), kind: 'arm', tier: 3, color: '#c99e60', cards: ['discharge', 'arc'], lore: T('Un trueno encerrado en carne.') },
+    piston: { name: T('Puño hidráulico'), kind: 'arm', tier: 3, color: '#b39979', cards: ['punch', 'crusher'], lore: T('Diseñado para trabajar. Adaptado para sobrevivir.') },
+    legs: { name: T('Pierna reanimada'), kind: 'leg', tier: 1, color: '#8fa58e', cards: ['kick', 'dodge'], lore: T('Un paso más lejos de la mesa.') },
+    spider: { name: T('Zanca arácnida'), kind: 'leg', tier: 2, color: '#9c93b9', cards: ['leap', 'silk'], lore: T('Demasiadas articulaciones. Ningún tropiezo.') },
+    pistons: { name: T('Pierna de pistón'), kind: 'leg', tier: 3, color: '#c19860', cards: ['impact', 'momentum'], lore: T('El hierro tampoco quiere arder.') },
+    funeral: { name: T('Pie funerario'), kind: 'leg', tier: 2, color: '#879caf', cards: ['grave', 'silent'], lore: T('Aprendió a caminar entre los muertos.') },
+    ash: { name: T('Cráneo de ceniza'), kind: 'head', tier: 3, color: '#d09262', cards: ['forbidden', 'echoes'], lore: T('El archivo prohibido habla a través de ti.'), expansion: true }
   };
 
   const enemies = {
-    orderly: { name: 'Celador de la morgue', tag: 'ABOMINACIÓN', sprite: 'brute', hp: 30, attack: 9, loot: ['claw', 'bone', 'funeral'], pattern: ['attack', 'guard', 'attack', 'fury'] },
-    scientist: { name: 'Cirujano apóstata', tag: 'CIENTÍFICO CORRUPTO', sprite: 'scientist', hp: 27, attack: 8, loot: ['surgeon', 'scalpel', 'mercury'], pattern: ['attack', 'heat', 'attack', 'guard'] },
-    stitched: { name: 'El mal cosido', tag: 'ABOMINACIÓN', sprite: 'stitched', hp: 34, attack: 10, loot: ['jaw', 'iron', 'spider'], pattern: ['guard', 'attack', 'fury', 'attack'] },
-    furnace: { name: 'Custodio de la caldera', tag: 'AUTÓMATA ALQUÍMICO', sprite: 'furnace', hp: 39, attack: 11, loot: ['boiler', 'cannon', 'pistons', 'piston'], pattern: ['attack', 'heat', 'fury', 'guard'] },
-    oracle: { name: 'Anatomista sin ojos', tag: 'CIENTÍFICO CORRUPTO', sprite: 'oracle', hp: 33, attack: 10, loot: ['oracle', 'mercury', 'surgeon'], pattern: ['heat', 'attack', 'guard', 'fury'] },
-    archivist: { name: 'Archivista de ceniza', tag: 'ALA PROHIBIDA', sprite: 'ash', hp: 40, attack: 11, loot: ['ash', 'boiler'], pattern: ['heat', 'fury', 'guard', 'attack'] },
-    boss: { name: 'El Rector de Carne', tag: 'GUARDIÁN DE LA SALIDA', sprite: 'boss', hp: 95, attack: 15, loot: ['cannon', 'mercury', 'oracle'], pattern: ['attack', 'guard', 'fury', 'heat', 'fury'], boss: true }
+    orderly: { name: T('Celador de la morgue'), tag: T('ABOMINACIÓN'), sprite: 'brute', hp: 30, attack: 9, loot: ['claw', 'bone', 'funeral'], pattern: ['attack', 'guard', 'attack', 'fury'] },
+    scientist: { name: T('Cirujano apóstata'), tag: T('CIENTÍFICO CORRUPTO'), sprite: 'scientist', hp: 27, attack: 8, loot: ['surgeon', 'scalpel', 'mercury'], pattern: ['attack', 'heat', 'attack', 'guard'] },
+    stitched: { name: T('El mal cosido'), tag: T('ABOMINACIÓN'), sprite: 'stitched', hp: 34, attack: 10, loot: ['jaw', 'iron', 'spider'], pattern: ['guard', 'attack', 'fury', 'attack'] },
+    furnace: { name: T('Custodio de la caldera'), tag: T('AUTÓMATA ALQUÍMICO'), sprite: 'furnace', hp: 39, attack: 11, loot: ['boiler', 'cannon', 'pistons', 'piston'], pattern: ['attack', 'heat', 'fury', 'guard'] },
+    oracle: { name: T('Anatomista sin ojos'), tag: T('CIENTÍFICO CORRUPTO'), sprite: 'oracle', hp: 33, attack: 10, loot: ['oracle', 'mercury', 'surgeon'], pattern: ['heat', 'attack', 'guard', 'fury'] },
+    archivist: { name: T('Archivista de ceniza'), tag: T('ALA PROHIBIDA'), sprite: 'ash', hp: 40, attack: 11, loot: ['ash', 'boiler'], pattern: ['heat', 'fury', 'guard', 'attack'] },
+    boss: { name: T('El Rector de Carne'), tag: T('GUARDIÁN DE LA SALIDA'), sprite: 'boss', hp: 95, attack: 15, loot: ['cannon', 'mercury', 'oracle'], pattern: ['attack', 'guard', 'fury', 'heat', 'fury'], boss: true }
   };
 
   const floors = [
-    { name: 'Laboratorios de sutura', small: 'Laboratorio', roman: 'I', subtitle: 'Donde la muerte es apenas un procedimiento.' },
-    { name: 'Fundición de los réprobos', small: 'Fundición', roman: 'II', subtitle: 'El humo ya conoce tu nombre.' },
-    { name: 'Observatorio del Rector', small: 'Observatorio', roman: 'III', subtitle: 'La última puerta todavía respira.' }
+    { name: T('Laboratorios de sutura'), small: T('Laboratorio'), roman: 'I', subtitle: T('Donde la muerte es apenas un procedimiento.') },
+    { name: T('Fundición de los réprobos'), small: T('Fundición'), roman: 'II', subtitle: T('El humo ya conoce tu nombre.') },
+    { name: T('Observatorio del Rector'), small: T('Observatorio'), roman: 'III', subtitle: T('La última puerta todavía respira.') }
   ];
 
   const roomNames = {
-    start: 'Mesa de disección', corridor: 'Pasillo de ceniza', combat: 'Sala de contención',
-    cache: 'Suministros abandonados', workshop: 'Estación de injertos', trap: 'Conducto de vapor',
-    stairs: 'Escalera de caracol', boss: 'El umbral del Rector', archive: 'Archivo anatómico'
+    start: T('Mesa de disección'), corridor: T('Pasillo de ceniza'), combat: T('Sala de contención'),
+    cache: T('Suministros abandonados'), workshop: T('Estación de injertos'), trap: T('Conducto de vapor'),
+    stairs: T('Escalera de caracol'), boss: T('El umbral del Rector'), archive: T('Archivo anatómico')
   };
 
   const skins = {
-    suture: { name: 'Piel de suturas', cost: 0, color: '#8fa58e', description: 'Carne prestada. Puntadas imperfectas.' },
-    copper: { name: 'Óxido y cobre', cost: 15, color: '#bd875b', description: 'Pátina cobriza para tu nuevo cuerpo.' },
-    spectral: { name: 'Espíritu de éter', cost: 25, color: '#72b9bd', description: 'Un resplandor espectral entre las costuras.' },
-    crimson: { name: 'Luto carmesí', cost: 35, color: '#be777d', description: 'El color de lo que no has olvidado.' }
+    suture: { name: T('Piel de suturas'), cost: 0, color: '#8fa58e', description: T('Carne prestada. Puntadas imperfectas.') },
+    copper: { name: T('Óxido y cobre'), cost: 15, color: '#bd875b', description: T('Pátina cobriza para tu nuevo cuerpo.') },
+    spectral: { name: T('Espíritu de éter'), cost: 25, color: '#72b9bd', description: T('Un resplandor espectral entre las costuras.') },
+    crimson: { name: T('Luto carmesí'), cost: 35, color: '#be777d', description: T('El color de lo que no has olvidado.') }
   };
 
   return { slots, cards, parts, enemies, floors, roomNames, skins };
@@ -889,6 +1496,8 @@ window.DDData = (() => {
   <script>
 /* Reglas, torre procedural, reloj y guardado local. */
 'use strict';
+
+const T = window.DDLang.t;
 
 window.DDGame = class extends EventTarget {
   constructor() {
@@ -950,7 +1559,7 @@ window.DDGame = class extends EventTarget {
     } catch (_) {
       if (this.storageAvailable) {
         this.storageAvailable = false;
-        this.notice('El navegador no permite guardar. Esta sesión sigue siendo jugable.', 'warning');
+        this.notice(T('El navegador no permite guardar. Esta sesión sigue siendo jugable.'), 'warning');
       }
     }
   }
@@ -995,7 +1604,7 @@ window.DDGame = class extends EventTarget {
   guard() {
     if (!this.active()) return false;
     if (this.remaining() <= 0) {
-      this.finish(false, 'La torre se derrumbó. El reloj no concede segundas oportunidades; tu espíritu, sí.');
+      this.finish(false, T('La torre se derrumbó. El reloj no concede segundas oportunidades; tu espíritu, sí.'));
       return false;
     }
     return true;
@@ -1017,9 +1626,9 @@ window.DDGame = class extends EventTarget {
       log: [], origin: '', awarded: false
     };
     const bases = [
-      { name: 'El ensamblado', hp: 80, arm: 'scalpel', torso: 'sutures', head: 'skull', leg: 'legs' },
-      { name: 'El estibador', hp: 88, arm: 'bone', torso: 'iron', head: 'skull', leg: 'legs' },
-      { name: 'El hambriento', hp: 76, arm: 'bone', torso: 'sutures', head: 'jaw', leg: 'funeral' }
+      { name: T('El ensamblado'), hp: 80, arm: 'scalpel', torso: 'sutures', head: 'skull', leg: 'legs' },
+      { name: T('El estibador'), hp: 88, arm: 'bone', torso: 'iron', head: 'skull', leg: 'legs' },
+      { name: T('El hambriento'), hp: 76, arm: 'bone', torso: 'sutures', head: 'jaw', leg: 'funeral' }
     ];
     const base = this.meta.runs === 1 ? bases[0] : this.pick(bases);
     this.state.origin = base.name;
@@ -1032,8 +1641,8 @@ window.DDGame = class extends EventTarget {
     }
     this.state.map = this.generateFloor(0);
     this.reveal(12);
-    this.log('Has despertado. Encuentra la escalera al noreste. El reloj ya corre.');
-    this.log(`${base.name}: otro cuerpo para un espíritu que se niega a morir.`);
+    this.log(T('Has despertado. Encuentra la escalera al noreste. El reloj ya corre.'));
+    this.log(T('{name}: otro cuerpo para un espíritu que se niega a morir.', { name: base.name }));
     this.sound('revive');
     this.change();
   }
@@ -1147,8 +1756,8 @@ window.DDGame = class extends EventTarget {
       }
     }
     this.reveal(this.state.current);
-    this.log('¡El derrumbe ha cambiado los pasillos! La salida sigue siendo accesible.');
-    this.notice('La torre se retuerce. Los pasillos han cambiado.', 'warning');
+    this.log(T('¡El derrumbe ha cambiado los pasillos! La salida sigue siendo accesible.'));
+    this.notice(T('La torre se retuerce. Los pasillos han cambiado.'), 'warning');
     this.sound('collapse');
     this.emit('effect', { type: 'shake' });
     this.change();
@@ -1164,7 +1773,7 @@ window.DDGame = class extends EventTarget {
     if (!this.guard()) return;
     const s = this.state;
     if (s.phase !== 'explore') {
-      this.notice(s.phase === 'combat' ? 'Resuelve el combate para seguir explorando.' : 'Resuelve esta sala antes de avanzar.');
+      this.notice(s.phase === 'combat' ? T('Resuelve el combate para seguir explorando.') : T('Resuelve esta sala antes de avanzar.'));
       return;
     }
     if (!s.map[s.current].links.includes(index)) return;
@@ -1202,7 +1811,7 @@ window.DDGame = class extends EventTarget {
     s.stats.rooms++;
     this.reveal(12);
     for (const part of Object.values(s.body)) part.heat = Math.max(0, part.heat - 15);
-    this.log(`Has alcanzado ${DDData.floors[s.floor].name}.`);
+    this.log(T('Has alcanzado {name}.', { name: DDData.floors[s.floor].name }));
     this.sound('stairs');
     this.change();
   }
@@ -1212,8 +1821,8 @@ window.DDGame = class extends EventTarget {
     this.meta.blueprints.push(id);
     if (this.state) this.state.stats.discovered++;
     if (notify) {
-      this.notice(`Plano descubierto: ${DDData.parts[id].name}. Lo conservarás al morir.`, 'good');
-      this.log(`Plano permanente descubierto: ${DDData.parts[id].name}.`);
+      this.notice(T('Plano descubierto: {name}. Lo conservarás al morir.', { name: DDData.parts[id].name }), 'good');
+      this.log(T('Plano permanente descubierto: {name}.', { name: DDData.parts[id].name }));
     }
     return true;
   }
@@ -1236,8 +1845,8 @@ window.DDGame = class extends EventTarget {
     s.coolants++;
     const ids = s.floor === 0 ? ['claw', 'scalpel', 'spider', 'iron'] : ['cannon', 'pistons', 'boiler', 'oracle'];
     const item = this.addPart(this.pick(ids));
-    this.log(`Recoges ${amount} de chatarra, un suero, un refrigerante y ${DDData.parts[item.id].name}.`);
-    this.notice(`+${amount} chatarra · +1 suero · +1 refrigerante · injerto en la bolsa`, 'good');
+    this.log(T('Recoges {amount} de chatarra, un suero, un refrigerante y {name}.', { amount, name: DDData.parts[item.id].name }));
+    this.notice(T('+{amount} chatarra · +1 suero · +1 refrigerante · injerto en la bolsa', { amount }), 'good');
     room.resolved = true;
     s.phase = 'explore';
     this.sound('loot');
@@ -1250,22 +1859,22 @@ window.DDGame = class extends EventTarget {
     const room = s.map[s.current];
     if (s.phase !== 'event' || room.type !== 'trap' || room.resolved) return;
     if (choice === 'scraps') {
-      if (s.scraps < 5) { this.notice('Necesitas 5 de chatarra.'); return; }
+      if (s.scraps < 5) { this.notice(T('Necesitas 5 de chatarra.')); return; }
       s.scraps -= 5;
-      this.log('Desvías el vapor con una válvula improvisada.');
+      this.log(T('Desvías el vapor con una válvula improvisada.'));
     } else if (choice === 'legs') {
       const legs = ['legL', 'legR'].filter(key => s.body[key].id);
-      if (!legs.length) { this.notice('Necesitas al menos una pierna intacta.'); return; }
+      if (!legs.length) { this.notice(T('Necesitas al menos una pierna intacta.')); return; }
       for (const key of legs) this.stress(key, 30, 12);
-      this.log('Saltas sobre el vapor. Tus piernas absorben el esfuerzo.');
+      this.log(T('Saltas sobre el vapor. Tus piernas absorben el esfuerzo.'));
     } else if (choice === 'cross') {
       s.hp -= 9 + s.floor * 2;
-      this.log('Atraviesas el vapor. Tu carne paga el precio.');
+      this.log(T('Atraviesas el vapor. Tu carne paga el precio.'));
       this.sound('hurt');
     } else return;
     room.resolved = true;
     s.phase = 'explore';
-    if (s.hp <= 0) this.finish(false, 'El vapor ha deshecho tus últimas suturas.');
+    if (s.hp <= 0) this.finish(false, T('El vapor ha deshecho tus últimas suturas.'));
     else this.change();
   }
 
@@ -1279,7 +1888,7 @@ window.DDGame = class extends EventTarget {
     if (unknown.length) this.discover(this.pick(unknown));
     else {
       s.scraps += 10;
-      this.notice('Ya conoces estos planos. Recuperas 10 de chatarra.', 'good');
+      this.notice(T('Ya conoces estos planos. Recuperas 10 de chatarra.'), 'good');
     }
     room.resolved = true;
     s.phase = 'explore';
@@ -1302,30 +1911,30 @@ window.DDGame = class extends EventTarget {
   }
 
   craft(id) {
-    if (!this.guard() || !this.atWorkshop()) { this.notice('Solo puedes fabricar en una estación de injertos.'); return; }
+    if (!this.guard() || !this.atWorkshop()) { this.notice(T('Solo puedes fabricar en una estación de injertos.')); return; }
     const def = DDData.parts[id];
     if (!def || !this.meta.blueprints.includes(id) || (def.expansion && !this.meta.expansion)) return;
     const cost = 6 + def.tier * 5;
-    if (this.state.scraps < cost) { this.notice(`Necesitas ${cost} de chatarra.`, 'warning'); return; }
+    if (this.state.scraps < cost) { this.notice(T('Necesitas {cost} de chatarra.', { cost }), 'warning'); return; }
     this.state.scraps -= cost;
     this.addPart(id);
-    this.log(`Has fabricado ${def.name}. Está en tu bolsa de injertos.`);
-    this.notice(`${def.name} añadido a la bolsa.`, 'good');
+    this.log(T('Has fabricado {name}. Está en tu bolsa de injertos.', { name: def.name }));
+    this.notice(T('{name} añadido a la bolsa.', { name: def.name }), 'good');
     this.sound('graft');
     this.change();
   }
 
   repair() {
     if (!this.guard() || !this.atWorkshop()) return;
-    if (this.state.scraps < 8) { this.notice('Necesitas 8 de chatarra.'); return; }
+    if (this.state.scraps < 8) { this.notice(T('Necesitas 8 de chatarra.')); return; }
     const parts = Object.values(this.state.body).filter(p => p.id);
-    if (!parts.some(p => p.integrity < 100 || p.heat > 0)) { this.notice('Tus injertos intactos ya están en perfecto estado.'); return; }
+    if (!parts.some(p => p.integrity < 100 || p.heat > 0)) { this.notice(T('Tus injertos intactos ya están en perfecto estado.')); return; }
     this.state.scraps -= 8;
     for (const part of parts) {
       part.integrity = Math.min(100, part.integrity + 40);
       part.heat = 0;
     }
-    this.log('La estación repara 40 de integridad y enfría tus injertos intactos.');
+    this.log(T('La estación repara 40 de integridad y enfría tus injertos intactos.'));
     this.sound('graft');
     this.change();
   }
@@ -1338,7 +1947,7 @@ window.DDGame = class extends EventTarget {
     if (index < 0 || !slot) return;
     const item = s.inventory[index];
     if (DDData.parts[item.id].kind !== slot.kind) return;
-    if (s.phase === 'combat' && s.energy < 1) { this.notice('Injertar durante el combate cuesta 1 de energía.'); return; }
+    if (s.phase === 'combat' && s.energy < 1) { this.notice(T('Injertar durante el combate cuesta 1 de energía.')); return; }
     const old = s.body[slotId];
     s.inventory.splice(index, 1);
     if (old.id) s.inventory.push({ ...old, uid: ++s.uid });
@@ -1352,8 +1961,8 @@ window.DDGame = class extends EventTarget {
       }
     }
     s.stats.grafts++;
-    this.log(`Injertas ${DDData.parts[item.id].name} en ${slot.label.toLowerCase()}.`);
-    this.notice('Injerto conectado. Tu cuerpo y tu mazo han cambiado.', 'good');
+    this.log(T('Injertas {name} en {slot}.', { name: DDData.parts[item.id].name, slot: slot.label.toLowerCase() }));
+    this.notice(T('Injerto conectado. Tu cuerpo y tu mazo han cambiado.'), 'good');
     this.sound('graft');
     this.change();
   }
@@ -1366,7 +1975,7 @@ window.DDGame = class extends EventTarget {
     const item = s.inventory.splice(index, 1)[0];
     const amount = DDData.parts[item.id].tier * 3;
     s.scraps += amount;
-    this.notice(`Injerto desguazado: +${amount} de chatarra.`, 'good');
+    this.notice(T('Injerto desguazado: +{amount} de chatarra.', { amount }), 'good');
     this.sound('loot');
     this.change();
   }
@@ -1375,16 +1984,16 @@ window.DDGame = class extends EventTarget {
     if (!this.guard()) return;
     const s = this.state;
     if (kind === 'heal') {
-      if (s.potions <= 0) { this.notice('No te quedan sueros.'); return; }
-      if (s.hp >= s.maxHp) { this.notice('Tu vida ya está al máximo.'); return; }
+      if (s.potions <= 0) { this.notice(T('No te quedan sueros.')); return; }
+      if (s.hp >= s.maxHp) { this.notice(T('Tu vida ya está al máximo.')); return; }
       s.potions--;
       s.hp = Math.min(s.maxHp, s.hp + 28);
-      this.log('Suero vital: recuperas hasta 28 de vida.');
+      this.log(T('Suero vital: recuperas hasta 28 de vida.'));
       this.sound('heal');
     } else if (kind === 'cool') {
-      if (s.coolants <= 0) { this.notice('No te queda refrigerante.'); return; }
+      if (s.coolants <= 0) { this.notice(T('No te queda refrigerante.')); return; }
       if (!Object.values(s.body).some(p => p.id && (p.heat > 0 || p.integrity < 100))) {
-        this.notice('No necesitas enfriar ni reparar ningún injerto.'); return;
+        this.notice(T('No necesitas enfriar ni reparar ningún injerto.')); return;
       }
       s.coolants--;
       for (const part of Object.values(s.body)) {
@@ -1392,7 +2001,7 @@ window.DDGame = class extends EventTarget {
         part.heat = Math.max(0, part.heat - 38);
         part.integrity = Math.min(100, part.integrity + 12);
       }
-      this.log('Refrigerante: −38° y +12 de integridad en todos los injertos intactos.');
+      this.log(T('Refrigerante: −38° y +12 de integridad en todos los injertos intactos.'));
       this.sound('cool');
     } else return;
     this.change();
@@ -1427,8 +2036,8 @@ window.DDGame = class extends EventTarget {
       this.state.stats.broken++;
       this.purgeSlot(slotId);
       if (this.state.phase === 'combat') this.state.draw.push(...this.cardsForSlot(slotId));
-      this.notice(`¡${name} se ha roto! Sus cartas desaparecen. Injerta un reemplazo.`, 'danger');
-      this.log(`${name} se rompe. Solo queda un muñón.`);
+      this.notice(T('¡{name} se ha roto! Sus cartas desaparecen. Injerta un reemplazo.', { name }), 'danger');
+      this.log(T('{name} se rompe. Solo queda un muñón.', { name }));
       this.sound('break');
       this.emit('effect', { type: 'break', slot: slotId });
     }
@@ -1451,7 +2060,7 @@ window.DDGame = class extends EventTarget {
     s.discard = [];
     s.draw = this.shuffle(this.fullDeck());
     this.drawCards(5);
-    this.log(`${def.name} te bloquea el paso. La intención enemiga está a la vista.`);
+    this.log(T('{name} te bloquea el paso. La intención enemiga está a la vista.', { name: def.name }));
     this.sound(boss ? 'boss' : 'combat');
   }
 
@@ -1475,10 +2084,10 @@ window.DDGame = class extends EventTarget {
     const kind = def.pattern[e.move % def.pattern.length];
     const base = def.attack + (def.boss ? 0 : s.floor * 2) + (this.remaining() < 120000 ? 2 : 0);
     const damage = Math.floor(base * (kind === 'fury' ? 1.6 : 1) * (e.weak > 0 ? 0.6 : 1));
-    if (e.stun > 0) return { kind: 'stunned', label: 'Aturdido · no actuará', value: 0, icon: 'bolt' };
-    if (kind === 'guard') return { kind, label: 'Se protegerá · 12 defensa', value: 12, icon: 'shield' };
-    if (kind === 'heat') return { kind, label: 'Vapor · +22° a un injerto', value: 22, icon: 'flame' };
-    return { kind, label: `${kind === 'fury' ? 'Golpe brutal' : 'Atacará'} · ${damage} de daño`, value: damage, icon: 'blade' };
+    if (e.stun > 0) return { kind: 'stunned', label: T('Aturdido · no actuará'), value: 0, icon: 'bolt' };
+    if (kind === 'guard') return { kind, label: T('Se protegerá · 12 defensa'), value: 12, icon: 'shield' };
+    if (kind === 'heat') return { kind, label: T('Vapor · +22° a un injerto'), value: 22, icon: 'flame' };
+    return { kind, label: T('{move} · {damage} de daño', { move: T(kind === 'fury' ? 'Golpe brutal' : 'Atacará'), damage }), value: damage, icon: 'blade' };
   }
 
   play(uid) {
@@ -1489,7 +2098,7 @@ window.DDGame = class extends EventTarget {
     const card = s.hand[index];
     if (s.body[card.slot].id !== card.part) { this.purgeSlot(card.slot); this.change(); return; }
     const def = DDData.cards[card.id];
-    if (def.cost > s.energy) { this.notice('No tienes suficiente energía. Termina el turno para recuperar 3.'); return; }
+    if (def.cost > s.energy) { this.notice(T('No tienes suficiente energía. Termina el turno para recuperar 3.')); return; }
     s.energy -= def.cost;
     s.hand.splice(index, 1);
     if (def.damage) {
@@ -1528,34 +2137,34 @@ window.DDGame = class extends EventTarget {
     if (e.burn > 0) {
       e.hp = Math.max(0, e.hp - e.burn);
       this.emit('effect', { type: 'hit', target: 'enemy', amount: e.burn });
-      this.log(`La quemadura inflige ${e.burn} de daño.`);
+      this.log(T('La quemadura inflige {amount} de daño.', { amount: e.burn }));
       e.burn = Math.max(0, e.burn - 1);
       if (e.hp <= 0) { this.victory(); this.change(); return; }
     }
     const intent = this.intent();
     if (intent.kind === 'stunned') {
-      this.log('El enemigo está aturdido. Su intención queda cancelada.');
+      this.log(T('El enemigo está aturdido. Su intención queda cancelada.'));
       e.stun = 0;
     } else if (intent.kind === 'guard') {
       e.block = Math.min(24, e.block + intent.value);
-      this.log('El enemigo se protege con 12 de defensa.');
+      this.log(T('El enemigo se protege con 12 de defensa.'));
       this.sound('guard');
     } else if (intent.kind === 'heat') {
       const slots = DDData.slots.filter(slot => s.body[slot.id].id);
       if (slots.length) {
         const slot = this.pick(slots);
         this.stress(slot.id, intent.value, 3);
-        this.log(`Una descarga de vapor recalienta tu ${slot.label.toLowerCase()}.`);
+        this.log(T('Una descarga de vapor recalienta tu {slot}.', { slot: slot.label.toLowerCase() }));
         this.sound('burn');
       }
     } else {
       const damage = Math.max(0, intent.value - s.block);
       s.hp = Math.max(0, s.hp - damage);
-      this.log(`El enemigo inflige ${damage} de daño; tu defensa absorbe ${Math.min(s.block, intent.value)}.`);
+      this.log(T('El enemigo inflige {damage} de daño; tu defensa absorbe {blocked}.', { damage, blocked: Math.min(s.block, intent.value) }));
       this.emit('effect', { type: 'hit', target: 'player', amount: damage });
       this.sound(damage ? 'hurt' : 'guard');
     }
-    if (s.hp <= 0) { this.finish(false, 'Tus suturas han cedido. La carne se queda; el espíritu continúa.'); return; }
+    if (s.hp <= 0) { this.finish(false, T('Tus suturas han cedido. La carne se queda; el espíritu continúa.')); return; }
     e.move++;
     e.weak = Math.max(0, e.weak - 1);
     for (const part of Object.values(s.body)) part.heat = Math.max(0, part.heat - 12);
@@ -1580,7 +2189,7 @@ window.DDGame = class extends EventTarget {
     s.reward = { id: item.id, uid: item.uid, scraps: amount, enemy: def.name, boss: Boolean(def.boss) };
     s.phase = 'loot';
     s.block = 0;
-    this.log(`${def.name} cae. Cosechas ${DDData.parts[item.id].name}, ${amount} de chatarra y 5 de vida.`);
+    this.log(T('{enemy} cae. Cosechas {name}, {amount} de chatarra y 5 de vida.', { enemy: def.name, name: DDData.parts[item.id].name, amount }));
     this.sound('victory');
   }
 
@@ -1597,7 +2206,7 @@ window.DDGame = class extends EventTarget {
     if (!this.guard()) return;
     const s = this.state;
     if (s.floor !== 2 || s.current !== 3 || !s.map[3].resolved || s.phase !== 'explore') return;
-    this.finish(true, 'Sales de la torre mientras el cielo se llena de ceniza. Este cuerpo, por fin, te pertenece.');
+    this.finish(true, T('Sales de la torre mientras el cielo se llena de ceniza. Este cuerpo, por fin, te pertenece.'));
   }
 
   finish(won, reason) {
@@ -1624,20 +2233,20 @@ window.DDGame = class extends EventTarget {
   buy(id) {
     if (id === 'expansion') {
       if (this.meta.expansion) return;
-      if (this.meta.souls < 30) { this.notice('Necesitas 30 ecos. Los obtienes al terminar cada intento.'); return; }
+      if (this.meta.souls < 30) { this.notice(T('Necesitas 30 ecos. Los obtienes al terminar cada intento.')); return; }
       this.meta.souls -= 30;
       this.meta.expansion = true;
-      this.notice('Ala prohibida abierta. Su archivista puede aparecer en los próximos encuentros.', 'good');
+      this.notice(T('Ala prohibida abierta. Su archivista puede aparecer en los próximos encuentros.'), 'good');
     } else {
       const skin = DDData.skins[id];
       if (!skin) return;
       if (!this.meta.skins.includes(id)) {
-        if (this.meta.souls < skin.cost) { this.notice(`Necesitas ${skin.cost} ecos.`); return; }
+        if (this.meta.souls < skin.cost) { this.notice(T('Necesitas {cost} ecos.', { cost: skin.cost })); return; }
         this.meta.souls -= skin.cost;
         this.meta.skins.push(id);
       }
       this.meta.skin = id;
-      this.notice(`Apariencia equipada: ${skin.name}.`, 'good');
+      this.notice(T('Apariencia equipada: {name}.', { name: skin.name }), 'good');
     }
     this.sound('discover');
     this.change();
@@ -2281,7 +2890,7 @@ window.DDAudio = class {
       this.context.resume().catch(() => {});
       this.update();
     } catch (_) {
-      this.game.notice('El audio no está disponible en este navegador. El juego puede continuar.');
+      this.game.notice(window.DDLang.t('El audio no está disponible en este navegador. El juego puede continuar.'));
     }
   }
 
@@ -2409,6 +3018,7 @@ window.DDAudio = class {
 
 (() => {
   const D = window.DDData;
+  const T = window.DDLang.t;
   const paths = {
     heart: '<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/>',
     bolt: '<path d="m13 2-9 12h7l-1 8 10-12h-7l1-8Z"/>',
@@ -2450,8 +3060,8 @@ window.DDAudio = class {
     const seconds = Math.ceil(Math.max(0, ms) / 1000);
     return `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
   };
-  const kindLabel = { head: 'Cabeza', torso: 'Torso', arm: 'Brazo', leg: 'Pierna' };
-  const tierLabel = { 1: 'Común', 2: 'Inusual', 3: 'Singular' };
+  const kindLabel = { head: T('Cabeza'), torso: T('Torso'), arm: T('Brazo'), leg: T('Pierna') };
+  const tierLabel = { 1: T('Común'), 2: T('Inusual'), 3: T('Singular') };
   const roomIcon = { start: 'skull', corridor: 'gear', combat: 'blade', cache: 'bag', trap: 'flame', workshop: 'flask', stairs: 'up', boss: 'skull', archive: 'book' };
 
   function pixelArt(type, color) {
@@ -2506,8 +3116,8 @@ window.DDAudio = class {
       this.render();
       this.game.tick();
       this.setupGamepad();
-      if (this.game.state && this.game.active()) this.toast({ text: 'Partida restaurada. El reloj siguió corriendo mientras no estabas.', tone: 'warning' });
-      if (!this.game.storageAvailable) this.toast({ text: 'El guardado local no está disponible en este navegador.', tone: 'warning' });
+      if (this.game.state && this.game.active()) this.toast({ text: T('Partida restaurada. El reloj siguió corriendo mientras no estabas.'), tone: 'warning' });
+      if (!this.game.storageAvailable) this.toast({ text: T('El guardado local no está disponible en este navegador.'), tone: 'warning' });
     }
 
     button(action, label, iconName, cls = '', attrs = '') {
@@ -2525,19 +3135,27 @@ window.DDAudio = class {
       setTimeout(() => item.remove(), tone === 'danger' ? 7000 : 4500);
     }
 
+    languageButtons() {
+      const current = window.DDLang.lang();
+      return [['es', 'ES', T('Español')], ['en', 'EN', T('Inglés')]].map(([id, label, title]) =>
+        this.button('lang', label, '', current === id ? 'small' : 'small quiet',
+          `data-lang="${id}" aria-pressed="${current === id}" aria-label="${title}" title="${title}"`)).join('');
+    }
+
     header() {
       return `<header class="topbar">
-        <a class="brand" href="#" data-action="home" aria-label="Deadlock Deck: inicio">
+        <a class="brand" href="#" data-action="home" aria-label="${T('Deadlock Deck: inicio')}">
           <span class="brand-mark">${icon('skull')}</span>
-          <span><strong>DEADLOCK DECK<span class="brand-dot">.</span></strong><small>EL RELOJ ANATÓMICO</small></span>
+          <span><strong>DEADLOCK DECK<span class="brand-dot">.</span></strong><small>${T('EL RELOJ ANATÓMICO')}</small></span>
         </a>
-        <div class="header-middle"><span class="live-dot"></span> LA TORRE ESTÁ ARDIENDO</div>
-        <nav class="header-actions" aria-label="Menú del juego">
-          ${this.button('archive', 'Archivo', 'book', 'quiet desktop-label')}
-          ${this.button('shop', 'Relicario', 'coin', 'quiet desktop-label')}
-          ${this.button('sound', '', this.game.meta.volume > 0 ? 'sound' : 'mute', 'icon-only quiet', `aria-label="${this.game.meta.volume > 0 ? 'Silenciar sonido' : 'Activar sonido'}" title="Sonido"`)}
-          ${this.button('help', '', 'help', 'icon-only quiet', 'aria-label="Cómo jugar y controles" title="Cómo jugar"')}
-          ${this.button('settings', '', 'settings', 'icon-only quiet', 'aria-label="Ajustes" title="Ajustes"')}
+        <div class="header-middle"><span class="live-dot"></span> ${T('LA TORRE ESTÁ ARDIENDO')}</div>
+        <nav class="header-actions" aria-label="${T('Menú del juego')}">
+          ${this.languageButtons()}
+          ${this.button('archive', T('Archivo'), 'book', 'quiet desktop-label')}
+          ${this.button('shop', T('Relicario'), 'coin', 'quiet desktop-label')}
+          ${this.button('sound', '', this.game.meta.volume > 0 ? 'sound' : 'mute', 'icon-only quiet', `aria-label="${this.game.meta.volume > 0 ? T('Silenciar sonido') : T('Activar sonido')}" title="${T('Sonido')}"`)}
+          ${this.button('help', '', 'help', 'icon-only quiet', `aria-label="${T('Cómo jugar y controles')}" title="${T('Cómo jugar')}"`)}
+          ${this.button('settings', '', 'settings', 'icon-only quiet', `aria-label="${T('Ajustes')}" title="${T('Ajustes')}"`)}
         </nav>
       </header>`;
     }
@@ -2546,12 +3164,12 @@ window.DDAudio = class {
       const s = this.game.state;
       const hp = s ? Math.max(0, s.hp) : 80;
       const maxHp = s?.maxHp || 80;
-      return `<section class="status-bar" aria-label="Estado del intento">
-        <div class="subject-block"><span class="eyebrow">SUJETO REANIMADO</span><strong>N.º ${String(this.game.meta.runs || 1).padStart(3, '0')} <span class="subtle">/ ${s?.origin || 'El ensamblado'}</span></strong></div>
-        <div class="health-block"><div class="stat-line"><span>${icon('heart')} VITALIDAD</span><strong>${hp}<span> / ${maxHp}</span></strong></div><div class="health-track"><span style="width:${hp / maxHp * 100}%"></span></div></div>
-        <div class="clock-block" id="clock-block"><span class="clock-label">${icon('clock')} TIEMPO HASTA EL COLAPSO</span><strong id="clock" aria-label="Tiempo restante">${timeLabel(this.game.remaining())}</strong><div class="clock-track"><span id="clock-fill"></span></div></div>
-        <div class="resource-block"><span class="eyebrow">${icon('gear')} CHATARRA</span><strong>${s?.scraps ?? 0}</strong></div>
-        <div class="resource-block echoes-stat"><span class="eyebrow">${icon('coin')} ECOS</span><strong>${this.game.meta.souls}</strong></div>
+      return `<section class="status-bar" aria-label="${T('Estado del intento')}">
+        <div class="subject-block"><span class="eyebrow">${T('SUJETO REANIMADO')}</span><strong>${T('N.º {number}', { number: String(this.game.meta.runs || 1).padStart(3, '0') })} <span class="subtle">/ ${s?.origin || T('El ensamblado')}</span></strong></div>
+        <div class="health-block"><div class="stat-line"><span>${icon('heart')} ${T('VITALIDAD')}</span><strong>${hp}<span> / ${maxHp}</span></strong></div><div class="health-track"><span style="width:${hp / maxHp * 100}%"></span></div></div>
+        <div class="clock-block" id="clock-block"><span class="clock-label">${icon('clock')} ${T('TIEMPO HASTA EL COLAPSO')}</span><strong id="clock" aria-label="${T('Tiempo restante')}">${timeLabel(this.game.remaining())}</strong><div class="clock-track"><span id="clock-fill"></span></div></div>
+        <div class="resource-block"><span class="eyebrow">${icon('gear')} ${T('CHATARRA')}</span><strong>${s?.scraps ?? 0}</strong></div>
+        <div class="resource-block echoes-stat"><span class="eyebrow">${icon('coin')} ${T('ECOS')}</span><strong>${this.game.meta.souls}</strong></div>
       </section>`;
     }
 
@@ -2559,21 +3177,21 @@ window.DDAudio = class {
       const s = this.game.state;
       const body = s?.body || this.art.defaultBody();
       const cardsCount = D.slots.reduce((n, slot) => n + (body[slot.id].id ? 2 : 1), 0);
-      return `<div class="panel-title"><h2>Tu anatomía</h2><span>${cardsCount} CARTAS</span></div>
-        <div class="anatomy-illustration"><canvas id="${modal ? 'modal-body' : 'body-canvas'}" width="200" height="148" aria-label="Tu cuerpo con los seis injertos actuales"></canvas><span class="specimen-tag">FIG. ${String(this.game.meta.runs || 1).padStart(3, '0')}</span></div>
+      return `<div class="panel-title"><h2>${T('Tu anatomía')}</h2><span>${T('{count} CARTAS', { count: cardsCount })}</span></div>
+        <div class="anatomy-illustration"><canvas id="${modal ? 'modal-body' : 'body-canvas'}" width="200" height="148" aria-label="${T('Tu cuerpo con los seis injertos actuales')}"></canvas><span class="specimen-tag">FIG. ${String(this.game.meta.runs || 1).padStart(3, '0')}</span></div>
         <div class="anatomy-slots">${D.slots.map(slot => {
           const p = body[slot.id];
           const def = p.id ? D.parts[p.id] : null;
           const warning = p.heat >= 75 || (p.integrity < 25 && def);
-          return `<button type="button" class="body-slot ${!def ? 'broken' : warning ? 'hot' : ''}" data-action="part" data-slot="${slot.id}" aria-label="${slot.label}: ${def?.name || 'Muñón'}. Calor ${p.heat} grados. Integridad ${p.integrity} por ciento.">
+          return `<button type="button" class="body-slot ${!def ? 'broken' : warning ? 'hot' : ''}" data-action="part" data-slot="${slot.id}" aria-label="${T('{slot}: {part}. Calor {heat} grados. Integridad {integrity} por ciento.', { slot: slot.label, part: def?.name || T('Muñón'), heat: p.heat, integrity: p.integrity })}">
             <span class="slot-glyph">${icon(slot.kind === 'head' ? 'skull' : slot.kind === 'torso' ? 'heart' : slot.kind === 'arm' ? 'bone' : 'foot')}</span>
-            <span class="slot-content"><span class="slot-heading">${slot.label}<b>${def ? `${p.heat}°` : 'ROTO'}</b></span><strong>${def?.name || 'Muñón · busca un reemplazo'}</strong>
+            <span class="slot-content"><span class="slot-heading">${slot.label}<b>${def ? `${p.heat}°` : T('ROTO')}</b></span><strong>${def?.name || T('Muñón · busca un reemplazo')}</strong>
             <span class="limb-meter"><i style="width:${p.integrity}%;background:${def?.color || '#b97567'}"></i></span><span class="heat-meter"><i style="width:${p.heat}%"></i></span></span>
           </button>`;
         }).join('')}</div>
-        <div class="anatomy-legend"><span><i class="integrity-dot"></i> Integridad</span><span><i class="heat-dot"></i> Calor</span></div>
-        ${this.button('bag', `Bolsa de injertos <b>${s?.inventory.length || 0}</b>`, 'bag', 'wide bag-button')}
-        <div class="consumables"><button type="button" class="consumable" data-action="heal" ${!this.game.active() ? 'disabled' : ''} title="Recupera 28 de vida · Q">${icon('flask')}<span>Suero<small>+28 vida</small></span><b>×${s?.potions || 0}</b></button><button type="button" class="consumable coolant" data-action="cool" ${!this.game.active() ? 'disabled' : ''} title="−38° y +12 integridad en todos los injertos intactos · E">${icon('snow')}<span>Refrigerante<small>−38° · repara</small></span><b>×${s?.coolants || 0}</b></button></div>`;
+        <div class="anatomy-legend"><span><i class="integrity-dot"></i> ${T('Integridad')}</span><span><i class="heat-dot"></i> ${T('Calor')}</span></div>
+        ${this.button('bag', `${T('Bolsa de injertos')} <b>${s?.inventory.length || 0}</b>`, 'bag', 'wide bag-button')}
+        <div class="consumables"><button type="button" class="consumable" data-action="heal" ${!this.game.active() ? 'disabled' : ''} title="${T('Recupera 28 de vida · Q')}">${icon('flask')}<span>${T('Suero')}<small>${T('+28 vida')}</small></span><b>×${s?.potions || 0}</b></button><button type="button" class="consumable coolant" data-action="cool" ${!this.game.active() ? 'disabled' : ''} title="${T('−38° y +12 integridad en todos los injertos intactos · E')}">${icon('snow')}<span>${T('Refrigerante')}<small>${T('−38° · repara')}</small></span><b>×${s?.coolants || 0}</b></button></div>`;
     }
 
     mapMarkup(large = false) {
@@ -2597,21 +3215,21 @@ window.DDAudio = class {
         const [x2, y2] = coordinates(next);
         edges += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="${room.visited && map[next].visited ? 'visited-link' : ''}"/>`;
       }
-      return `<div class="panel-title"><h2>La torre</h2><span>${icon('tower')}</span></div>
+      return `<div class="panel-title"><h2>${T('La torre')}</h2><span>${icon('tower')}</span></div>
         <div class="floor-stack">${[2, 1, 0].map(i => `<div class="floor-row ${floor === i ? 'active' : floor > i ? 'completed' : ''}"><span class="floor-numeral">${D.floors[i].roman}</span><span>${D.floors[i].small}</span>${floor === i ? '<i class="live-dot"></i>' : floor > i ? icon('check') : icon('lock')}</div>`).join('')}</div>
-        <div class="map-heading"><span>PLANO DEL PISO ${D.floors[floor].roman}</span><span>N ↑</span></div>
-        <div class="tower-map ${large ? 'large-map' : ''}" aria-label="Plano de pasillos. Puedes entrar en las salas conectadas a tu posición.">
+        <div class="map-heading"><span>${T('PLANO DEL PISO {roman}', { roman: D.floors[floor].roman })}</span><span>N ↑</span></div>
+        <div class="tower-map ${large ? 'large-map' : ''}" aria-label="${T('Plano de pasillos. Puedes entrar en las salas conectadas a tu posición.')}">
           <svg viewBox="0 0 200 200" class="map-links" aria-hidden="true">${edges}</svg>
           ${map.map(room => {
             const [x, y] = coordinates(room.id);
             const accessible = canMove && map[current].links.includes(room.id);
-            const name = room.seen ? D.roomNames[room.type] : 'Sala desconocida';
-            return `<button type="button" class="map-node ${room.id === current ? 'current' : ''} ${room.visited ? 'visited' : ''} ${room.seen ? 'seen' : ''} ${accessible ? 'reachable' : ''} ${room.id === 3 ? 'exit-node' : ''}" style="left:${x / 2}%;top:${y / 2}%" data-action="move" data-id="${room.id}" ${accessible ? '' : 'disabled'} aria-label="${name}${room.id === current ? ', estás aquí' : accessible ? ', entrar' : ''}" title="${name}">${room.id === current ? '<span class="you-dot"></span>' : room.seen ? icon(roomIcon[room.type]) : '<span class="unknown-dot"></span>'}</button>`;
+            const name = room.seen ? D.roomNames[room.type] : T('Sala desconocida');
+            return `<button type="button" class="map-node ${room.id === current ? 'current' : ''} ${room.visited ? 'visited' : ''} ${room.seen ? 'seen' : ''} ${accessible ? 'reachable' : ''} ${room.id === 3 ? 'exit-node' : ''}" style="left:${x / 2}%;top:${y / 2}%" data-action="move" data-id="${room.id}" ${accessible ? '' : 'disabled'} aria-label="${name}${room.id === current ? T(', estás aquí') : accessible ? T(', entrar') : ''}" title="${name}">${room.id === current ? '<span class="you-dot"></span>' : room.seen ? icon(roomIcon[room.type]) : '<span class="unknown-dot"></span>'}</button>`;
           }).join('')}
         </div>
-        <div class="map-legend"><span><i class="you-dot"></i> Tú</span><span>${icon('up')} ${floor === 2 ? 'Salida' : 'Escalera'}</span><span><i class="unknown-dot"></i> Oculta</span></div>
-        <div class="objective"><span class="eyebrow">OBJETIVO ACTUAL</span><p>${floor === 2 ? 'Derrota al Rector y cruza la última puerta.' : 'Encuentra la escalera y asciende al siguiente piso.'}</p></div>
-        <div class="map-tip">${icon('flame')}<span>Los pasillos cambian a los 2 y 4 minutos. El reloj no se detiene.</span></div>`;
+        <div class="map-legend"><span><i class="you-dot"></i> ${T('Tú')}</span><span>${icon('up')} ${floor === 2 ? T('Salida') : T('Escalera')}</span><span><i class="unknown-dot"></i> ${T('Oculta')}</span></div>
+        <div class="objective"><span class="eyebrow">${T('OBJETIVO ACTUAL')}</span><p>${floor === 2 ? T('Derrota al Rector y cruza la última puerta.') : T('Encuentra la escalera y asciende al siguiente piso.')}</p></div>
+        <div class="map-tip">${icon('flame')}<span>${T('Los pasillos cambian a los 2 y 4 minutos. El reloj no se detiene.')}</span></div>`;
     }
 
     sceneMarkup() {
@@ -2623,11 +3241,11 @@ window.DDAudio = class {
       const enemy = s?.enemy;
       const intent = fight ? this.game.intent() : null;
       return `<section class="scene-panel panel">
-        <div class="scene-heading"><div><span class="eyebrow">PISO ${floor.roman} <span class="separator">/</span> ${floor.name}</span><h1>${room ? D.roomNames[room.type] : 'Mesa de disección'}</h1></div><span class="phase-badge ${fight ? 'combat-badge' : ''}">${icon(fight ? 'blade' : phase === 'loot' ? 'bag' : 'eye')}${fight ? `COMBATE · TURNO ${s.turn}` : phase === 'loot' ? 'COSECHA' : phase === 'dead' ? 'EL ESPÍRITU PERMANECE' : phase === 'won' ? 'LIBERTAD' : 'EXPLORACIÓN'}</span></div>
-        <div class="scene-wrap" id="scene-wrap"><canvas id="scene" width="512" height="276" aria-label="Laboratorio gótico en pixel art. Tu abominación cambia de aspecto con cada injerto."></canvas>
-          <div class="scene-topline"><span class="location-label">${icon('tower')} TORRE DE LA MISERICORDIA</span><span class="scene-coordinates">${String(s?.current ?? 12).padStart(2, '0')} : ${floor.roman}</span></div>
-          ${fight ? `<div class="combat-info"><div class="player-chip"><span>${icon('shield')} ${s.block} DEFENSA</span></div><div class="enemy-chip"><span class="enemy-kind">${D.enemies[enemy.id].tag}</span><h3>${D.enemies[enemy.id].name}</h3><div class="enemy-health"><i style="width:${enemy.hp / enemy.maxHp * 100}%"></i></div><div class="enemy-numbers"><span>${enemy.hp} / ${enemy.maxHp} PV</span><span>${enemy.block ? `◈ ${enemy.block}` : ''}${enemy.burn ? ` · ${enemy.burn} quemadura` : ''}${enemy.weak ? ' · débil' : ''}</span></div></div></div><div class="enemy-intent ${intent.kind}">${icon(intent.icon)}<span>${intent.label}</span></div>` : ''}
-          <div class="scene-bottomline"><span>${s ? `${s.stats.rooms} salas recorridas` : 'UN NUEVO CUERPO. UNA ÚLTIMA OPORTUNIDAD.'}</span><span>${s ? `SEMILLA ${s.seed.toString(16).slice(0, 6).toUpperCase()}` : '06:00'}</span></div>
+        <div class="scene-heading"><div><span class="eyebrow">${T('PISO')} ${floor.roman} <span class="separator">/</span> ${floor.name}</span><h1>${room ? D.roomNames[room.type] : T('Mesa de disección')}</h1></div><span class="phase-badge ${fight ? 'combat-badge' : ''}">${icon(fight ? 'blade' : phase === 'loot' ? 'bag' : 'eye')}${fight ? T('COMBATE · TURNO {turn}', { turn: s.turn }) : phase === 'loot' ? T('COSECHA') : phase === 'dead' ? T('EL ESPÍRITU PERMANECE') : phase === 'won' ? T('LIBERTAD') : T('EXPLORACIÓN')}</span></div>
+        <div class="scene-wrap" id="scene-wrap"><canvas id="scene" width="512" height="276" aria-label="${T('Laboratorio gótico en pixel art. Tu abominación cambia de aspecto con cada injerto.')}"></canvas>
+          <div class="scene-topline"><span class="location-label">${icon('tower')} ${T('TORRE DE LA MISERICORDIA')}</span><span class="scene-coordinates">${String(s?.current ?? 12).padStart(2, '0')} : ${floor.roman}</span></div>
+          ${fight ? `<div class="combat-info"><div class="player-chip"><span>${icon('shield')} ${s.block} ${T('DEFENSA')}</span></div><div class="enemy-chip"><span class="enemy-kind">${D.enemies[enemy.id].tag}</span><h3>${D.enemies[enemy.id].name}</h3><div class="enemy-health"><i style="width:${enemy.hp / enemy.maxHp * 100}%"></i></div><div class="enemy-numbers"><span>${enemy.hp} / ${enemy.maxHp} ${T('PV')}</span><span>${enemy.block ? `◈ ${enemy.block}` : ''}${enemy.burn ? ` · ${enemy.burn} ${T('quemadura')}` : ''}${enemy.weak ? ` · ${T('débil')}` : ''}</span></div></div></div><div class="enemy-intent ${intent.kind}">${icon(intent.icon)}<span>${intent.label}</span></div>` : ''}
+          <div class="scene-bottomline"><span>${s ? T('{rooms} salas recorridas', { rooms: s.stats.rooms }) : T('UN NUEVO CUERPO. UNA ÚLTIMA OPORTUNIDAD.')}</span><span>${s ? `${T('SEMILLA')} ${s.seed.toString(16).slice(0, 6).toUpperCase()}` : '06:00'}</span></div>
         </div>
         ${this.eventMarkup()}
       </section>`;
@@ -2635,38 +3253,38 @@ window.DDAudio = class {
 
     eventMarkup() {
       const s = this.game.state;
-      if (!s) return `<div class="room-event"><div class="event-copy"><h3>Algo dentro de ti se niega a morir.</h3><p>Tu cuerpo es tu mazo. Cada injerto, una nueva posibilidad.</p></div>${this.button('start', 'Reanimar', 'bolt', 'primary')}</div>`;
+      if (!s) return `<div class="room-event"><div class="event-copy"><h3>${T('Algo dentro de ti se niega a morir.')}</h3><p>${T('Tu cuerpo es tu mazo. Cada injerto, una nueva posibilidad.')}</p></div>${this.button('start', T('Reanimar'), 'bolt', 'primary')}</div>`;
       if (s.phase === 'combat') {
         const intent = this.game.intent();
         const projected = ['attack', 'fury'].includes(intent.kind) ? Math.max(0, intent.value - s.block) : null;
-        return `<div class="combat-guidance"><span>${icon('eye')} <strong>Tu turno.</strong> Juega cartas; después, termina el turno.</span><span>${projected !== null ? `Recibirías <b class="${projected ? 'text-red' : 'text-green'}">${projected}</b> de daño.` : intent.kind === 'heat' ? 'El vapor puede romper tus injertos.' : intent.kind === 'stunned' ? 'La intención enemiga está cancelada.' : 'El enemigo prepara su defensa.'}</span></div>`;
+        return `<div class="combat-guidance"><span>${icon('eye')} <strong>${T('Tu turno.')}</strong> ${T('Juega cartas; después, termina el turno.')}</span><span>${projected !== null ? T('Recibirías {damage} de daño.', { damage: `<b class="${projected ? 'text-red' : 'text-green'}">${projected}</b>` }) : intent.kind === 'heat' ? T('El vapor puede romper tus injertos.') : intent.kind === 'stunned' ? T('La intención enemiga está cancelada.') : T('El enemigo prepara su defensa.')}</span></div>`;
       }
       if (s.phase === 'loot') {
         const reward = s.reward;
-        return `<div class="room-event loot-event"><span class="event-emblem">${icon('bag')}</span><div class="event-copy"><span class="eyebrow text-green">ENEMIGO COSECHADO</span><h3>${D.parts[reward.id].name}</h3><p>En tu bolsa · +${reward.scraps} chatarra · +5 vida. El plano es permanente.</p></div><div class="event-actions">${this.button('bag', 'Injertar', 'bone', 'primary')}${this.button('continue-loot', reward.boss ? 'Hacia la salida' : 'Continuar', 'right')}</div></div>`;
+        return `<div class="room-event loot-event"><span class="event-emblem">${icon('bag')}</span><div class="event-copy"><span class="eyebrow text-green">${T('ENEMIGO COSECHADO')}</span><h3>${D.parts[reward.id].name}</h3><p>${T('En tu bolsa · +{scraps} chatarra · +5 vida. El plano es permanente.', { scraps: reward.scraps })}</p></div><div class="event-actions">${this.button('bag', T('Injertar'), 'bone', 'primary')}${this.button('continue-loot', reward.boss ? T('Hacia la salida') : T('Continuar'), 'right')}</div></div>`;
       }
       if (s.phase === 'dead' || s.phase === 'won') {
-        return `<div class="room-event"><div class="event-copy"><h3>${s.phase === 'won' ? 'Has escapado de la torre.' : 'La carne falla. El espíritu no.'}</h3><p>${s.reason}</p></div>${this.button('end', 'Ver resultado', 'right')}</div>`;
+        return `<div class="room-event"><div class="event-copy"><h3>${s.phase === 'won' ? T('Has escapado de la torre.') : T('La carne falla. El espíritu no.')}</h3><p>${s.reason}</p></div>${this.button('end', T('Ver resultado'), 'right')}</div>`;
       }
       const room = s.map[s.current];
       if (s.phase === 'event') {
-        if (room.type === 'cache') return `<div class="room-event"><div class="event-copy"><span class="eyebrow text-gold">SUMINISTROS</span><h3>Alguien no llegó a usarlos.</h3><p>Un injerto, chatarra, suero y refrigerante. Todo puede servir.</p></div><div class="event-actions">${this.button('cache', 'Recoger todo', 'bag', 'primary')}</div></div>`;
-        if (room.type === 'archive') return `<div class="room-event"><div class="event-copy"><span class="eyebrow text-green">CONOCIMIENTO PERMANENTE</span><h3>El conocimiento sobrevive a la carne.</h3><p>Descubre un plano. Podrás fabricarlo en las estaciones de injertos.</p></div><div class="event-actions">${this.button('search-archive', 'Guardar plano', 'book', 'primary')}</div></div>`;
-        if (room.type === 'workshop') return `<div class="room-event workshop-event"><div class="event-copy"><span class="eyebrow text-green">ESTACIÓN DE INJERTOS</span><h3>La mesa aún está tibia.</h3><p>Fabrica planos o repara +40 de integridad y enfría todos tus injertos intactos.</p></div><div class="event-actions">${this.button('archive', 'Fabricar', 'flask', 'primary')}${this.button('repair', 'Reparar · 8 chatarra', 'gear')}${this.button('leave-workshop', 'Continuar', 'right', 'quiet')}</div></div>`;
-        if (room.type === 'trap') return `<div class="room-event trap-event"><div class="event-copy"><span class="eyebrow text-red">TRAMPA · VAPOR A PRESIÓN</span><h3>El pasillo está a punto de estallar.</h3><p>Desvía la válvula, fuerza tus piernas o acepta las quemaduras.</p></div><div class="event-actions">${this.button('trap-scraps', 'Desviar · 5 chatarra', 'gear', 'primary', s.scraps < 5 ? 'disabled' : '')}${this.button('trap-legs', 'Saltar · +30° / −12 integridad', 'foot', '', !s.body.legL.id && !s.body.legR.id ? 'disabled' : '')}${this.button('trap-cross', `Cruzar · −${9 + s.floor * 2} vida`, 'flame', 'danger-outline')}</div></div>`;
+        if (room.type === 'cache') return `<div class="room-event"><div class="event-copy"><span class="eyebrow text-gold">${T('SUMINISTROS')}</span><h3>${T('Alguien no llegó a usarlos.')}</h3><p>${T('Un injerto, chatarra, suero y refrigerante. Todo puede servir.')}</p></div><div class="event-actions">${this.button('cache', T('Recoger todo'), 'bag', 'primary')}</div></div>`;
+        if (room.type === 'archive') return `<div class="room-event"><div class="event-copy"><span class="eyebrow text-green">${T('CONOCIMIENTO PERMANENTE')}</span><h3>${T('El conocimiento sobrevive a la carne.')}</h3><p>${T('Descubre un plano. Podrás fabricarlo en las estaciones de injertos.')}</p></div><div class="event-actions">${this.button('search-archive', T('Guardar plano'), 'book', 'primary')}</div></div>`;
+        if (room.type === 'workshop') return `<div class="room-event workshop-event"><div class="event-copy"><span class="eyebrow text-green">${T('ESTACIÓN DE INJERTOS')}</span><h3>${T('La mesa aún está tibia.')}</h3><p>${T('Fabrica planos o repara +40 de integridad y enfría todos tus injertos intactos.')}</p></div><div class="event-actions">${this.button('archive', T('Fabricar'), 'flask', 'primary')}${this.button('repair', T('Reparar · 8 chatarra'), 'gear')}${this.button('leave-workshop', T('Continuar'), 'right', 'quiet')}</div></div>`;
+        if (room.type === 'trap') return `<div class="room-event trap-event"><div class="event-copy"><span class="eyebrow text-red">${T('TRAMPA · VAPOR A PRESIÓN')}</span><h3>${T('El pasillo está a punto de estallar.')}</h3><p>${T('Desvía la válvula, fuerza tus piernas o acepta las quemaduras.')}</p></div><div class="event-actions">${this.button('trap-scraps', T('Desviar · 5 chatarra'), 'gear', 'primary', s.scraps < 5 ? 'disabled' : '')}${this.button('trap-legs', T('Saltar · +30° / −12 integridad'), 'foot', '', !s.body.legL.id && !s.body.legR.id ? 'disabled' : '')}${this.button('trap-cross', T('Cruzar · −{damage} vida', { damage: 9 + s.floor * 2 }), 'flame', 'danger-outline')}</div></div>`;
       }
-      if (room.type === 'stairs') return `<div class="room-event"><div class="event-copy"><span class="eyebrow text-green">HACIA ARRIBA</span><h3>La salida está un poco más cerca.</h3><p>Subir enfría tus injertos 15°. No hay vuelta al piso anterior.</p></div><div class="event-actions">${this.button('ascend', `Subir al piso ${D.floors[s.floor + 1].roman}`, 'up', 'primary')}</div></div>${this.movementMarkup()}`;
-      if (room.type === 'boss' && room.resolved) return `<div class="room-event"><div class="event-copy"><span class="eyebrow text-green">LA PUERTA ESTÁ ABIERTA</span><h3>El aire de afuera no huele a muerte.</h3><p>Cruza antes de que el reloj llegue a cero.</p></div><div class="event-actions">${this.button('escape', 'Escapar de la torre', 'right', 'primary escape-button')}</div></div>`;
-      return `<div class="room-event exploration-event"><div class="event-copy"><h3>${room.type === 'start' ? 'Levántate. Todavía queda tiempo.' : room.type === 'workshop' ? 'Aún puedes usar la estación.' : 'Sigue avanzando.'}</h3><p>${room.type === 'workshop' ? 'Los planos descubiertos se fabrican con chatarra.' : 'Escoge un pasillo conectado. La escalera está marcada en el plano.'}</p></div>${room.type === 'workshop' ? this.button('archive', 'Fabricar', 'flask') : ''}</div>${this.movementMarkup()}`;
+      if (room.type === 'stairs') return `<div class="room-event"><div class="event-copy"><span class="eyebrow text-green">${T('HACIA ARRIBA')}</span><h3>${T('La salida está un poco más cerca.')}</h3><p>${T('Subir enfría tus injertos 15°. No hay vuelta al piso anterior.')}</p></div><div class="event-actions">${this.button('ascend', T('Subir al piso {roman}', { roman: D.floors[s.floor + 1].roman }), 'up', 'primary')}</div></div>${this.movementMarkup()}`;
+      if (room.type === 'boss' && room.resolved) return `<div class="room-event"><div class="event-copy"><span class="eyebrow text-green">${T('LA PUERTA ESTÁ ABIERTA')}</span><h3>${T('El aire de afuera no huele a muerte.')}</h3><p>${T('Cruza antes de que el reloj llegue a cero.')}</p></div><div class="event-actions">${this.button('escape', T('Escapar de la torre'), 'right', 'primary escape-button')}</div></div>`;
+      return `<div class="room-event exploration-event"><div class="event-copy"><h3>${room.type === 'start' ? T('Levántate. Todavía queda tiempo.') : room.type === 'workshop' ? T('Aún puedes usar la estación.') : T('Sigue avanzando.')}</h3><p>${room.type === 'workshop' ? T('Los planos descubiertos se fabrican con chatarra.') : T('Escoge un pasillo conectado. La escalera está marcada en el plano.')}</p></div>${room.type === 'workshop' ? this.button('archive', T('Fabricar'), 'flask') : ''}</div>${this.movementMarkup()}`;
     }
 
     movementMarkup() {
       const s = this.game.state;
-      const directions = [['north', 'Norte', 'up', -4], ['west', 'Oeste', 'left', -1], ['east', 'Este', 'right', 1], ['south', 'Sur', 'down', 4]];
-      return `<nav class="movement" aria-label="Pasillos disponibles">${directions.map(([id, label, symbol, delta]) => {
+      const directions = [['north', T('Norte'), 'up', -4], ['west', T('Oeste'), 'left', -1], ['east', T('Este'), 'right', 1], ['south', T('Sur'), 'down', 4]];
+      return `<nav class="movement" aria-label="${T('Pasillos disponibles')}">${directions.map(([id, label, symbol, delta]) => {
         const target = s.current + delta;
         const enabled = s.phase === 'explore' && s.map[s.current].links.includes(target);
-        return this.button('direction', label, symbol, 'direction-button', `data-direction="${id}" ${enabled ? '' : 'disabled'} aria-label="Ir al ${label.toLowerCase()}${enabled ? '' : ', no hay pasillo'}"`);
+        return this.button('direction', label, symbol, 'direction-button', `data-direction="${id}" ${enabled ? '' : 'disabled'} aria-label="${T('Ir al {direction}', { direction: label.toLowerCase() })}${enabled ? '' : T(', no hay pasillo')}"`);
       }).join('')}<span class="movement-hint">W A S D <span>/</span> FLECHAS</span></nav>`;
     }
 
@@ -2681,11 +3299,11 @@ window.DDAudio = class {
       const overheats = bodyPart?.id && (Math.max(0, bodyPart.heat - (def.cool || 0)) + def.heat >= 100
         || bodyPart.integrity <= def.wear + (bodyPart.heat + def.heat >= 75 ? 7 : 0));
       const tag = detail ? 'div' : 'button';
-      return `<${tag} ${detail ? '' : 'type="button"'} class="anatomy-card ${preview ? 'preview-card' : ''} ${overheats && !preview ? 'will-break' : ''} ${!part ? 'stump-card' : ''}" style="--part-color:${color}" ${detail ? '' : `data-action="play" data-id="${card.uid}" ${preview || !affordable ? 'disabled' : ''}`} ${detail ? '' : `aria-label="${def.name}. ${def.cost} energía. ${def.text} Calor más ${def.heat}, desgaste ${def.wear}.${overheats ? ' Atención: se romperá el injerto.' : ''}"`}>
-        <div class="card-top"><span class="energy-cost">${def.cost}</span><span class="card-origin">${slot?.short || kindLabel[part?.kind] || 'MUÑÓN'}</span><kbd>${index + 1}</kbd></div>
+      return `<${tag} ${detail ? '' : 'type="button"'} class="anatomy-card ${preview ? 'preview-card' : ''} ${overheats && !preview ? 'will-break' : ''} ${!part ? 'stump-card' : ''}" style="--part-color:${color}" ${detail ? '' : `data-action="play" data-id="${card.uid}" ${preview || !affordable ? 'disabled' : ''}`} ${detail ? '' : `aria-label="${T('{name}. {cost} energía. {text} Calor más {heat}, desgaste {wear}.', { name: def.name, cost: def.cost, text: def.text, heat: def.heat, wear: def.wear })}${overheats ? T(' Atención: se romperá el injerto.') : ''}"`}>
+        <div class="card-top"><span class="energy-cost">${def.cost}</span><span class="card-origin">${slot?.short || kindLabel[part?.kind] || T('MUÑÓN')}</span><kbd>${index + 1}</kbd></div>
         <div class="card-art">${pixelArt(def.icon, color)}</div>
         <h3>${def.name}</h3><p>${def.text}</p>
-        <div class="card-bottom">${def.heat ? `<span>${icon('flame')} +${def.heat}°</span><span>${overheats && !preview ? '¡ROTURA!' : `−${def.wear}%`}</span>` : '<span>MUÑÓN</span><span>Sin injerto</span>'}</div>
+        <div class="card-bottom">${def.heat ? `<span>${icon('flame')} +${def.heat}°</span><span>${overheats && !preview ? T('¡ROTURA!') : `−${def.wear}%`}</span>` : `<span>${T('MUÑÓN')}</span><span>${T('Sin injerto')}</span>`}</div>
       </${tag}>`;
     }
 
@@ -2699,24 +3317,24 @@ window.DDAudio = class {
         return { id: part.id ? D.parts[part.id].cards[0] : fallback[slot], part: part.id, slot, uid: 0 };
       });
       const cards = combat ? s.hand : previews;
-      return `<section class="hand-section" aria-label="${combat ? 'Tu mano de cartas' : 'Cartas de tu cuerpo'}">
-        <div class="hand-header"><div><h2>${combat ? 'Tu mano' : 'Tu cuerpo es tu mazo'}</h2><span>${combat ? `${s.hand.length} CARTAS · ROBA ${s.draw.length} · DESCARTE ${s.discard.length}` : 'CADA INJERTO CAMBIA TUS CARTAS'}</span></div><button type="button" data-action="deck" class="text-button">Ver mazo ${icon('book')}</button></div>
-        <div class="hand ${cards.length > 5 ? 'many-cards' : ''}">${cards.map((card, i) => this.cardMarkup(card, i, !combat)).join('') || '<div class="empty-hand">No quedan cartas en tu mano. Termina el turno para robar otras cinco.</div>'}</div>
-        <div class="turn-bar"><div class="energy-display">${icon('bolt')}<strong>${combat ? s.energy : '—'}<small> / 3</small></strong><div><b>ENERGÍA</b><span>${combat ? 'Se recupera al terminar el turno' : 'Disponible durante el combate'}</span></div></div>${this.button('end-turn', 'Terminar turno <kbd>ESPACIO</kbd>', 'right', combat ? 'primary turn-button' : 'turn-button', combat ? '' : 'disabled')}</div>
+      return `<section class="hand-section" aria-label="${combat ? T('Tu mano de cartas') : T('Cartas de tu cuerpo')}">
+        <div class="hand-header"><div><h2>${combat ? T('Tu mano') : T('Tu cuerpo es tu mazo')}</h2><span>${combat ? T('{hand} CARTAS · ROBA {draw} · DESCARTE {discard}', { hand: s.hand.length, draw: s.draw.length, discard: s.discard.length }) : T('CADA INJERTO CAMBIA TUS CARTAS')}</span></div><button type="button" data-action="deck" class="text-button">${T('Ver mazo')} ${icon('book')}</button></div>
+        <div class="hand ${cards.length > 5 ? 'many-cards' : ''}">${cards.map((card, i) => this.cardMarkup(card, i, !combat)).join('') || `<div class="empty-hand">${T('No quedan cartas en tu mano. Termina el turno para robar otras cinco.')}</div>`}</div>
+        <div class="turn-bar"><div class="energy-display">${icon('bolt')}<strong>${combat ? s.energy : '—'}<small> / 3</small></strong><div><b>${T('ENERGÍA')}</b><span>${combat ? T('Se recupera al terminar el turno') : T('Disponible durante el combate')}</span></div></div>${this.button('end-turn', `${T('Terminar turno')} <kbd>${T('ESPACIO')}</kbd>`, 'right', combat ? 'primary turn-button' : 'turn-button', combat ? '' : 'disabled')}</div>
       </section>`;
     }
 
     modalShell(title, eyebrow, body, extraClass = '') {
-      return `<div class="modal-backdrop" data-overlay="true"><section class="modal ${extraClass}" role="dialog" aria-modal="true" aria-labelledby="modal-title"><header class="modal-header"><div><span class="eyebrow">${eyebrow}</span><h2 id="modal-title">${title}</h2></div>${this.button('close', '', 'close', 'icon-only quiet', 'aria-label="Cerrar ventana"')}</header>${this.game.active() ? '<div class="modal-clock-note">El reloj sigue corriendo. <strong class="modal-live-clock"></strong></div>' : ''}<div class="modal-body">${body}</div></section></div>`;
+      return `<div class="modal-backdrop" data-overlay="true"><section class="modal ${extraClass}" role="dialog" aria-modal="true" aria-labelledby="modal-title"><header class="modal-header"><div><span class="eyebrow">${eyebrow}</span><h2 id="modal-title">${title}</h2></div>${this.button('close', '', 'close', 'icon-only quiet', `aria-label="${T('Cerrar ventana')}"`)}</header>${this.game.active() ? `<div class="modal-clock-note">${T('El reloj sigue corriendo.')} <strong class="modal-live-clock"></strong></div>` : ''}<div class="modal-body">${body}</div></section></div>`;
     }
 
     modalMarkup() {
       const s = this.game.state;
       if (!this.modal) return '';
-      if (this.modal === 'intro') return `<div class="modal-backdrop intro-backdrop"><section class="intro-modal" role="dialog" aria-modal="true" aria-labelledby="intro-title"><div class="intro-kicker"><span></span> UN ROGUELIKE ANATÓMICO <span></span></div><div class="intro-sigil">${icon('skull')}</div><h2 id="intro-title">Un cuerpo prestado.<br><em>Seis minutos de vida.</em></h2><p>La torre arde. Cosecha a quienes te detengan.<br>Injerta sus extremidades. Escapa antes del colapso.</p><div class="intro-pillars"><span>${icon('bone')} TU CUERPO ES TU MAZO</span><span>${icon('clock')} 06:00 REALES</span></div>${this.button('start', 'Reanimar', 'bolt', 'primary intro-start')}<div class="intro-footer">${this.button('help', 'Cómo sobrevivir', 'help', 'quiet')}<span>Ratón · teclado · táctil · mando</span></div><small class="content-note">Horror anatómico estilizado · audio activado al interactuar</small></section></div>`;
+      if (this.modal === 'intro') return `<div class="modal-backdrop intro-backdrop"><section class="intro-modal" role="dialog" aria-modal="true" aria-labelledby="intro-title"><div class="intro-kicker"><span></span> ${T('UN ROGUELIKE ANATÓMICO')} <span></span></div><div class="intro-sigil">${icon('skull')}</div><h2 id="intro-title">${T('Un cuerpo prestado.')}<br><em>${T('Seis minutos de vida.')}</em></h2><p>${T('La torre arde. Cosecha a quienes te detengan.')}<br>${T('Injerta sus extremidades. Escapa antes del colapso.')}</p><div class="intro-pillars"><span>${icon('bone')} ${T('TU CUERPO ES TU MAZO')}</span><span>${icon('clock')} ${T('06:00 REALES')}</span></div>${this.button('start', T('Reanimar'), 'bolt', 'primary intro-start')}<div class="intro-footer">${this.languageButtons()}${this.button('help', T('Cómo sobrevivir'), 'help', 'quiet')}<span>${T('Ratón · teclado · táctil · mando')}</span></div><small class="content-note">${T('Horror anatómico estilizado · audio activado al interactuar')}</small></section></div>`;
       if (this.modal === 'bag') {
-        const content = s?.inventory.length ? s.inventory.map(item => this.inventoryItem(item)).join('') : `<div class="empty-state">${icon('bag')}<h3>La bolsa está vacía.</h3><p>Derrota enemigos, recoge suministros o fabrica un plano en una estación de injertos.</p></div>`;
-        return this.modalShell('Bolsa de injertos', `${s?.inventory.length || 0} EXTREMIDADES RECUPERADAS`, `<p class="modal-intro">${s?.phase === 'combat' ? '<strong>Injertar cuesta 1 de energía.</strong> Las cartas del injerto anterior desaparecen de inmediato.' : 'Elige dónde injertar. La pieza que reemplaces vuelve a la bolsa con su calor y desgaste actuales.'}</p><div class="inventory-list">${content}</div>`);
+        const content = s?.inventory.length ? s.inventory.map(item => this.inventoryItem(item)).join('') : `<div class="empty-state">${icon('bag')}<h3>${T('La bolsa está vacía.')}</h3><p>${T('Derrota enemigos, recoge suministros o fabrica un plano en una estación de injertos.')}</p></div>`;
+        return this.modalShell(T('Bolsa de injertos'), T('{count} EXTREMIDADES RECUPERADAS', { count: s?.inventory.length || 0 }), `<p class="modal-intro">${s?.phase === 'combat' ? `<strong>${T('Injertar cuesta 1 de energía.')}</strong> ${T('Las cartas del injerto anterior desaparecen de inmediato.')}` : T('Elige dónde injertar. La pieza que reemplaces vuelve a la bolsa con su calor y desgaste actuales.')}</p><div class="inventory-list">${content}</div>`);
       }
       if (this.modal === 'part') {
         const slot = D.slots.find(v => v.id === this.part);
@@ -2725,18 +3343,18 @@ window.DDAudio = class {
         const fallback = { head: 'stumpHead', torso: 'stumpTorso', arm: 'stumpArm', leg: 'stumpLeg' };
         const ids = def ? def.cards : [fallback[slot.kind]];
         const available = s?.inventory.filter(p => D.parts[p.id].kind === slot.kind) || [];
-        return this.modalShell(def?.name || 'Solo queda un muñón', slot.label.toUpperCase(), `<p class="lore">${def?.lore || 'El injerto se ha roto. Todas sus cartas han desaparecido de tu mazo.'}</p><div class="part-stats"><span>${icon('flame')} Calor <b>${part.heat}° / 100°</b></span><span>${icon('shield')} Integridad <b>${part.integrity}%</b></span></div><p class="modal-intro">A 100° o 0% de integridad, el injerto se rompe. Desde 75°, cada uso causa 7 de desgaste adicional. Terminar turno enfría 12°; cambiar de sala, 7°.</p><div class="detail-cards">${ids.map((id, i) => this.cardMarkup({ id, slot: slot.id, part: part.id, uid: 0 }, i, true, true)).join('')}</div><h3 class="section-caption">Reemplazos disponibles</h3>${available.length ? available.map(item => this.inventoryItem(item, slot.id)).join('') : '<p class="muted">No tienes un reemplazo compatible. Busca enemigos o suministros.</p>'}`);
+        return this.modalShell(def?.name || T('Solo queda un muñón'), slot.label.toUpperCase(), `<p class="lore">${def?.lore || T('El injerto se ha roto. Todas sus cartas han desaparecido de tu mazo.')}</p><div class="part-stats"><span>${icon('flame')} ${T('Calor')} <b>${part.heat}° / 100°</b></span><span>${icon('shield')} ${T('Integridad')} <b>${part.integrity}%</b></span></div><p class="modal-intro">${T('A 100° o 0% de integridad, el injerto se rompe. Desde 75°, cada uso causa 7 de desgaste adicional. Terminar turno enfría 12°; cambiar de sala, 7°.')}</p><div class="detail-cards">${ids.map((id, i) => this.cardMarkup({ id, slot: slot.id, part: part.id, uid: 0 }, i, true, true)).join('')}</div><h3 class="section-caption">${T('Reemplazos disponibles')}</h3>${available.length ? available.map(item => this.inventoryItem(item, slot.id)).join('') : `<p class="muted">${T('No tienes un reemplazo compatible. Busca enemigos o suministros.')}</p>`}`);
       }
-      if (this.modal === 'body') return this.modalShell('Tu cuerpo', 'SEIS RANURAS · UN SOLO ESPÍRITU', `<div class="mobile-anatomy">${this.anatomyMarkup(true)}</div>`);
-      if (this.modal === 'map') return this.modalShell('Camino a la salida', 'LOS PASILLOS NUNCA SON LOS MISMOS', this.mapMarkup(true), 'map-modal');
+      if (this.modal === 'body') return this.modalShell(T('Tu cuerpo'), T('SEIS RANURAS · UN SOLO ESPÍRITU'), `<div class="mobile-anatomy">${this.anatomyMarkup(true)}</div>`);
+      if (this.modal === 'map') return this.modalShell(T('Camino a la salida'), T('LOS PASILLOS NUNCA SON LOS MISMOS'), this.mapMarkup(true), 'map-modal');
       if (this.modal === 'archive') {
         const known = this.game.meta.blueprints.length;
         const station = this.game.atWorkshop();
         const entries = Object.entries(D.parts).filter(([, part]) => this.filter === 'all' || part.kind === this.filter);
-        return this.modalShell('Archivo anatómico', `${known} / ${Object.keys(D.parts).length} PLANOS DESCUBIERTOS`, `<p class="modal-intro">Los planos sobreviven a la muerte. ${station ? '<strong>Estás en una estación: puedes fabricar con chatarra.</strong>' : 'Para fabricar, visita una estación de injertos en la torre.'}</p><div class="filter-tabs" role="group" aria-label="Filtrar planos">${[['all', 'Todos'], ['head', 'Cabezas'], ['torso', 'Torsos'], ['arm', 'Brazos'], ['leg', 'Piernas']].map(([id, label]) => `<button type="button" class="${this.filter === id ? 'selected' : ''}" data-action="filter" data-filter="${id}" aria-pressed="${this.filter === id}">${label}</button>`).join('')}</div><div class="blueprint-grid">${entries.map(([id, part]) => {
+        return this.modalShell(T('Archivo anatómico'), T('{known} / {total} PLANOS DESCUBIERTOS', { known, total: Object.keys(D.parts).length }), `<p class="modal-intro">${T('Los planos sobreviven a la muerte.')} ${station ? `<strong>${T('Estás en una estación: puedes fabricar con chatarra.')}</strong>` : T('Para fabricar, visita una estación de injertos en la torre.')}</p><div class="filter-tabs" role="group" aria-label="${T('Filtrar planos')}">${[['all', T('Todos')], ['head', T('Cabezas')], ['torso', T('Torsos')], ['arm', T('Brazos')], ['leg', T('Piernas')]].map(([id, label]) => `<button type="button" class="${this.filter === id ? 'selected' : ''}" data-action="filter" data-filter="${id}" aria-pressed="${this.filter === id}">${label}</button>`).join('')}</div><div class="blueprint-grid">${entries.map(([id, part]) => {
           const unlocked = this.game.meta.blueprints.includes(id);
           const cost = 6 + part.tier * 5;
-          return `<article class="blueprint ${unlocked ? '' : 'locked'}"><div class="blueprint-top"><span class="tier tier-${part.tier}">${unlocked ? tierLabel[part.tier] : 'DESCONOCIDO'}</span>${icon(unlocked ? (part.kind === 'head' ? 'skull' : part.kind === 'torso' ? 'heart' : part.kind === 'arm' ? 'bone' : 'foot') : 'lock')}</div><h3>${unlocked ? part.name : part.expansion && !this.game.meta.expansion ? 'Plano del ala prohibida' : `${kindLabel[part.kind]} sin descubrir`}</h3><p>${unlocked ? part.cards.map(card => D.cards[card].name).join(' · ') : part.expansion && !this.game.meta.expansion ? 'Desbloquea el ala en el relicario.' : 'Explora, cosecha o consulta los archivos de la torre.'}</p>${unlocked ? this.button('craft', `Fabricar · ${cost}`, 'gear', 'small', `data-id="${id}" ${!station || s.scraps < cost ? 'disabled' : ''}`) : '<span class="locked-label">EL CONOCIMIENTO PERDURA</span>'}</article>`;
+          return `<article class="blueprint ${unlocked ? '' : 'locked'}"><div class="blueprint-top"><span class="tier tier-${part.tier}">${unlocked ? tierLabel[part.tier] : T('DESCONOCIDO')}</span>${icon(unlocked ? (part.kind === 'head' ? 'skull' : part.kind === 'torso' ? 'heart' : part.kind === 'arm' ? 'bone' : 'foot') : 'lock')}</div><h3>${unlocked ? part.name : part.expansion && !this.game.meta.expansion ? T('Plano del ala prohibida') : T('{kind} sin descubrir', { kind: kindLabel[part.kind] })}</h3><p>${unlocked ? part.cards.map(card => D.cards[card].name).join(' · ') : part.expansion && !this.game.meta.expansion ? T('Desbloquea el ala en el relicario.') : T('Explora, cosecha o consulta los archivos de la torre.')}</p>${unlocked ? this.button('craft', `${T('Fabricar')} · ${cost}`, 'gear', 'small', `data-id="${id}" ${!station || s.scraps < cost ? 'disabled' : ''}`) : `<span class="locked-label">${T('EL CONOCIMIENTO PERDURA')}</span>`}</article>`;
         }).join('')}</div>`, 'wide-modal');
       }
       if (this.modal === 'deck') {
@@ -2746,20 +3364,20 @@ window.DDAudio = class {
           const fallback = { head: 'stumpHead', torso: 'stumpTorso', arm: 'stumpArm', leg: 'stumpLeg' };
           return (part.id ? D.parts[part.id].cards : [fallback[slot.kind]]).map(id => ({ id, slot: slot.id, part: part.id, uid: 0 }));
         });
-        return this.modalShell('Tu mazo anatómico', `${cards.length} CARTAS · CADA UNA PERTENECE A UN INJERTO`, `<p class="modal-intro">Empiezas cada combate con 5 cartas y 3 de energía. Al terminar turno descartas la mano, enfrías 12° y robas 5. El descarte se baraja cuando se acaba el mazo. Máximo 7 cartas en mano.</p><div class="deck-grid">${cards.map((card, i) => this.cardMarkup(card, i, true, true)).join('')}</div>`, 'wide-modal');
+        return this.modalShell(T('Tu mazo anatómico'), T('{count} CARTAS · CADA UNA PERTENECE A UN INJERTO', { count: cards.length }), `<p class="modal-intro">${T('Empiezas cada combate con 5 cartas y 3 de energía. Al terminar turno descartas la mano, enfrías 12° y robas 5. El descarte se baraja cuando se acaba el mazo. Máximo 7 cartas en mano.')}</p><div class="deck-grid">${cards.map((card, i) => this.cardMarkup(card, i, true, true)).join('')}</div>`, 'wide-modal');
       }
-      if (this.modal === 'shop') return this.modalShell('El relicario', `${this.game.meta.souls} ECOS DEL ESPÍRITU`, `<div class="shop-notice">${icon('coin')}<p><strong>Sin compras con dinero real.</strong> Este prototipo usa ecos ganados al completar intentos. Los cosméticos no alteran tus estadísticas.</p></div><div class="skin-grid">${Object.entries(D.skins).map(([id, skin]) => {
+      if (this.modal === 'shop') return this.modalShell(T('El relicario'), T('{souls} ECOS DEL ESPÍRITU', { souls: this.game.meta.souls }), `<div class="shop-notice">${icon('coin')}<p><strong>${T('Sin compras con dinero real.')}</strong> ${T('Este prototipo usa ecos ganados al completar intentos. Los cosméticos no alteran tus estadísticas.')}</p></div><div class="skin-grid">${Object.entries(D.skins).map(([id, skin]) => {
         const owned = this.game.meta.skins.includes(id);
         const active = this.game.meta.skin === id;
-        return `<article class="skin-card"><div class="skin-swatch" style="--skin:${skin.color}">${pixelArt('heart', skin.color)}<span>${icon('skull')}</span></div><h3>${skin.name}</h3><p>${skin.description}</p>${this.button('buy', active ? 'Equipada' : owned ? 'Equipar' : `Desbloquear · ${skin.cost} ecos`, active ? 'check' : 'coin', active ? 'small equipped' : 'small', `data-id="${id}" ${active || (!owned && this.game.meta.souls < skin.cost) ? 'disabled' : ''}`)}</article>`;
-      }).join('')}</div><article class="expansion-card"><div><span class="eyebrow">CONTENIDO ADICIONAL</span><h3>El ala prohibida</h3><p>Abre los encuentros del Archivista de ceniza y su cráneo exclusivo, con dos nuevas cartas. Disponible en los próximos encuentros.</p></div>${this.button('buy', this.game.meta.expansion ? 'Ala desbloqueada' : 'Abrir · 30 ecos', this.game.meta.expansion ? 'check' : 'lock', 'primary small', `data-id="expansion" ${this.game.meta.expansion || this.game.meta.souls < 30 ? 'disabled' : ''}`)}</article>`, 'wide-modal');
-      if (this.modal === 'settings') return this.modalShell('Ajustes', 'LA TORRE NO ESPERA', `<div class="setting-row"><label for="volume">Volumen general<small>Música sintetizada y efectos viscerales.</small></label><div class="volume-control"><input type="range" id="volume" min="0" max="100" value="${Math.round(this.game.meta.volume * 100)}" data-preference="volume"><output id="volume-output">${Math.round(this.game.meta.volume * 100)}%</output></div></div><div class="setting-row"><label for="sfx">Efectos de sonido<small>Impactos, injertos y señales del laboratorio.</small></label><input type="checkbox" id="sfx" data-preference="sfx" ${this.game.meta.sfx ? 'checked' : ''}></div><div class="setting-row"><label for="motion">Animaciones ambientales<small>Desactiva movimiento, partículas animadas y sacudidas.</small></label><input type="checkbox" id="motion" data-preference="motion" ${this.game.meta.motion ? 'checked' : ''}></div><div class="setting-row"><div>Pantalla completa<small>Disponible cuando el navegador lo permite.</small></div>${this.button('fullscreen', 'Alternar', 'fullscreen', 'small')}</div><div class="save-note">${icon('check')} ${this.game.storageAvailable ? 'Guardado automático en este navegador. El reloj continúa al cerrar o recargar.' : 'El guardado está bloqueado. Puedes jugar, pero se perderá el progreso al cerrar.'}</div>${this.game.active() ? `<div class="abandon-row">${this.button('confirm-abandon', 'Abandonar este cuerpo', 'skull', 'danger-outline')}<p>Conservarás los planos descubiertos.</p></div>` : ''}`);
-      if (this.modal === 'confirm-abandon') return this.modalShell('¿Abandonar este cuerpo?', 'ESTE INTENTO TERMINARÁ', `<p class="modal-intro">Perderás tus injertos, suministros y chatarra de este intento. Los planos descubiertos y los ecos permanecen.</p><div class="confirm-actions">${this.button('close', 'Seguir luchando', 'shield', 'primary')}${this.button('abandon', 'Abandonar y volver a la mesa', 'skull', 'danger-outline')}</div>`);
-      if (this.modal === 'help') return this.modalShell('Cómo sobrevivir', 'EL RELOJ ANATÓMICO', `<div class="help-lead">No necesitas un mazo mejor.<br><em>Necesitas un cuerpo mejor.</em></div><div class="help-grid"><article><span>01</span><h3>Explora y asciende</h3><p>Recorre los pasillos conectados. Llega a la escalera del noreste en los pisos I y II. En el III, derrota al Rector y pulsa <strong>Escapar de la torre</strong>.</p></article><article><span>02</span><h3>Combate por turnos</h3><p>Tienes <strong>3 de energía</strong>. Las cartas muestran su coste arriba a la izquierda. La intención enemiga te dice qué ocurrirá al terminar turno. La defensa dura hasta entonces.</p></article><article><span>03</span><h3>Cosecha e injerta</h3><p>Los enemigos derrotados dejan extremidades en tu bolsa. Cada injerto aporta <strong>2 cartas</strong>. Cambiarlo quita las anteriores; en combate cuesta 1 de energía.</p></article><article><span>04</span><h3>No te consumas</h3><p>A <strong>100° o 0% de integridad</strong>, el injerto se rompe y solo te queda una carta de muñón. Desde 75°, cada uso añade 7 de desgaste. Enfría 12° por turno o 7° al moverte.</p></article><article><span>05</span><h3>Usa lo que encuentres</h3><p>Suero: +28 vida. Refrigerante: −38° y +12 integridad. Fabrica los planos descubiertos con chatarra en las estaciones de injertos.</p></article><article><span>06</span><h3>Muere, aprende, vuelve</h3><p>Son <strong>6 minutos de tiempo real</strong>, incluso en menús o fuera de la pestaña. Al morir vuelves a una mesa con otro cuerpo y otra torre. Los planos y ecos permanecen.</p></article></div><div class="controls-grid"><div>${icon('settings')}<h3>Teclado y ratón</h3><p>WASD / flechas: moverse<br>1–7: jugar carta · Espacio: terminar turno<br>Q: suero · E: refrigerante<br>I: injertos · M: mapa · Esc: cerrar</p></div><div>${icon('gamepad')}<h3>Táctil y mando</h3><p>Toca las cartas, pasillos y botones.<br>Mando estándar: cruceta / stick para moverte o elegir · A: confirmar · B: cerrar<br>RB: terminar turno · X / Y: suministros</p></div></div><p class="help-fineprint">Quemadura: daño al terminar turno, baja 1 por turno. Debilidad: reduce un 40% el ataque. Aturdimiento: cancela la siguiente intención. El tiempo no se pausa.</p>`,'wide-modal');
-      if (this.modal === 'log') return this.modalShell('Bitácora del cuerpo', 'LOS ÚLTIMOS 24 ACONTECIMIENTOS', `<ol class="journal-list">${(s?.log || ['Aún no has despertado.']).map(line => `<li>${escapeHtml(line)}</li>`).join('')}</ol>`);
+        return `<article class="skin-card"><div class="skin-swatch" style="--skin:${skin.color}">${pixelArt('heart', skin.color)}<span>${icon('skull')}</span></div><h3>${skin.name}</h3><p>${skin.description}</p>${this.button('buy', active ? T('Equipada') : owned ? T('Equipar') : T('Desbloquear · {cost} ecos', { cost: skin.cost }), active ? 'check' : 'coin', active ? 'small equipped' : 'small', `data-id="${id}" ${active || (!owned && this.game.meta.souls < skin.cost) ? 'disabled' : ''}`)}</article>`;
+      }).join('')}</div><article class="expansion-card"><div><span class="eyebrow">${T('CONTENIDO ADICIONAL')}</span><h3>${T('El ala prohibida')}</h3><p>${T('Abre los encuentros del Archivista de ceniza y su cráneo exclusivo, con dos nuevas cartas. Disponible en los próximos encuentros.')}</p></div>${this.button('buy', this.game.meta.expansion ? T('Ala desbloqueada') : T('Abrir · 30 ecos'), this.game.meta.expansion ? 'check' : 'lock', 'primary small', `data-id="expansion" ${this.game.meta.expansion || this.game.meta.souls < 30 ? 'disabled' : ''}`)}</article>`, 'wide-modal');
+      if (this.modal === 'settings') return this.modalShell(T('Ajustes'), T('LA TORRE NO ESPERA'), `<div class="setting-row"><label for="volume">${T('Volumen general')}<small>${T('Música sintetizada y efectos viscerales.')}</small></label><div class="volume-control"><input type="range" id="volume" min="0" max="100" value="${Math.round(this.game.meta.volume * 100)}" data-preference="volume"><output id="volume-output">${Math.round(this.game.meta.volume * 100)}%</output></div></div><div class="setting-row"><label for="sfx">${T('Efectos de sonido')}<small>${T('Impactos, injertos y señales del laboratorio.')}</small></label><input type="checkbox" id="sfx" data-preference="sfx" ${this.game.meta.sfx ? 'checked' : ''}></div><div class="setting-row"><label for="motion">${T('Animaciones ambientales')}<small>${T('Desactiva movimiento, partículas animadas y sacudidas.')}</small></label><input type="checkbox" id="motion" data-preference="motion" ${this.game.meta.motion ? 'checked' : ''}></div><div class="setting-row"><div>${T('Pantalla completa')}<small>${T('Disponible cuando el navegador lo permite.')}</small></div>${this.button('fullscreen', T('Alternar'), 'fullscreen', 'small')}</div><div class="save-note">${icon('check')} ${this.game.storageAvailable ? T('Guardado automático en este navegador. El reloj continúa al cerrar o recargar.') : T('El guardado está bloqueado. Puedes jugar, pero se perderá el progreso al cerrar.')}</div>${this.game.active() ? `<div class="abandon-row">${this.button('confirm-abandon', T('Abandonar este cuerpo'), 'skull', 'danger-outline')}<p>${T('Conservarás los planos descubiertos.')}</p></div>` : ''}`);
+      if (this.modal === 'confirm-abandon') return this.modalShell(T('¿Abandonar este cuerpo?'), T('ESTE INTENTO TERMINARÁ'), `<p class="modal-intro">${T('Perderás tus injertos, suministros y chatarra de este intento. Los planos descubiertos y los ecos permanecen.')}</p><div class="confirm-actions">${this.button('close', T('Seguir luchando'), 'shield', 'primary')}${this.button('abandon', T('Abandonar y volver a la mesa'), 'skull', 'danger-outline')}</div>`);
+      if (this.modal === 'help') return this.modalShell(T('Cómo sobrevivir'), T('EL RELOJ ANATÓMICO'), `<div class="help-lead">${T('No necesitas un mazo mejor.')}<br><em>${T('Necesitas un cuerpo mejor.')}</em></div><div class="help-grid"><article><span>01</span><h3>${T('Explora y asciende')}</h3><p>${T('Recorre los pasillos conectados. Llega a la escalera del noreste en los pisos I y II. En el III, derrota al Rector y pulsa {action}.', { action: `<strong>${T('Escapar de la torre')}</strong>` })}</p></article><article><span>02</span><h3>${T('Combate por turnos')}</h3><p>${T('Tienes {energy}. Las cartas muestran su coste arriba a la izquierda. La intención enemiga te dice qué ocurrirá al terminar turno. La defensa dura hasta entonces.', { energy: `<strong>${T('3 de energía')}</strong>` })}</p></article><article><span>03</span><h3>${T('Cosecha e injerta')}</h3><p>${T('Los enemigos derrotados dejan extremidades en tu bolsa. Cada injerto aporta {cards}. Cambiarlo quita las anteriores; en combate cuesta 1 de energía.', { cards: `<strong>${T('2 cartas')}</strong>` })}</p></article><article><span>04</span><h3>${T('No te consumas')}</h3><p>${T('A {limit}, el injerto se rompe y solo te queda una carta de muñón. Desde 75°, cada uso añade 7 de desgaste. Enfría 12° por turno o 7° al moverte.', { limit: `<strong>${T('100° o 0% de integridad')}</strong>` })}</p></article><article><span>05</span><h3>${T('Usa lo que encuentres')}</h3><p>${T('Suero: +28 vida. Refrigerante: −38° y +12 integridad. Fabrica los planos descubiertos con chatarra en las estaciones de injertos.')}</p></article><article><span>06</span><h3>${T('Muere, aprende, vuelve')}</h3><p>${T('Son {time}, incluso en menús o fuera de la pestaña. Al morir vuelves a una mesa con otro cuerpo y otra torre. Los planos y ecos permanecen.', { time: `<strong>${T('6 minutos de tiempo real')}</strong>` })}</p></article></div><div class="controls-grid"><div>${icon('settings')}<h3>${T('Teclado y ratón')}</h3><p>${T('WASD / flechas: moverse')}<br>${T('1–7: jugar carta · Espacio: terminar turno')}<br>${T('Q: suero · E: refrigerante')}<br>${T('I: injertos · M: mapa · Esc: cerrar')}</p></div><div>${icon('gamepad')}<h3>${T('Táctil y mando')}</h3><p>${T('Toca las cartas, pasillos y botones.')}<br>${T('Mando estándar: cruceta / stick para moverte o elegir · A: confirmar · B: cerrar')}<br>${T('RB: terminar turno · X / Y: suministros')}</p></div></div><p class="help-fineprint">${T('Quemadura: daño al terminar turno, baja 1 por turno. Debilidad: reduce un 40% el ataque. Aturdimiento: cancela la siguiente intención. El tiempo no se pausa.')}</p>`,'wide-modal');
+      if (this.modal === 'log') return this.modalShell(T('Bitácora del cuerpo'), T('LOS ÚLTIMOS 24 ACONTECIMIENTOS'), `<ol class="journal-list">${(s?.log || [T('Aún no has despertado.')]).map(line => `<li>${escapeHtml(line)}</li>`).join('')}</ol>`);
       if (this.modal === 'end' && s) {
         const won = s.phase === 'won';
-        return `<div class="modal-backdrop end-backdrop"><section class="end-modal ${won ? 'won' : ''}" role="dialog" aria-modal="true" aria-labelledby="end-title"><div class="end-symbol">${icon(won ? 'tower' : 'skull')}</div><span class="eyebrow">${won ? 'EL CIELO TODAVÍA EXISTE' : 'EL ESPÍRITU HA ENCONTRADO OTRA MESA'}</span><h2 id="end-title">${won ? 'Este cuerpo es tuyo.' : 'La carne no era eterna.'}</h2><p>${s.reason}</p><div class="result-grid"><div><strong>${s.stats.kills}</strong><span>ENEMIGOS COSECHADOS</span></div><div><strong>${s.stats.grafts}</strong><span>INJERTOS REALIZADOS</span></div><div><strong>${s.stats.discovered}</strong><span>PLANOS DESCUBIERTOS</span></div><div><strong>+${s.earnedSouls || 0}</strong><span>ECOS CONSERVADOS</span></div></div><div class="result-clock">${icon('clock')} ${won ? `Escapaste en ${timeLabel(360000 - s.remainingAtEnd)} · ${timeLabel(s.remainingAtEnd)} restantes` : `Piso ${D.floors[s.floor].roman} · ${s.stats.rooms} salas recorridas`}</div><div class="end-actions">${this.button('start', 'Reanimar otro cuerpo', 'bolt', 'primary')}${this.button('shop', 'Abrir relicario', 'coin')}</div><small>Tus ${this.game.meta.blueprints.length} planos permanecen. Tu próxima torre será distinta.</small></section></div>`;
+        return `<div class="modal-backdrop end-backdrop"><section class="end-modal ${won ? 'won' : ''}" role="dialog" aria-modal="true" aria-labelledby="end-title"><div class="end-symbol">${icon(won ? 'tower' : 'skull')}</div><span class="eyebrow">${won ? T('EL CIELO TODAVÍA EXISTE') : T('EL ESPÍRITU HA ENCONTRADO OTRA MESA')}</span><h2 id="end-title">${won ? T('Este cuerpo es tuyo.') : T('La carne no era eterna.')}</h2><p>${s.reason}</p><div class="result-grid"><div><strong>${s.stats.kills}</strong><span>${T('ENEMIGOS COSECHADOS')}</span></div><div><strong>${s.stats.grafts}</strong><span>${T('INJERTOS REALIZADOS')}</span></div><div><strong>${s.stats.discovered}</strong><span>${T('PLANOS DESCUBIERTOS')}</span></div><div><strong>+${s.earnedSouls || 0}</strong><span>${T('ECOS CONSERVADOS')}</span></div></div><div class="result-clock">${icon('clock')} ${won ? T('Escapaste en {time} · {left} restantes', { time: timeLabel(360000 - s.remainingAtEnd), left: timeLabel(s.remainingAtEnd) }) : T('Piso {roman} · {rooms} salas recorridas', { roman: D.floors[s.floor].roman, rooms: s.stats.rooms })}</div><div class="end-actions">${this.button('start', T('Reanimar otro cuerpo'), 'bolt', 'primary')}${this.button('shop', T('Abrir relicario'), 'coin')}</div><small>${T('Tus {count} planos permanecen. Tu próxima torre será distinta.', { count: this.game.meta.blueprints.length })}</small></section></div>`;
       }
       return '';
     }
@@ -2768,7 +3386,7 @@ window.DDAudio = class {
       const part = D.parts[item.id];
       const slots = D.slots.filter(slot => slot.kind === part.kind && (!onlySlot || slot.id === onlySlot));
       const energy = this.game.state?.phase !== 'combat' || this.game.state.energy >= 1;
-      return `<article class="inventory-item"><div class="inventory-symbol" style="color:${part.color}">${icon(part.kind === 'head' ? 'skull' : part.kind === 'torso' ? 'heart' : part.kind === 'arm' ? 'bone' : 'foot')}</div><div class="inventory-description"><span class="eyebrow">${kindLabel[part.kind]} · ${tierLabel[part.tier]} <span class="inventory-condition">${item.integrity}% / ${item.heat}°</span></span><h3>${part.name}</h3><p>${part.cards.map(id => D.cards[id].name).join(' · ')}</p><div class="inventory-actions">${slots.map(slot => this.button('equip', `Injertar: ${slot.short}`, 'bone', 'small', `data-id="${item.uid}" data-slot="${slot.id}" ${energy ? '' : 'disabled'}`)).join('')}${this.button('salvage', `Desguazar +${part.tier * 3}`, 'gear', 'small quiet', `data-id="${item.uid}"`)}</div></div></article>`;
+      return `<article class="inventory-item"><div class="inventory-symbol" style="color:${part.color}">${icon(part.kind === 'head' ? 'skull' : part.kind === 'torso' ? 'heart' : part.kind === 'arm' ? 'bone' : 'foot')}</div><div class="inventory-description"><span class="eyebrow">${kindLabel[part.kind]} · ${tierLabel[part.tier]} <span class="inventory-condition">${item.integrity}% / ${item.heat}°</span></span><h3>${part.name}</h3><p>${part.cards.map(id => D.cards[id].name).join(' · ')}</p><div class="inventory-actions">${slots.map(slot => this.button('equip', `${T('Injertar')}: ${slot.short}`, 'bone', 'small', `data-id="${item.uid}" data-slot="${slot.id}" ${energy ? '' : 'disabled'}`)).join('')}${this.button('salvage', `${T('Desguazar')} +${part.tier * 3}`, 'gear', 'small quiet', `data-id="${item.uid}"`)}</div></div></article>`;
     }
 
     render() {
@@ -2779,7 +3397,7 @@ window.DDAudio = class {
       const s = this.game.state;
       document.body.classList.toggle('reduce-motion', !this.game.meta.motion);
       document.body.classList.toggle('has-modal', Boolean(this.modal));
-      this.root.innerHTML = `${this.header()}<main class="game-shell" ${this.modal ? 'inert' : ''}>${this.statusBar()}<div class="game-grid"><aside class="panel anatomy-panel">${this.anatomyMarkup()}</aside><div class="center-column">${this.sceneMarkup()}${this.handMarkup()}</div><aside class="panel map-panel">${this.mapMarkup()}<div class="run-record"><span class="eyebrow">EL ESPÍRITU RECUERDA</span><div><span>Planos</span><strong>${this.game.meta.blueprints.length} / ${Object.keys(D.parts).length}</strong></div><div><span>Escapes</span><strong>${this.game.meta.wins}</strong></div>${this.game.meta.best ? `<div><span>Mejor tiempo</span><strong>${timeLabel(this.game.meta.best)}</strong></div>` : ''}</div></aside></div><footer class="game-footer"><button type="button" class="journal-preview" data-action="log">${icon('log')}<span>${escapeHtml(s?.log[0] || 'La muerte es solo el principio del procedimiento.')}</span>${icon('right')}</button><span class="version-label">PROTOTIPO 1.0 <i></i> GUARDADO ${this.game.storageAvailable ? 'LOCAL' : 'NO DISPONIBLE'}</span></footer></main><nav class="mobile-toolbar" aria-label="Paneles del juego" ${this.modal ? 'inert' : ''}>${this.button('body', 'Cuerpo', 'skull', 'quiet')}${this.button('bag', `Injertos${s?.inventory.length ? ` · ${s.inventory.length}` : ''}`, 'bag', 'quiet')}${this.button('map', 'Mapa', 'map', 'quiet')}${this.button('archive', 'Planos', 'book', 'quiet')}</nav>${this.modalMarkup()}`;
+      this.root.innerHTML = `${this.header()}<main class="game-shell" ${this.modal ? 'inert' : ''}>${this.statusBar()}<div class="game-grid"><aside class="panel anatomy-panel">${this.anatomyMarkup()}</aside><div class="center-column">${this.sceneMarkup()}${this.handMarkup()}</div><aside class="panel map-panel">${this.mapMarkup()}<div class="run-record"><span class="eyebrow">${T('EL ESPÍRITU RECUERDA')}</span><div><span>${T('Planos')}</span><strong>${this.game.meta.blueprints.length} / ${Object.keys(D.parts).length}</strong></div><div><span>${T('Escapes')}</span><strong>${this.game.meta.wins}</strong></div>${this.game.meta.best ? `<div><span>${T('Mejor tiempo')}</span><strong>${timeLabel(this.game.meta.best)}</strong></div>` : ''}</div></aside></div><footer class="game-footer"><button type="button" class="journal-preview" data-action="log">${icon('log')}<span>${escapeHtml(s?.log[0] || T('La muerte es solo el principio del procedimiento.'))}</span>${icon('right')}</button><span class="version-label">${T('PROTOTIPO 1.0')} <i></i> ${T('GUARDADO')} ${this.game.storageAvailable ? T('LOCAL') : T('NO DISPONIBLE')}</span></footer></main><nav class="mobile-toolbar" aria-label="${T('Paneles del juego')}" ${this.modal ? 'inert' : ''}>${this.button('body', T('Cuerpo'), 'skull', 'quiet')}${this.button('bag', `${T('Injertos')}${s?.inventory.length ? ` · ${s.inventory.length}` : ''}`, 'bag', 'quiet')}${this.button('map', T('Mapa'), 'map', 'quiet')}${this.button('archive', T('Planos'), 'book', 'quiet')}</nav>${this.modalMarkup()}`;
       this.root.querySelector('.topbar')?.toggleAttribute('inert', Boolean(this.modal));
       this.art.bind();
       if (this.root.querySelector('#modal-body')) this.art.anatomy = this.root.querySelector('#modal-body');
@@ -2805,7 +3423,7 @@ window.DDAudio = class {
       if (clockBlock) clockBlock.classList.toggle('critical', remaining < 60000 && this.game.active());
       for (const element of document.querySelectorAll('.modal-live-clock')) element.textContent = timeLabel(remaining);
       const header = this.root.querySelector('.header-middle');
-      if (header && !this.game.active() && this.game.state) header.innerHTML = `<span class="live-dot"></span> ${this.game.state.phase === 'won' ? 'HAS ESCAPADO DE LA TORRE' : 'EL ESPÍRITU PERMANECE'}`;
+      if (header && !this.game.active() && this.game.state) header.innerHTML = `<span class="live-dot"></span> ${this.game.state.phase === 'won' ? T('HAS ESCAPADO DE LA TORRE') : T('EL ESPÍRITU PERMANECE')}`;
     }
 
     openModal(name) {
@@ -2827,6 +3445,7 @@ window.DDAudio = class {
       this.audio.unlock();
       const action = el.dataset.action;
       const g = this.game;
+      if (action === 'lang') { window.DDLang.set(el.dataset.lang); return; }
       if (action === 'start') { this.modal = null; g.start(); return; }
       if (action === 'home') { this.openModal(g.state ? 'help' : 'intro'); return; }
       if (action === 'close') { this.closeModal(); return; }
@@ -2840,8 +3459,8 @@ window.DDAudio = class {
       }
       if (action === 'fullscreen') {
         if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
-        else if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => this.toast({ text: 'Este navegador no permite pantalla completa aquí.' }));
-        else this.toast({ text: 'Este navegador no ofrece pantalla completa.' });
+        else if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => this.toast({ text: T('Este navegador no permite pantalla completa aquí.') }));
+        else this.toast({ text: T('Este navegador no ofrece pantalla completa.') });
         return;
       }
       if (action === 'buy') { g.buy(el.dataset.id); return; }
@@ -2862,7 +3481,7 @@ window.DDAudio = class {
       if (action === 'continue-loot') { g.continueAfterLoot(); return; }
       if (action === 'ascend') { g.ascend(); return; }
       if (action === 'escape') { g.escape(); return; }
-      if (action === 'abandon') { this.modal = null; g.finish(false, 'Has dejado atrás este cuerpo. Tu espíritu encuentra otra mesa de disección.'); }
+      if (action === 'abandon') { this.modal = null; g.finish(false, T('Has dejado atrás este cuerpo. Tu espíritu encuentra otra mesa de disección.')); }
     }
 
     handleInput(event) {
@@ -2941,7 +3560,7 @@ window.DDAudio = class {
         try { pads = navigator.getGamepads ? [...navigator.getGamepads()] : []; } catch (_) { /* Some embedded browsers disable this API. */ }
         const pad = pads.find(Boolean);
         if (pad) {
-          if (!connected) { connected = true; this.toast({ text: 'Mando conectado · A confirma · B cierra · RB termina turno', tone: 'good' }); }
+          if (!connected) { connected = true; this.toast({ text: T('Mando conectado · A confirma · B cierra · RB termina turno'), tone: 'good' }); }
           const pressed = pad.buttons.map(button => button.pressed);
           const edge = i => pressed[i] && !previous[i];
           const axisX = pad.axes[0] || 0;
@@ -2974,7 +3593,8 @@ window.DDAudio = class {
     } catch (error) {
       console.error('Deadlock Deck:', error);
       const root = document.getElementById('app');
-      root.innerHTML = '<main class="boot-error"><h1>No se pudo reanimar el juego.</h1><p>Recarga la página en un navegador actualizado. No se han borrado tus planos.</p><button type="button" id="retry-boot">Recargar</button></main>';
+      const L = window.DDLang.t;
+      root.innerHTML = `<main class="boot-error"><h1>${L('No se pudo reanimar el juego.')}</h1><p>${L('Recarga la página en un navegador actualizado. No se han borrado tus planos.')}</p><button type="button" id="retry-boot">${L('Recargar')}</button></main>`;
       document.getElementById('retry-boot').addEventListener('click', () => location.reload());
     }
   });
@@ -2985,6 +3605,6 @@ window.DDAudio = class {
 <body>
   <div id="app"></div>
   <div id="notifications" aria-live="polite" aria-atomic="false"></div>
-  <noscript><main class="boot-error"><h1>Deadlock Deck</h1><p>Activa JavaScript para reanimar el juego. No se necesita conexión a internet.</p></main></noscript>
+  <noscript><main class="boot-error"><h1>Deadlock Deck</h1><p lang="es">Activa JavaScript para reanimar el juego. No se necesita conexión a internet.</p><p lang="en">Enable JavaScript to reanimate the game. No internet connection is required.</p></main></noscript>
 </body>
 </html>

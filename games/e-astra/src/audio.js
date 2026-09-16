@@ -52,7 +52,7 @@ window.DDAudio = class {
       this.context.resume().catch(() => {});
       this.update();
     } catch (_) {
-      this.game.notice('El audio no está disponible en este navegador. El juego puede continuar.');
+      this.game.notice(window.DDLang.t('El audio no está disponible en este navegador. El juego puede continuar.'));
     }
   }
 

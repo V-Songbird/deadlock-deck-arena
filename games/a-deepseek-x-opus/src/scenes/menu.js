@@ -3,7 +3,7 @@
   'use strict';
   var DD = window.DD;
 
-  var ITEMS = ['NUEVA PARTIDA', 'CÓDIGO ANATÓMICO', 'TIENDA DE COSMÉTICOS', 'CÓMO JUGAR'];
+  var ITEMS = [DD.t('NUEVA PARTIDA'), DD.t('CÓDIGO ANATÓMICO'), DD.t('TIENDA DE COSMÉTICOS'), DD.t('CÓMO JUGAR')];
 
   /* Mirrors DD.View.ui.menu's own defaults so the pointer can hit the rows. */
   var MENU = { x: 214, y: 186, w: 212, rowH: 22, gap: 2 };
@@ -60,9 +60,9 @@
     var limbs = 0, k;
     for (k in (m.codexLimbs || {})) if (m.codexLimbs[k]) limbs++;
     var total = ((DD.Data && DD.Data.limbs) || []).length;
-    var best = m.bestTime ? DD.clock(m.bestTime) : 'aún ninguna';
-    DD.Pixel.text('Carreras: ' + (m.runs || 0) + '   Huidas: ' + (m.escapes || 0) +
-      '   Mejor huida: ' + best + '   Planos: ' + limbs + '/' + total,
+    var best = m.bestTime ? DD.clock(m.bestTime) : DD.t('aún ninguna');
+    DD.Pixel.text(DD.t('Carreras: ') + (m.runs || 0) + DD.t('   Huidas: ') + (m.escapes || 0) +
+      DD.t('   Mejor huida: ') + best + DD.t('   Planos: ') + limbs + '/' + total,
       DD.VW / 2, 316, { align: 'center', color: DD.C.textDim });
   }
 
@@ -82,7 +82,8 @@
       }
       U.bg();
       if (U.title) U.title();
-      if (U.menu) U.menu(ITEMS, index, { hint: 'ENTER para elegir' });
+      if (U.menu) U.menu(ITEMS, index, { hint: DD.t('ENTER para elegir') });
+      if (U.langToggle) U.langToggle(16, 330);
       metaLine();
     },
 

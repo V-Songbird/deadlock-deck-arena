@@ -112,17 +112,17 @@
     var I = DD.Input;
     if (!I || !DD.Pixel || DD.Scenes.name !== 'run') return;
     if (I.virtual && I.button) {
-      if (vbutton('vcod', 200, 'CÓDICE')) {
+      if (vbutton('vcod', 200, DD.t('CÓDICE'))) {
         if (DD.Scenes.has('codex')) DD.Scenes.push('codex', { from: 'run' });
       }
-      if (vbutton('vpause', 274, 'PAUSA')) {
+      if (vbutton('vpause', 274, DD.t('PAUSA'))) {
         if (DD.Scenes.has('pause')) DD.Scenes.push('pause');
       }
       return;
     }
     /* Bottom line: the combat view labels its draw and discard piles at y 334,
      * so this hint sits below them rather than through them. */
-    DD.Pixel.text('TAB códice - ESC pausa', DD.VW - 8, 352, {
+    DD.Pixel.text(DD.t('TAB códice - ESC pausa'), DD.VW - 8, 352, {
       align: 'right', color: DD.C.textFaint, alpha: 0.85
     });
   }
@@ -130,7 +130,7 @@
   function empty() {
     if (DD.View && DD.View.ui && DD.View.ui.bg) DD.View.ui.bg();
     if (DD.Pixel && DD.Pixel.text) {
-      DD.Pixel.text('No hay ninguna partida en curso.', DD.VW / 2, 176, {
+      DD.Pixel.text(DD.t('No hay ninguna partida en curso.'), DD.VW / 2, 176, {
         align: 'center', color: DD.C.textDim
       });
     }
@@ -144,7 +144,7 @@
         if (DD.Run && DD.Run.newRun) { DD.Run.newRun(); s = st(); }
       }
       if (s && DD.Run.say && s.log && !s.log.length) {
-        DD.Run.say('Despiertas en una mesa de disección. Seis minutos.');
+        DD.Run.say(DD.t('Despiertas en una mesa de disección. Seis minutos.'));
       }
       track('explore', true);
     },

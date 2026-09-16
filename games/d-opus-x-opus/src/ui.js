@@ -11,6 +11,7 @@ import { makeRng } from './rng.js';
 import { audio } from './audio.js';
 import * as sprites from './sprites.js';
 import * as combat from './combat.js';
+import { getLang, setLang, t } from './lang.js';
 
 /* ------------------------------------------------------------------ labels */
 
@@ -139,6 +140,14 @@ function button(ctx, x, y, w, h, label, accent, enabled = true) {
   return enabled && clickIn(x, y, w, h);
 }
 
+// ES/EN switch, built from the same panel button as every other control.
+// The active language keeps the bright accent; clicking it is a no-op.
+function langToggle(ctx, x, y) {
+  const cur = getLang();
+  if (button(ctx, x, y, 30, 18, 'ES', cur === 'es' ? PAL.spark : PAL.stone) && cur !== 'es') setLang('es');
+  if (button(ctx, x + 34, y, 30, 18, 'EN', cur === 'en' ? PAL.spark : PAL.stone) && cur !== 'en') setLang('en');
+}
+
 // 7x4 solid triangle; the bitmap font has no up/down arrows.
 function arrow(ctx, x, y, up, col) {
   for (let i = 0; i < 4; i++) {
@@ -263,10 +272,10 @@ export function drawHud(ctx, state) {
   // Same numbering as the explore panel: floor 3 is PISO 4, floor 0 is PISO 1.
   const room = currentRoom(run);
   trackDepth(run, room);
-  text(ctx, clip('PISO ' + (room ? room.floor + 1 : 1), 10), 300, 2, PAL.brass);
-  const sh = clip('REORDEN ' + (run && run.tower ? Math.max(0, num(run.tower.shuffles)) : 0), 12);
+  text(ctx, clip(t('PISO {0}', room ? room.floor + 1 : 1), 10), 300, 2, PAL.brass);
+  const sh = clip(t('REORDEN {0}', run && run.tower ? Math.max(0, num(run.tower.shuffles)) : 0), 12);
   text(ctx, sh, W - 4 - textW(sh), 2, PAL.arcane);
-  const nm = clip(room ? room.name : 'SIN SALA', 28);
+  const nm = clip(room ? t(room.name) : t('SIN SALA'), 28);
   text(ctx, nm, W - 4 - textW(nm), 10, PAL.ash);
 
   // Thin draining time bar across the whole width.
@@ -297,16 +306,16 @@ export function drawBody(ctx, state, x, y) {
       rect(ctx, x + 3, ry + 7, 10, 10, limb ? limbColor(limb) : PAL.grave);
     }
 
-    text(ctx, limb ? clip(abbrev(limb.name, 13), 13) : 'MUÑÓN', x + 18, ry + 3, limb ? PAL.bone : PAL.ash);
+    text(ctx, limb ? clip(abbrev(t(limb.name), 13), 13) : t('MUÑÓN'), x + 18, ry + 3, limb ? PAL.bone : PAL.ash);
 
     const ip = integrityPct(limb);
-    text(ctx, 'I', x + 18, ry + 10, PAL.flesh);
+    text(ctx, t('I'), x + 18, ry + 10, PAL.flesh);
     bar(ctx, x + 24, ry + 10, 58, 5, ip, PAL.gore, PAL.grave);
     text(ctx, clip(limb ? limb.integrity + '/' + limb.maxIntegrity : '-', 5), x + 84, ry + 10, limb ? PAL.flesh : PAL.ash);
 
     const hpc = heatPct(limb);
     const hot = hpc > 0.75 ? PAL.fire : PAL.ember;
-    text(ctx, 'C', x + 18, ry + 16, hot);
+    text(ctx, t('C'), x + 18, ry + 16, hot);
     bar(ctx, x + 24, ry + 16, 58, 5, hpc, hot, PAL.grave);
     text(ctx, clip(limb ? limb.heat + '/' + limb.heatCap : '-', 5), x + 84, ry + 16, limb ? hot : PAL.ash);
   }
@@ -329,9 +338,9 @@ function intentLabel(c) {
     if (s) return String(s);
   }
   const it = c ? c.intent : null;
-  if (!it) return 'INTENCIÓN OCULTA';
+  if (!it) return t('INTENCIÓN OCULTA');
   const times = num(it.times) > 1 ? ' X' + Math.round(it.times) : '';
-  return (it.name || 'ATAQUE') + ' ' + Math.round(num(it.amount)) + times;
+  return t(it.name || 'ATAQUE') + ' ' + Math.round(num(it.amount)) + times;
 }
 
 function drawCard(ctx, state, entry, x, y, hover, active, c) {
@@ -356,13 +365,13 @@ function drawCard(ctx, state, entry, x, y, hover, active, c) {
   text(ctx, clip(String(heat), 1), x + 64, cy + 5, PAL.ember);
 
   rect(ctx, x + 2, cy + 15, 66, 1, PAL.stone);
-  const nameLines = wrap(def ? def.name : 'CARTA', 13).slice(0, 2);
+  const nameLines = wrap(t(def ? def.name : 'CARTA'), 13).slice(0, 2);
   for (let i = 0; i < nameLines.length; i++) {
     text(ctx, nameLines[i], x + 2, cy + 17 + i * 7, PAL.pale);
   }
 
   rect(ctx, x + 2, cy + 31, 66, 1, PAL.stone);
-  const descLines = wrap(def ? def.desc : '', 13).slice(0, 5);
+  const descLines = wrap(def ? t(def.desc) : '', 13).slice(0, 5);
   for (let i = 0; i < descLines.length; i++) {
     text(ctx, descLines[i], x + 2, cy + 34 + i * 7, PAL.bone);
   }
@@ -371,7 +380,7 @@ function drawCard(ctx, state, entry, x, y, hover, active, c) {
   const body = state.run ? state.run.body : null;
   const slot = entry && typeof entry === 'object' ? entry.slot : null;
   rect(ctx, x + 4, cy + 80, 3, 3, body && slot && body[slot] ? limbColor(body[slot]) : PAL.ash);
-  textCenter(ctx, clip(TYPE_LABEL[type] || 'CARTA', 12), x + 35, cy + 79, TYPE_COLOR[type]);
+  textCenter(ctx, clip(t(TYPE_LABEL[type] || 'CARTA'), 12), x + 35, cy + 79, TYPE_COLOR[type]);
 
   ctx.restore();
   ctx.globalAlpha = 1;
@@ -400,7 +409,7 @@ export function drawCombat(ctx, state) {
   }
 
   if (!c) {
-    textCenter(ctx, 'SIN COMBATE', 165, 80, PAL.ash);
+    textCenter(ctx, t('SIN COMBATE'), 165, 80, PAL.ash);
     ctx.globalAlpha = 1;
     return;
   }
@@ -414,7 +423,7 @@ export function drawCombat(ctx, state) {
   }
 
   // Enemy name, life and the telegraphed intent, above the enemy sprite.
-  const nm = clip(foe ? foe.name : 'ENEMIGO', 28);
+  const nm = clip(t(foe ? foe.name : 'ENEMIGO'), 28);
   text(ctx, nm, 326 - textW(nm), 22, PAL.pale);
   const ehp = foe ? Math.max(0, Math.round(num(foe.hp))) : 0;
   const emax = foe ? Math.max(1, Math.round(num(foe.maxHp) || num(foe.hp))) : 1;
@@ -434,13 +443,13 @@ export function drawCombat(ctx, state) {
   const foeLimbs = foe && Array.isArray(foe.limbs) ? foe.limbs : [];
   if (foeLimbs.length) {
     frame(ctx, 2, 82, 120, 36, PAL.stone, PAL.ink);
-    text(ctx, 'COSECHABLE', 5, 84, PAL.ash);
+    text(ctx, t('COSECHABLE'), 5, 84, PAL.ash);
     for (let i = 0; i < Math.min(4, foeLimbs.length); i++) {
       const L = foeLimbs[i] || {};
       const bp = limbBp(L.blueprint);
       const integ = Math.max(0, Math.round(num(L.integrity)));
       const dead = L.ruined || integ <= 0;
-      const label = abbrev(bp ? bp.name : 'RESTO', 19) + ' ' + integ;
+      const label = abbrev(t(bp ? bp.name : 'RESTO'), 19) + ' ' + integ;
       text(ctx, clip(label, 23), 5, 92 + i * 7, dead ? PAL.ash : PAL.flesh);
     }
   }
@@ -470,7 +479,7 @@ export function drawCombat(ctx, state) {
     drawCard(ctx, state, hand[i], hx0 + i * 73, 154, i === hoverIdx, active, c);
   }
   if (n === 0) {
-    text(ctx, 'MANO VACÍA', 8, 196, PAL.ash);
+    text(ctx, t('MANO VACÍA'), 8, 196, PAL.ash);
   }
 
   /* -------------------------------------------------- end turn and counters */
@@ -479,7 +488,7 @@ export function drawCombat(ctx, state) {
   const apTop = Math.round(num(c.apMax)) || (run && run.body ? apMax(run.body) : 3);
   const pile = Array.isArray(c.drawPile) ? c.drawPile.length : 0;
   const disc = Array.isArray(c.discard) ? c.discard.length : 0;
-  const phaseTxt = active ? 'TU TURNO' : c.phase === 'enemy' ? 'ENEMIGO ACTÚA' : c.phase === 'won' ? 'HA CAÍDO' : 'FIN';
+  const phaseTxt = t(active ? 'TU TURNO' : c.phase === 'enemy' ? 'ENEMIGO ACTÚA' : c.phase === 'won' ? 'HA CAÍDO' : 'FIN');
 
   // Opaque turn panel at x 246..327, y 96..124: it must hide whatever is behind,
   // so the plate itself is painted at full alpha even while the block is dimmed.
@@ -487,9 +496,9 @@ export function drawCombat(ctx, state) {
   ctx.save();
   ctx.globalAlpha = active ? 1 : 0.45;
   const column = [
-    ['ACCIONES: ' + ap + '/' + apTop, PAL.spark],
-    ['MAZO: ' + pile, PAL.bone],
-    ['DESCARTE: ' + disc, PAL.bone],
+    [t('ACCIONES: {0}/{1}', ap, apTop), PAL.spark],
+    [t('MAZO: {0}', pile), PAL.bone],
+    [t('DESCARTE: {0}', disc), PAL.bone],
     [phaseTxt, active ? PAL.ichor : PAL.gore],
   ];
   for (let i = 0; i < column.length; i++) {
@@ -498,7 +507,7 @@ export function drawCombat(ctx, state) {
   }
   const overBtn = active && hit(246, 126, 81, 23);
   frame(ctx, 246, 126, 81, 23, active ? (overBtn ? PAL.pale : PAL.brass) : PAL.ash, overBtn ? PAL.stone : PAL.ink);
-  textCenter(ctx, 'FIN DE TURNO', 286, 134, active ? (overBtn ? PAL.pale : PAL.bone) : PAL.ash);
+  textCenter(ctx, t('FIN DE TURNO'), 286, 134, active ? (overBtn ? PAL.pale : PAL.bone) : PAL.ash);
   ctx.restore();
   ctx.globalAlpha = 1;
 
@@ -514,7 +523,7 @@ export function drawCombat(ctx, state) {
     if (!clickIn(hx0 + i * 73, 154, 70, 90)) continue;
     if (typeof combat.playCard !== 'function') break;
     const res = combat.playCard(state, i);
-    if (res && res.ok === false) toast(res.reason || 'NO PUEDES JUGAR ESA CARTA');
+    if (res && res.ok === false) toast(res.reason || t('NO PUEDES JUGAR ESA CARTA'));
     break;
   }
 }
@@ -532,7 +541,7 @@ export function drawTitle(ctx, state) {
   // Dark plates under every text block: the brick backdrop eats grey on grey.
   frame(ctx, 92, 0, 264, 42, PAL.stone, PAL.ink);
   textCenter(ctx, 'DEADLOCK DECK', 224, 12, PAL.gore, 2);
-  textCenter(ctx, 'EL RELOJ ANATÓMICO', 224, 30, PAL.brass, 1);
+  textCenter(ctx, t('EL RELOJ ANATÓMICO'), 224, 30, PAL.brass, 1);
 
   if (typeof sprites.drawAbomination === 'function') {
     sprites.drawAbomination(ctx, 86, 198, TITLE_BODY, state.t);
@@ -549,19 +558,19 @@ export function drawTitle(ctx, state) {
     'SEIS MINUTOS ANTES DE QUE TODO FALLE.',
   ];
   for (let i = 0; i < synopsis.length; i++) {
-    text(ctx, clip(synopsis[i], 40), 176, 52 + i * 9, PAL.bone);
+    text(ctx, clip(t(synopsis[i]), 40), 176, 52 + i * 9, PAL.bone);
   }
 
   const meta = state.meta || {};
   const found = meta.blueprints ? Object.keys(meta.blueprints).filter((k) => limbBp(k)).length : 0;
   const total = Object.keys(LIMBS).length;
-  text(ctx, clip('PLANOS DESCUBIERTOS: ' + found + '/' + total, 40), 176, 88, PAL.ichor);
-  text(ctx, clip('FUGAS: ' + Math.round(num(meta.escapes)) + '   MESAS: ' + Math.round(num(meta.runs)), 40), 176, 98, PAL.acid);
+  text(ctx, clip(t('PLANOS DESCUBIERTOS: {0}/{1}', found, total), 40), 176, 88, PAL.ichor);
+  text(ctx, clip(t('FUGAS: {0}   MESAS: {1}', Math.round(num(meta.escapes)), Math.round(num(meta.runs))), 40), 176, 98, PAL.acid);
   if (Number.isFinite(meta.bestTime)) {
-    text(ctx, clip('MEJOR FUGA: ' + fmtTime(meta.bestTime), 40), 176, 108, PAL.spark);
+    text(ctx, clip(t('MEJOR FUGA: {0}', fmtTime(meta.bestTime)), 40), 176, 108, PAL.spark);
   }
 
-  text(ctx, 'CONTROLES', 176, 126, PAL.pale);
+  text(ctx, t('CONTROLES'), 176, 126, PAL.pale);
   const keys = [
     'RATÓN: ELEGIR SALA Y JUGAR CARTAS',
     'ESPACIO: FIN DE TURNO',
@@ -569,13 +578,16 @@ export function drawTitle(ctx, state) {
     'FLECHAS: LISTAS    M: SILENCIO',
   ];
   for (let i = 0; i < keys.length; i++) {
-    text(ctx, clip(keys[i], 40), 176, 138 + i * 9, PAL.ash);
+    text(ctx, clip(t(keys[i]), 40), 176, 138 + i * 9, PAL.ash);
   }
+
+  // The language switch goes first: it eats its own click so it can never wake the body.
+  langToggle(ctx, 378, 4);
 
   const blink = Math.floor(num(state.t) * 2) % 2 === 0;
   const overWake = hit(160, 218, 128, 20);
   frame(ctx, 160, 218, 128, 20, overWake || blink ? PAL.spark : PAL.brass, PAL.ink);
-  textCenter(ctx, '[ DESPERTAR ]', 224, 225, overWake || blink ? PAL.pale : PAL.bone);
+  textCenter(ctx, t('[ DESPERTAR ]'), 224, 225, overWake || blink ? PAL.pale : PAL.bone);
 
   // The concrete rect is tested first; the catch-all click comes last, so the
   // button can never be starved by the single click this frame allows.
@@ -618,8 +630,8 @@ function freeSlotFor(id) {
 function togglePick(id) {
   const at = slabPicks.indexOf(id);
   if (at >= 0) { slabPicks.splice(at, 1); return; }
-  if (slabPicks.length >= 3) { toast('YA HAS ELEGIDO TRES PLANOS'); return; }
-  if (!freeSlotFor(id)) { toast('NO QUEDA HUECO DE ESA FAMILIA'); return; }
+  if (slabPicks.length >= 3) { toast(t('YA HAS ELEGIDO TRES PLANOS')); return; }
+  if (!freeSlotFor(id)) { toast(t('NO QUEDA HUECO DE ESA FAMILIA')); return; }
   slabPicks.push(id);
 }
 
@@ -648,11 +660,11 @@ export function drawSlab(ctx, state) {
   dither(ctx, 0, 0, W, H, PAL.ink, 0.25);
 
   frame(ctx, 92, 0, 264, 26, PAL.stone, PAL.ink);
-  textCenter(ctx, 'MESA DE DISECCIÓN', 224, 2, PAL.bone, 2);
+  textCenter(ctx, t('MESA DE DISECCIÓN'), 224, 2, PAL.bone, 2);
 
   // Anatomy preview on the left.
   frame(ctx, 4, 26, 112, 174, PAL.stone, PAL.ink);
-  textCenter(ctx, 'CUERPO NUEVO', 60, 30, PAL.ash);
+  textCenter(ctx, t('CUERPO NUEVO'), 60, 30, PAL.ash);
   if (typeof sprites.drawAbomination === 'function') {
     sprites.drawAbomination(ctx, 60, 192, previewBody(), state.t);
   }
@@ -664,16 +676,16 @@ export function drawSlab(ctx, state) {
   frame(ctx, lx, ly, lw, lh, PAL.stone, PAL.ink);
 
   if (!ids.length) {
-    textCenter(ctx, 'AÚN NO GUARDAS PLANOS: COSECHA UN CADÁVER PARA RETENERLOS.', 282, 100, PAL.ash);
-    textCenter(ctx, 'ESTA VEZ DESPERTARÁS CON PIEZAS DE TIER 1 AL AZAR.', 282, 112, PAL.ash);
+    textCenter(ctx, t('AÚN NO GUARDAS PLANOS: COSECHA UN CADÁVER PARA RETENERLOS.'), 282, 100, PAL.ash);
+    textCenter(ctx, t('ESTA VEZ DESPERTARÁS CON PIEZAS DE TIER 1 AL AZAR.'), 282, 112, PAL.ash);
   } else {
     // Flat row list: one header per family, then its blueprints.
     const rows = [];
     for (const fam of FAMILY_ORDER) {
       const group = ids.filter((id) => LIMBS[id].slot === fam)
-        .sort((a, b) => LIMBS[a].tier - LIMBS[b].tier || (LIMBS[a].name < LIMBS[b].name ? -1 : 1));
+        .sort((a, b) => LIMBS[a].tier - LIMBS[b].tier || (t(LIMBS[a].name) < t(LIMBS[b].name) ? -1 : 1));
       if (!group.length) continue;
-      rows.push({ header: FAMILY_LABEL[fam] + ' (' + group.length + ')' });
+      rows.push({ header: t(FAMILY_LABEL[fam]) + ' (' + group.length + ')' });
       for (const id of group) rows.push({ id });
     }
 
@@ -706,8 +718,8 @@ export function drawSlab(ctx, state) {
       const over = hit(lx + 2, ry, rowW, rowH);
       if (picked) rect(ctx, lx + 2, ry, rowW, rowH, PAL.violet);
       else if (over) rect(ctx, lx + 2, ry, rowW, rowH, PAL.grave);
-      const info = (picked ? '*' : ' ') + clip(bp.name, 18)
-        + '  T' + bp.tier + '  INT ' + bp.integrity + '  CAL ' + bp.heatCap
+      const info = (picked ? '*' : ' ') + clip(t(bp.name), 18)
+        + t('  T{0}  INT {1}  CAL {2}', bp.tier, bp.integrity, bp.heatCap)
         + (num(bp.hpBonus) > 0 ? '  HP+' + bp.hpBonus : '');
       text(ctx, clip(info, 60), lx + 4, ry + 2, picked ? PAL.pale : PAL.bone);
       if (clickIn(lx + 2, ry, rowW, rowH)) togglePick(row.id);
@@ -716,18 +728,20 @@ export function drawSlab(ctx, state) {
 
   // Chosen summary. Everything stays above y=230: that band is the button's.
   frame(ctx, 0, 200, W, 28, PAL.stone, PAL.ink);
-  text(ctx, clip('ELEGIDOS ' + slabPicks.length + '/3', 20), 4, 202, PAL.spark);
+  text(ctx, clip(t('ELEGIDOS {0}/3', slabPicks.length), 20), 4, 202, PAL.spark);
   const map = picksMap(slabPicks);
   const parts = [];
   for (const slot of SLOTS) {
     if (!has(map, slot)) continue;
     const bp = limbBp(map[slot]);
-    parts.push(SLOT_LABEL[slot] + '=' + clip(bp ? bp.name : '?', 14));
+    parts.push(t(SLOT_LABEL[slot]) + '=' + clip(bp ? t(bp.name) : '?', 14));
   }
-  text(ctx, clip(parts.length ? parts.join('  ') : 'EL RESTO SERÁ TIER 1 AL AZAR', 86), 4, 211, PAL.bone);
-  text(ctx, clip('VUELVE A PULSAR UN PLANO PARA DESCARTARLO. EL RESTO DE SLOTS SERÁ TIER 1.', 86), 4, 220, PAL.ash);
+  text(ctx, clip(parts.length ? parts.join('  ') : t('EL RESTO SERÁ TIER 1 AL AZAR'), 86), 4, 211, PAL.bone);
+  text(ctx, clip(t('VUELVE A PULSAR UN PLANO PARA DESCARTARLO. EL RESTO DE SLOTS SERÁ TIER 1.'), 86), 4, 220, PAL.ash);
 
-  if (button(ctx, 300, 231, 140, 18, '[ REANIMAR ]', PAL.gore) || pressed('Enter')) {
+  langToggle(ctx, 8, 231);
+
+  if (button(ctx, 300, 231, 140, 18, t('[ REANIMAR ]'), PAL.gore) || pressed('Enter')) {
     newRun(Date.now() % 1e9, picksMap(slabPicks));
     state.scene = 'explore';
     audio.startMusic();
@@ -749,14 +763,14 @@ export function drawHarvest(ctx, state) {
 
   const h = state.harvest;
   const limbs = h && Array.isArray(h.limbs) ? h.limbs : [];
-  const fallen = (h && (h.enemyName || (h.enemy && h.enemy.name)))
+  const fallen = t((h && (h.enemyName || (h.enemy && h.enemy.name)))
     || (state.combat && state.combat.enemy && state.combat.enemy.name)
-    || 'EL CADÁVER';
+    || 'EL CADÁVER');
 
   frame(ctx, 60, 0, 328, 40, PAL.stone, PAL.ink);
-  textCenter(ctx, 'COSECHA', 224, 4, PAL.gore, 2);
-  textCenter(ctx, clip('HA CAÍDO: ' + fallen, 40), 224, 20, PAL.bone);
-  textCenter(ctx, 'EL RELOJ ESTÁ PARADO MIENTRAS CORTAS', 224, 30, PAL.ichor);
+  textCenter(ctx, t('COSECHA'), 224, 4, PAL.gore, 2);
+  textCenter(ctx, clip(t('HA CAÍDO: {0}', fallen), 40), 224, 20, PAL.bone);
+  textCenter(ctx, t('EL RELOJ ESTÁ PARADO MIENTRAS CORTAS'), 224, 30, PAL.ichor);
 
   const body = state.run ? state.run.body : null;
   if (harvestPick >= limbs.length) harvestPick = -1;
@@ -772,24 +786,24 @@ export function drawHarvest(ctx, state) {
     const over = !ruined && hit(8, cy, 212, 34);
 
     frame(ctx, 8, cy, 212, 34, ruined ? PAL.ash : sel ? PAL.spark : over ? PAL.pale : PAL.brass, sel ? PAL.stone : PAL.ink);
-    text(ctx, clip(bp ? bp.name : 'RESTO SIN NOMBRE', 22), 12, cy + 3, ruined ? PAL.ash : PAL.pale);
-    if (ruined) text(ctx, 'INSERVIBLE', 152, cy + 3, PAL.gore);
+    text(ctx, clip(t(bp ? bp.name : 'RESTO SIN NOMBRE'), 22), 12, cy + 3, ruined ? PAL.ash : PAL.pale);
+    if (ruined) text(ctx, t('INSERVIBLE'), 152, cy + 3, PAL.gore);
 
-    const fam = bp ? FAMILY_LABEL[bp.slot] || '?' : '?';
+    const fam = t(bp ? FAMILY_LABEL[bp.slot] || '?' : '?');
     const maxI = bp ? bp.integrity : integ;
     text(ctx, clip(fam + '   TIER ' + (bp ? bp.tier : 1) + '   INT ' + integ + '/' + maxI, 40), 12, cy + 12, ruined ? PAL.ash : PAL.flesh);
 
     const names = bp && Array.isArray(bp.cards)
-      ? bp.cards.map((id) => (cardBp(id) ? CARDS[id].name : id)).join(', ')
+      ? bp.cards.map((id) => (cardBp(id) ? t(CARDS[id].name) : id)).join(', ')
       : '';
-    text(ctx, clip('CARTAS: ' + names, 40), 12, cy + 21, ruined ? PAL.ash : PAL.cold);
+    text(ctx, clip(t('CARTAS: {0}', names), 40), 12, cy + 21, ruined ? PAL.ash : PAL.cold);
 
     if (ruined) line(ctx, 10, cy + 17, 217, cy + 17, PAL.gore);
     else if (clickIn(8, cy, 212, 34)) harvestPick = harvestPick === i ? -1 : i;
   }
   if (!limbs.length) {
     frame(ctx, 8, 42, 212, 20, PAL.stone, PAL.ink);
-    text(ctx, 'NO QUEDA NADA APROVECHABLE.', 12, 48, PAL.ash);
+    text(ctx, t('NO QUEDA NADA APROVECHABLE.'), 12, 48, PAL.ash);
   }
 
   // Destination picker: the six slots with their current occupant.
@@ -797,7 +811,7 @@ export function drawHarvest(ctx, state) {
   const chosenBp = chosen ? limbBp(chosen.blueprint) : null;
   frame(ctx, 224, 38, 220, 14, PAL.stone, PAL.ink);
   if (chosenBp) {
-    text(ctx, 'ELIGE DÓNDE INJERTARLO', 228, 42, PAL.pale);
+    text(ctx, t('ELIGE DÓNDE INJERTARLO'), 228, 42, PAL.pale);
     for (let i = 0; i < SLOTS.length; i++) {
       const slot = SLOTS[i];
       const ry = 54 + i * 22;
@@ -805,8 +819,8 @@ export function drawHarvest(ctx, state) {
       const limb = body && body[slot] ? body[slot] : null;
       const over = ok && hit(228, ry, 212, 20);
       frame(ctx, 228, ry, 212, 20, ok ? (over ? PAL.pale : PAL.ichor) : PAL.grave, over ? PAL.stone : PAL.ink);
-      text(ctx, clip(SLOT_LABEL[slot], 14), 232, ry + 3, ok ? PAL.bone : PAL.ash);
-      text(ctx, clip(limb ? limb.name : 'LIBRE', 18), 232, ry + 11, !ok ? PAL.ash : limb ? PAL.flesh : PAL.acid);
+      text(ctx, clip(t(SLOT_LABEL[slot]), 14), 232, ry + 3, ok ? PAL.bone : PAL.ash);
+      text(ctx, clip(t(limb ? limb.name : 'LIBRE'), 18), 232, ry + 11, !ok ? PAL.ash : limb ? PAL.flesh : PAL.acid);
       if (limb) {
         const iTxt = clip(limb.integrity + '/' + limb.maxIntegrity, 5);
         text(ctx, iTxt, 436 - textW(iTxt), ry + 11, ok ? PAL.flesh : PAL.ash);
@@ -817,15 +831,15 @@ export function drawHarvest(ctx, state) {
       }
     }
   } else {
-    text(ctx, 'ELIGE UNA EXTREMIDAD DE LA IZQUIERDA', 228, 42, PAL.ash);
-    const hintLines = wrap('LO QUE CORTAS QUEDA ANOTADO EN TUS PLANOS Y PODRÁS ELEGIRLO EN LA PRÓXIMA MESA DE DISECCIÓN.', 40).slice(0, 4);
+    text(ctx, t('ELIGE UNA EXTREMIDAD DE LA IZQUIERDA'), 228, 42, PAL.ash);
+    const hintLines = wrap(t('LO QUE CORTAS QUEDA ANOTADO EN TUS PLANOS Y PODRÁS ELEGIRLO EN LA PRÓXIMA MESA DE DISECCIÓN.'), 40).slice(0, 4);
     frame(ctx, 224, 54, 220, 8 + hintLines.length * 9, PAL.stone, PAL.ink);
     for (let i = 0; i < hintLines.length; i++) {
       text(ctx, hintLines[i], 228, 58 + i * 9, PAL.ash);
     }
   }
 
-  if (button(ctx, 140, 228, 168, 18, '[ DEJAR EL CADÁVER ]', PAL.stone)) {
+  if (button(ctx, 140, 228, 168, 18, t('[ DEJAR EL CADÁVER ]'), PAL.stone)) {
     if (typeof combat.skipHarvest === 'function') combat.skipHarvest(state);
     else { state.harvest = null; state.scene = 'explore'; }
   }
@@ -843,11 +857,11 @@ function runStats(state, escaped) {
   const reached = (run && run === deepestRun ? deepestFloor : room ? room.floor : 3) + 1;
   const found = meta.blueprints ? Object.keys(meta.blueprints).filter((k) => limbBp(k)).length : 0;
   return [
-    (escaped ? 'TIEMPO EN LA TORRE: ' : 'TIEMPO SOBREVIVIDO: ') + fmtTime(spent),
-    'PISO ALCANZADO: ' + reached,
-    'ENEMIGOS COSECHADOS: ' + (run ? Math.round(num(run.kills)) : 0),
-    'INJERTOS: ' + (run ? Math.round(num(run.grafts)) : 0),
-    'PLANOS DESCUBIERTOS: ' + found + '/' + Object.keys(LIMBS).length,
+    t(escaped ? 'TIEMPO EN LA TORRE: {0}' : 'TIEMPO SOBREVIVIDO: {0}', fmtTime(spent)),
+    t('PISO ALCANZADO: {0}', reached),
+    t('ENEMIGOS COSECHADOS: {0}', run ? Math.round(num(run.kills)) : 0),
+    t('INJERTOS: {0}', run ? Math.round(num(run.grafts)) : 0),
+    t('PLANOS DESCUBIERTOS: {0}/{1}', found, Object.keys(LIMBS).length),
   ];
 }
 
@@ -856,20 +870,20 @@ export function drawDeath(ctx, state) {
   rect(ctx, 0, 0, W, H, PAL.void);
   dither(ctx, 0, 0, W, H, PAL.blood, 0.18);
 
-  textCenter(ctx, 'TU CUERPO FALLA', 224, 26, PAL.gore, 2);
+  textCenter(ctx, t('TU CUERPO FALLA'), 224, 26, PAL.gore, 2);
   frame(ctx, 72, 38, 304, 132, PAL.stone, PAL.ink);
   const timeout = state.run ? num(state.run.timeLeft) <= 0 : true;
-  textCenter(ctx, timeout ? 'EL RELOJ LLEGÓ A CERO' : 'TE DESTRUYERON', 224, 46, PAL.fire);
+  textCenter(ctx, t(timeout ? 'EL RELOJ LLEGÓ A CERO' : 'TE DESTRUYERON'), 224, 46, PAL.fire);
 
   const stats = runStats(state, false);
   for (let i = 0; i < stats.length; i++) {
     textCenter(ctx, clip(stats[i], 40), 224, 72 + i * 11, PAL.bone);
   }
 
-  textCenter(ctx, 'TU ESPÍRITU SE TRASLADA A UNA MESA NUEVA.', 224, 146, PAL.arcane);
-  textCenter(ctx, 'LOS PLANOS QUE CORTASTE TE SIGUEN.', 224, 158, PAL.ichor);
+  textCenter(ctx, t('TU ESPÍRITU SE TRASLADA A UNA MESA NUEVA.'), 224, 146, PAL.arcane);
+  textCenter(ctx, t('LOS PLANOS QUE CORTASTE TE SIGUEN.'), 224, 158, PAL.ichor);
 
-  if (button(ctx, 140, 198, 168, 20, '[ NUEVA MESA DE DISECCIÓN ]', PAL.gore) || pressed('Enter')) {
+  if (button(ctx, 140, 198, 168, 20, t('[ NUEVA MESA DE DISECCIÓN ]'), PAL.gore) || pressed('Enter')) {
     state.scene = 'slab';
   }
   ctx.globalAlpha = 1;
@@ -880,10 +894,10 @@ export function drawEscape(ctx, state) {
   rect(ctx, 0, 0, W, H, PAL.void);
   dither(ctx, 0, 0, W, H, PAL.violet, 0.2);
 
-  textCenter(ctx, 'HAS ESCAPADO', 224, 26, PAL.ichor, 2);
+  textCenter(ctx, t('HAS ESCAPADO'), 224, 26, PAL.ichor, 2);
   frame(ctx, 72, 38, 304, 132, PAL.stone, PAL.ink);
   const left = state.run ? Math.max(0, num(state.run.timeLeft)) : 0;
-  textCenter(ctx, clip('EL RELOJ SE DETUVO EN ' + fmtTime(left), 40), 224, 46, PAL.acid);
+  textCenter(ctx, clip(t('EL RELOJ SE DETUVO EN {0}', fmtTime(left)), 40), 224, 46, PAL.acid);
 
   const stats = runStats(state, true);
   for (let i = 0; i < stats.length; i++) {
@@ -892,11 +906,11 @@ export function drawEscape(ctx, state) {
 
   // meta.bestTime stores the time SPENT on the fastest escape, not what was left.
   const meta = state.meta || {};
-  const best = Number.isFinite(meta.bestTime) ? fmtTime(meta.bestTime) : 'NINGUNA';
-  textCenter(ctx, clip('MEJOR FUGA: ' + best, 40), 224, 146, PAL.spark);
-  textCenter(ctx, clip('FUGAS: ' + Math.round(num(meta.escapes)), 40), 224, 158, PAL.arcane);
+  const best = Number.isFinite(meta.bestTime) ? fmtTime(meta.bestTime) : t('NINGUNA');
+  textCenter(ctx, clip(t('MEJOR FUGA: {0}', best), 40), 224, 146, PAL.spark);
+  textCenter(ctx, clip(t('FUGAS: {0}', Math.round(num(meta.escapes))), 40), 224, 158, PAL.arcane);
 
-  if (button(ctx, 164, 198, 120, 20, '[ OTRA VEZ ]', PAL.ichor) || pressed('Enter')) {
+  if (button(ctx, 164, 198, 120, 20, t('[ OTRA VEZ ]'), PAL.ichor) || pressed('Enter')) {
     state.scene = 'slab';
   }
   ctx.globalAlpha = 1;

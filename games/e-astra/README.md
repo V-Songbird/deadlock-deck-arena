@@ -10,6 +10,8 @@ La entrega también incluye `Deadlock-Deck.html`: una versión autocontenida con
 
 Pulsa **Reanimar**. El audio se habilita al interactuar. La ayuda puede leerse antes de empezar, sin consumir tiempo del intento.
 
+El juego está en español y en inglés. Los botones **ES / EN** de la cabecera cambian el idioma antes y durante el intento; la elección se guarda en `localStorage` bajo `dd-lang`. También puedes forzarlo con `?lang=es` o `?lang=en` en la dirección. Sin ninguna de las dos cosas, el juego arranca en español.
+
 Para alojar la versión web, publica esta carpeta en un alojamiento estático conservando sus rutas. En móviles, usa un navegador, no un visor de archivos que bloquee JavaScript. No hay servicios externos, cuentas, analítica ni solicitudes de pago.
 
 ## El juego
@@ -93,6 +95,7 @@ index.html        Punto de entrada de la versión en carpeta
 styles.css        Interfaz, adaptación móvil y estados visuales
 favicon.svg       Icono original
 src/
+  i18n.js         Idioma activo y diccionario español / inglés
   data.js         Extremidades, cartas, enemigos, pisos y cosméticos
   engine.js       Reglas, reloj, generación de la torre y guardado
   art.js          Entornos y sprites de pixel art

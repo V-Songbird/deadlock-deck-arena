@@ -93,7 +93,7 @@
     Run.saveMeta();
 
     Run.loadFloor(0);
-    Run.say('Te despiertas en una mesa de disección. Seis minutos.');
+    Run.say(DD.t('Te despiertas en una mesa de disección. Seis minutos.'));
     return st;
   };
 
@@ -119,7 +119,7 @@
       return false;
     }
     Run.loadFloor(st.floor + 1);
-    Run.say('Piso ' + (st.floor + 1) + '. El aire huele a formol.');
+    Run.say(DD.t('Piso ') + (st.floor + 1) + DD.t('. El aire huele a formol.'));
     return true;
   };
 
@@ -129,7 +129,7 @@
     DD.Tower.relayout(st.map, DD.hash(st.seed, (st.elapsed * 1000) | 0));
     st.shiftTimer = DD.SHIFT_SECONDS;
     st.shiftWarn = 0;
-    Run.say('La torre se reordena a tu alrededor.');
+    Run.say(DD.t('La torre se reordena a tu alrededor.'));
   };
 
   /* ---------------------------------------------------------------- clock */
@@ -215,7 +215,7 @@
     st.stats.grafted++;
     if (wasStump) st.stats.lost = Math.max(0, st.stats.lost - 1);
     if (DD.Progress) DD.Progress.discoverLimb(limbId);
-    Run.say('Injertas ' + limb.name + '.');
+    Run.say(DD.t('Injertas ') + limb.name + '.');
     return true;
   };
 

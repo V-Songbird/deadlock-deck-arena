@@ -260,7 +260,7 @@
       s.player.flash = 0.3;
       s.player.invuln = 0.5;
       DD.Run.damage(dmg);
-      say((def.name || 'Trampa') + ': -' + dmg, e.x, e.y, col('hp'));
+      say((def.name || DD.t('Trampa')) + ': -' + dmg, e.x, e.y, col('hp'));
     }
     var heat = def.heat || 0;
     if (heat > 0 && DD.Heat && DD.Heat.add && s.body) {
@@ -364,7 +364,7 @@
     removeEntity(s.map, e);
     sfx('growl');
     var def = enemyDef(e.id);
-    log('¡' + ((def && def.name) || 'Algo') + ' te corta el paso!');
+    log(DD.t('¡') + ((def && def.name) || DD.t('Algo')) + DD.t(' te corta el paso!'));
   }
 
   /* ================================================================== loot */
@@ -383,7 +383,7 @@
         kind: 'resource', x: pos.x, y: pos.y, id: 'limb',
         data: { limbId: limbId }, dead: false, active: false, timer: 0
       });
-      say('Restos en el suelo.', pos.x, pos.y, col('integrity'));
+      say(DD.t('Restos en el suelo.'), pos.x, pos.y, col('integrity'));
     }
     pending.length = 0;
   }
@@ -419,7 +419,7 @@
       removeEntity(s.map, e);
       Explore.pendingGraft = limbId;
       sfx('loot');
-      say('Un miembro cercenado.', x, y, col('integrity'));
+      say(DD.t('Un miembro cercenado.'), x, y, col('integrity'));
       if (DD.Scenes && DD.Scenes.has && DD.Scenes.push && DD.Scenes.has('graft')) DD.Scenes.push('graft');
       return true;
     }
@@ -428,19 +428,19 @@
     if (!def) return false;
 
     var gains = [], n;
-    if (def.heal) { n = DD.Run.heal(def.heal); if (n > 0) gains.push('+' + n + ' PV'); }
-    if (def.cool) { n = coolAll(s, def.cool); if (n > 0) gains.push('-' + n + ' calor'); }
-    if (def.integrity) { n = repairMost(s, def.integrity); if (n > 0) gains.push('+' + n + ' integridad'); }
+    if (def.heal) { n = DD.Run.heal(def.heal); if (n > 0) gains.push('+' + n + DD.t(' PV')); }
+    if (def.cool) { n = coolAll(s, def.cool); if (n > 0) gains.push('-' + n + DD.t(' calor')); }
+    if (def.integrity) { n = repairMost(s, def.integrity); if (n > 0) gains.push('+' + n + DD.t(' integridad')); }
 
     n = (e.id === 'shard') ? (def.shard || def.amount || 1) : (def.amount || 1);
-    if (e.id === 'residue') { s.residue += n; gains.push('+' + n + ' residuo'); }
-    else if (e.id === 'oil') { s.oils += n; gains.push('+' + n + ' aceite'); }
-    else if (e.id === 'bandage') { s.bandages += n; gains.push('+' + n + ' venda'); }
-    else if (e.id === 'shard') { s.shards += n; gains.push('+' + n + ' esquirla'); }
+    if (e.id === 'residue') { s.residue += n; gains.push('+' + n + DD.t(' residuo')); }
+    else if (e.id === 'oil') { s.oils += n; gains.push('+' + n + DD.t(' aceite')); }
+    else if (e.id === 'bandage') { s.bandages += n; gains.push('+' + n + DD.t(' venda')); }
+    else if (e.id === 'shard') { s.shards += n; gains.push('+' + n + DD.t(' esquirla')); }
 
     removeEntity(s.map, e);
     sfx('pickup');
-    say(gains.length ? gains.join('  ') : (def.name || 'Hallazgo'), x, y, resColor(e.id));
+    say(gains.length ? gains.join('  ') : (def.name || DD.t('Hallazgo')), x, y, resColor(e.id));
     return true;
   };
 
@@ -546,14 +546,14 @@
   function useAltar(s, altar) {
     var msg;
     if (s.residue < ALTAR_COST) {
-      msg = 'El altar pide ' + ALTAR_COST + ' de residuo.';
+      msg = DD.t('El altar pide ') + ALTAR_COST + DD.t(' de residuo.');
       log(msg);
       say(msg, altar.x, altar.y, col('textDim'));
       return true;
     }
     var choice = bestAltarOption(s);
     if (!choice) {
-      msg = 'Nada que reparar en tu cuerpo.';
+      msg = DD.t('Nada que reparar en tu cuerpo.');
       log(msg);
       say(msg, altar.x, altar.y, col('textDim'));
       return true;
@@ -562,14 +562,14 @@
     s.residue -= ALTAR_COST;
     if (choice === 'heal') {
       var h = DD.Run.heal(ALTAR_HEAL);
-      msg = 'El altar te devuelve ' + h + ' de vida.';
+      msg = DD.t('El altar te devuelve ') + h + DD.t(' de vida.');
     } else if (choice === 'cool') {
       coolAll(s, 999);
-      msg = 'El altar enfría tus miembros.';
+      msg = DD.t('El altar enfría tus miembros.');
     } else {
       var socket = worstSocket(s);
       var n = repairMost(s, ALTAR_REPAIR);
-      msg = 'El altar repara ' + ((DD.SOCKET_LABEL && DD.SOCKET_LABEL[socket]) || socket) + ' (+' + n + ').';
+      msg = DD.t('El altar repara ') + ((DD.SOCKET_LABEL && DD.SOCKET_LABEL[socket]) || socket) + ' (+' + n + ').';
     }
     sfx('levelup');
     log(msg);

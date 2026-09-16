@@ -13,13 +13,14 @@ enum value and data shape that crosses a module boundary is written down there, 
 invents one. That is what let eleven modules be written concurrently against the same spine.
 
 The other rules that keep it loadable: every file is an IIFE, no file uses `import`/`export`,
-no file assigns `window.DD` (only `src/core/ns.js` creates the namespaces), and no file does
-work at load time that could throw.
+only `src/core/lang.js` and `src/core/ns.js` assign `window.DD` (lang.js creates it, ns.js
+creates the namespaces on it), and no file does work at load time that could throw.
 
 ## Layers
 
 ```
-core        ns.js      vocabulary: sockets, tile ids, palette, the 360-second clock
+core        lang.js    the ES/EN dictionary and DD.t(); loaded first, see localization.md
+            ns.js      vocabulary: sockets, tile ids, palette, the 360-second clock
             util.js    seeded RNG (mulberry32), maths, colour
             host.js    virtual canvas + scaling, input (keyboard/gamepad/pointer/touch), storage
             flow.js    scene stack + the single requestAnimationFrame loop

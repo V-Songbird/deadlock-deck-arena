@@ -24,24 +24,26 @@
   var SCROLLBAR = { w: 3 };
 
   /* ---------------------------------------------------------- vocabulary */
-  var TYPE_ES = { attack: 'Ataque', block: 'Defensa', skill: 'Habilidad', power: 'Poder' };
+  var TYPE_ES = { attack: DD.t('Ataque'), block: DD.t('Defensa'), skill: DD.t('Habilidad'), power: DD.t('Poder') };
   var TYPE_COL = { attack: DD.C.bloodHi, block: DD.C.steel, skill: DD.C.bile, power: DD.C.poison };
-  var RARITY_ES = { common: 'Común', uncommon: 'Poco común', rare: 'Rara' };
+  var RARITY_ES = { common: DD.t('Común'), uncommon: DD.t('Poco común'), rare: DD.t('Rara') };
   var RARITY_COL = { common: DD.C.textDim, uncommon: DD.C.integrity, rare: DD.C.gold };
-  var SLOT_ES = { head: 'Cabeza', torso: 'Torso', arm: 'Brazo', leg: 'Pierna' };
+  var SLOT_ES = { head: DD.t('Cabeza'), torso: DD.t('Torso'), arm: DD.t('Brazo'), leg: DD.t('Pierna') };
   var PASSIVE_ES = {
-    thorns: 'Espinas', regen: 'Regeneración', drawBonus: 'Cartas extra', energyBonus: 'Energía extra',
-    blockBonus: 'Bloqueo extra', heatResist: 'Resiste calor', coolBonus: 'Enfriamiento extra',
-    lifesteal: 'Robavida', firstStrike: 'Golpe inicial', bleedOnHit: 'Sangrado al golpear',
-    maxHpBonus: 'Vida máxima', scavengeBonus: 'Botín extra', openingDraw: 'Mano inicial'
+    thorns: DD.t('Espinas'), regen: DD.t('Regeneración'), drawBonus: DD.t('Cartas extra'),
+    energyBonus: DD.t('Energía extra'), blockBonus: DD.t('Bloqueo extra'),
+    heatResist: DD.t('Resiste calor'), coolBonus: DD.t('Enfriamiento extra'),
+    lifesteal: DD.t('Robavida'), firstStrike: DD.t('Golpe inicial'),
+    bleedOnHit: DD.t('Sangrado al golpear'), maxHpBonus: DD.t('Vida máxima'),
+    scavengeBonus: DD.t('Botín extra'), openingDraw: DD.t('Mano inicial')
   };
   var RESULT = {
-    dead: { title: 'HAS MUERTO', col: DD.C.steel, tint: '#0e1420',
-      sub: 'La torre te ha desmontado pieza a pieza.' },
-    timedout: { title: 'SE ACABÓ EL TIEMPO', col: DD.C.bloodHi, tint: '#1c0408',
-      sub: 'El reloj anatómico se detuvo. Y tú con él.' },
-    escaped: { title: 'HAS ESCAPADO', col: DD.C.gold, tint: '#1c1404',
-      sub: 'Saliste por la puerta con el cuerpo que te queda.' }
+    dead: { title: DD.t('HAS MUERTO'), col: DD.C.steel, tint: '#0e1420',
+      sub: DD.t('La torre te ha desmontado pieza a pieza.') },
+    timedout: { title: DD.t('SE ACABÓ EL TIEMPO'), col: DD.C.bloodHi, tint: '#1c0408',
+      sub: DD.t('El reloj anatómico se detuvo. Y tú con él.') },
+    escaped: { title: DD.t('HAS ESCAPADO'), col: DD.C.gold, tint: '#1c1404',
+      sub: DD.t('Saliste por la puerta con el cuerpo que te queda.') }
   };
 
   /* ------------------------------------------------------------- clock */
@@ -130,7 +132,7 @@
   }
 
   function passiveText(p) {
-    if (!p || !p.id) return 'Sin pasiva';
+    if (!p || !p.id) return DD.t('Sin pasiva');
     return (PASSIVE_ES[p.id] || p.id) + ' ' + (p.v || 0);
   }
 
@@ -194,7 +196,7 @@
     }
     if (DD.Pixel.hasSprite('ui_logo')) DD.Pixel.sprite('ui_logo', TITLE.cx, TITLE.logoY, { anchor: 'center', scale: 2 });
     DD.Pixel.text('DEADLOCK DECK', TITLE.cx, TITLE.titleY + 3, { scale: 3, align: 'center', color: DD.C.text });
-    DD.Pixel.text('El Reloj Anatómico', TITLE.cx, TITLE.subY + 1, { align: 'center', color: DD.C.gold });
+    DD.Pixel.text(DD.t('El Reloj Anatómico'), TITLE.cx, TITLE.subY + 1, { align: 'center', color: DD.C.gold });
     DD.Pixel.rect(TITLE.cx - 90, TITLE.lineY, 180, 1, DD.C.line);
     DD.Pixel.rect(TITLE.cx - 20, TITLE.lineY - 1, 40, 3, DD.C.lineHi);
     if (sub) center(sub, TITLE.cx, TITLE.lineY + 10, DD.C.textDim, 1);
@@ -251,6 +253,36 @@
         align: 'center', color: DD.C.textDim
       });
     }
+  };
+
+  /* ------------------------------------------------------ language switch */
+  /* Two cells in the panel style the rest of the chrome uses. Drawn from a
+   * scene's draw(), the same place the exploration view puts its own buttons,
+   * so it reads DD.Input.button for the tap. Picking a language reloads. */
+  var LANG_CELL = { w: 26, h: 15, gap: 2 };
+
+  U.langToggle = function (x, y) {
+    var codes = (DD && DD.LANGS) || ['es', 'en'];
+    var cur = DD.lang ? DD.lang() : 'es';
+    var i, code, cx, on, id, tapped, hover;
+    for (i = 0; i < codes.length; i++) {
+      code = codes[i];
+      cx = x + i * (LANG_CELL.w + LANG_CELL.gap);
+      on = code === cur;
+      id = 'lang_' + code;
+      tapped = (DD.Input && DD.Input.button) ? DD.Input.button(id, cx, y, LANG_CELL.w, LANG_CELL.h) : false;
+      hover = !!(DD.Input && DD.Input.btns && DD.Input.btns[id] && DD.Input.btns[id].hover);
+      DD.Pixel.panel(cx, y, LANG_CELL.w, LANG_CELL.h, {
+        fill: on ? DD.C.panelHi : DD.C.panelLo,
+        accent: on ? DD.C.gold : DD.C.line,
+        alpha: on ? 1 : 0.85
+      });
+      DD.Pixel.text(code.toUpperCase(), cx + LANG_CELL.w / 2, vmid(y, LANG_CELL.h, 1) + 1, {
+        align: 'center', color: on ? DD.C.gold : (hover ? DD.C.text : DD.C.textDim)
+      });
+      if (tapped && !on && DD.setLang) DD.setLang(code);
+    }
+    return { x: x, y: y, w: codes.length * (LANG_CELL.w + LANG_CELL.gap) - LANG_CELL.gap, h: LANG_CELL.h };
   };
 
   /* ---------------------------------------------------------- card face */
@@ -333,23 +365,23 @@
       DD.Pixel.text(nameLines[i], nx, ny + i * 8 * nameScale + nameScale, { color: DD.C.text, scale: nameScale });
     }
     ny += nameLines.length * 8 * nameScale + 2;
-    line((SLOT_ES[limb.slot] || limb.slot || '?') + ' -Nivel ' + (limb.tier || 1), nx, ny, tierColor(limb.tier), 1);
+    line((SLOT_ES[limb.slot] || limb.slot || '?') + DD.t(' -Nivel ') + (limb.tier || 1), nx, ny, tierColor(limb.tier), 1);
 
     var st = y + 74, half = Math.round(w / 2);
-    stat('Integridad', String(limb.integrity || 0), x + 10, st);
-    stat('Calor máx.', String(limb.heatCap || 0), x + 10, st + 11);
-    stat('Enfriamiento', String(limb.coolRate || 0), x + half, st);
-    stat('Vida', '+' + (limb.maxHpBonus || 0), x + half, st + 11);
+    stat(DD.t('Integridad'), String(limb.integrity || 0), x + 10, st);
+    stat(DD.t('Calor máx.'), String(limb.heatCap || 0), x + 10, st + 11);
+    stat(DD.t('Enfriamiento'), String(limb.coolRate || 0), x + half, st);
+    stat(DD.t('Vida'), '+' + (limb.maxHpBonus || 0), x + half, st + 11);
 
     var py = y + 100;
-    var lw = DD.Pixel.textW('Pasiva: ', 1);
-    DD.Pixel.text('Pasiva: ', x + 10, py + 1, { color: DD.C.textFaint });
+    var lw = DD.Pixel.textW(DD.t('Pasiva: '), 1);
+    DD.Pixel.text(DD.t('Pasiva: '), x + 10, py + 1, { color: DD.C.textFaint });
     para(passiveText(limb.passive), x + 10 + lw, py, w - 20 - lw, DD.C.gold, 1);
 
     /* the limb's cards, drawn as the faces the player will actually hold: the
      * combat view owns that renderer, so a graft preview matches the hand. */
     var cardsY = y + h - 138;
-    line('CARTAS', x + 10, cardsY - 12, DD.C.textFaint, 1);
+    line(DD.t('CARTAS'), x + 10, cardsY - 12, DD.C.textFaint, 1);
     var cards = limb.cards || [];
     var face = (V.combat && V.combat.drawCard) ? V.combat : null;
     for (i = 0; i < cards.length; i++) {
@@ -436,14 +468,14 @@
     var h = hud();
 
     DD.Pixel.panel(GUT, 6, VW - GUT * 2, 34, { title: null });
-    line('INJERTO', GUT + 12, 14, DD.C.text, 2);
+    line(DD.t('INJERTO'), GUT + 12, 14, DD.C.text, 2);
     var clockX = VW - GUT - 40;
     if (h && h.drawClock) h.drawClock(clockX, 8, st ? st.timeLeft : 0, !!(st && st.timeLeft < 60));
-    DD.Pixel.text('EL TIEMPO CORRE', clockX - 8, 42, { align: 'right', color: DD.C.bloodHi });
+    DD.Pixel.text(DD.t('EL TIEMPO CORRE'), clockX - 8, 42, { align: 'right', color: DD.C.bloodHi });
 
     if (!limb) {
-      center('No hay ningún injerto preparado.', VW / 2, 170, DD.C.textDim, 1);
-      center('El reloj no se detiene.', VW / 2, FOOT_Y, DD.C.gold, 1);
+      center(DD.t('No hay ningún injerto preparado.'), VW / 2, 170, DD.C.textDim, 1);
+      center(DD.t('El reloj no se detiene.'), VW / 2, FOOT_Y, DD.C.gold, 1);
       return;
     }
 
@@ -480,33 +512,33 @@
     var cx = Math.min(bounds.x, VW - GUT - cw);
     DD.Pixel.panel(cx, cy, cw, 66, { alpha: 0.95 });
     var colW = Math.round((cw - 24) / 2);
-    line('PIERDES', cx + 10, cy + 8, DD.C.bloodHi, 1);
-    line('GANAS', cx + 10 + colW + 12, cy + 8, DD.C.bile, 1);
+    line(DD.t('PIERDES'), cx + 10, cy + 8, DD.C.bloodHi, 1);
+    line(DD.t('GANAS'), cx + 10 + colW + 12, cy + 8, DD.C.bile, 1);
 
     var out = (st && st.body && DD.Body && cursor) ? DD.Body.limbOf(st.body, cursor) : null;
     var outCards = out ? (out.cards || []).length : 0;
-    var left = out ? out.name : (cursor ? 'Nada: el muñón.' : '-');
+    var left = out ? out.name : (cursor ? DD.t('Nada: el muñón.') : '-');
     var leftLines = DD.Pixel.wrap(left, colW - 6, 1);
     for (i = 0; i < leftLines.length && i < 2; i++) line(leftLines[i], cx + 10, cy + 22 + i * 10, DD.C.textDim, 1);
     if (out) {
-      line(outCards + ' cartas -' + passiveText(out.passive), cx + 10, cy + 44, DD.C.textFaint, 1);
+      line(outCards + DD.t(' cartas -') + passiveText(out.passive), cx + 10, cy + 44, DD.C.textFaint, 1);
     }
 
     var gLines = DD.Pixel.wrap(limb.name, colW - 6, 1);
     for (i = 0; i < gLines.length && i < 2; i++) {
       line(gLines[i], cx + 10 + colW + 12, cy + 22 + i * 10, DD.C.text, 1);
     }
-    line((limb.cards || []).length + ' cartas -' + passiveText(limb.passive),
+    line((limb.cards || []).length + DD.t(' cartas -') + passiveText(limb.passive),
       cx + 10 + colW + 12, cy + 44, DD.C.textFaint, 1);
 
-    center('El reloj no se detiene.', VW / 2, FOOT_Y, DD.C.gold, 1);
+    center(DD.t('El reloj no se detiene.'), VW / 2, FOOT_Y, DD.C.gold, 1);
   };
 
   /* -------------------------------------------------------------- codex */
   var TABS = [
-    { id: 'limbs', label: 'Planos' },
-    { id: 'enemies', label: 'Bestias' },
-    { id: 'help', label: 'Ayuda' }
+    { id: 'limbs', label: DD.t('Planos') },
+    { id: 'enemies', label: DD.t('Bestias') },
+    { id: 'help', label: DD.t('Ayuda') }
   ];
 
   U.codex = function (tab, scroll) {
@@ -517,11 +549,11 @@
     var i;
 
     DD.Pixel.panel(HEAD.x, HEAD.y, HEAD.w, HEAD.h, {});
-    line('CÓDICE ANATÓMICO', HEAD.x + 10, HEAD.y + 6, DD.C.text, 2);
+    line(DD.t('CÓDICE ANATÓMICO'), HEAD.x + 10, HEAD.y + 6, DD.C.text, 2);
     var count = codexCount(tab === 'enemies' ? 'enemies' : 'limbs');
     var total = codexTotal(tab === 'enemies' ? 'enemies' : 'limbs');
     if (tab !== 'help') {
-      var unit = tab === 'enemies' ? 'bestias' : 'planos';
+      var unit = tab === 'enemies' ? DD.t('bestias') : DD.t('planos');
       DD.Pixel.text(count + '/' + total + ' ' + unit, HEAD.x + HEAD.w - 10, HEAD.y + 20, {
         align: 'right', color: (count >= total && total > 0) ? DD.C.gold : DD.C.textDim
       });
@@ -551,12 +583,12 @@
       DD.Pixel.rect(VW - GUT + 4, CONTENT.y, SCROLLBAR.w, CONTENT.h, DD.C.panelLo);
       DD.Pixel.rect(VW - GUT + 4, CONTENT.y + Math.round((CONTENT.h - bh) * frac), SCROLLBAR.w, bh, DD.C.lineHi);
     }
-    center('Flechas para mover -RETROCESO para volver', VW / 2, FOOT_Y, DD.C.textFaint, 1);
+    center(DD.t('Flechas para mover -RETROCESO para volver'), VW / 2, FOOT_Y, DD.C.textFaint, 1);
   };
 
   function codexLimbs(scroll) {
     var list = (DD.Data && DD.Data.limbs) || [];
-    if (!list.length) { center('Catálogo no disponible.', VW / 2, 150, DD.C.textFaint, 1); return 0; }
+    if (!list.length) { center(DD.t('Catálogo no disponible.'), VW / 2, 150, DD.C.textFaint, 1); return 0; }
     var cols = 2, pitch = LIMB_H + 8, i, row, col;
     var cw = Math.floor((CONTENT.w - 8) / cols);
     for (i = 0; i < list.length; i++) {
@@ -581,13 +613,13 @@
     line('???', x + 10, y + 100, DD.C.textFaint, 2);
     line(SLOT_ES[limb.slot] || limb.slot || '?', x + 10, y + 124, DD.C.lineHi, 1);
     /* the break is deliberate: greedy wrapping strands "cuerpo." on its own line */
-    para('Un plano que aún no has arrancado\nde ningún cuerpo.', x + 10, y + 140, w - 20, DD.C.textFaint, 1, 10);
-    line('Nivel ' + (limb.tier || 1), x + 10, y + h - 22, DD.C.textFaint, 1);
+    para(DD.t('Un plano que aún no has arrancado\nde ningún cuerpo.'), x + 10, y + 140, w - 20, DD.C.textFaint, 1, 10);
+    line(DD.t('Nivel ') + (limb.tier || 1), x + 10, y + h - 22, DD.C.textFaint, 1);
   }
 
   function codexEnemies(scroll) {
     var list = (DD.Data && DD.Data.enemies) || [];
-    if (!list.length) { center('Catálogo no disponible.', VW / 2, 150, DD.C.textFaint, 1); return 0; }
+    if (!list.length) { center(DD.t('Catálogo no disponible.'), VW / 2, 150, DD.C.textFaint, 1); return 0; }
     var cols = 3, i, row, col, x, y;
     var cw = ENEMY_C.w, ch = ENEMY_C.h;
     for (i = 0; i < list.length; i++) {
@@ -611,12 +643,12 @@
     var t = y + 44;
     if (!known) {
       center('???', x + w / 2, t, DD.C.textFaint, 2);
-      center('Nivel ' + (e.tier || 1), x + w / 2, t + 20, DD.C.lineHi, 1);
-      para('Todavía no la has visto de cerca. Mejor así.', x + 10, t + 36, w - 20, DD.C.textFaint, 1, 10);
+      center(DD.t('Nivel ') + (e.tier || 1), x + w / 2, t + 20, DD.C.lineHi, 1);
+      para(DD.t('Todavía no la has visto de cerca. Mejor así.'), x + 10, t + 36, w - 20, DD.C.textFaint, 1, 10);
       return;
     }
     center(e.name, x + w / 2, t, DD.C.text, 2);
-    center('Nivel ' + (e.tier || 1) + ' -' + (e.hp || 0) + ' PV' + (e.boss ? ' -JEFE' : ''),
+    center(DD.t('Nivel ') + (e.tier || 1) + ' -' + (e.hp || 0) + DD.t(' PV') + (e.boss ? DD.t(' -JEFE') : ''),
       x + w / 2, t + 18, tierColor(e.tier), 1);
     var intents = e.intents || [];
     var iy = t + 32;
@@ -654,10 +686,12 @@
     return y + scroll - CONTENT.y;
   }
 
+  /* Both arguments arrive as Spanish literals: the body is one sentence split
+   * over source lines, so the assembled string is what the dictionary keys on. */
   function helpBlock(x, w, y, title, body) {
-    if (y >= CONTENT.y - 14 && y < CONTENT.y + CONTENT.h) line(title, x, y, DD.C.gold, 2);
+    if (y >= CONTENT.y - 14 && y < CONTENT.y + CONTENT.h) line(DD.t(title), x, y, DD.C.gold, 2);
     y += 18;
-    var lines = DD.Pixel.wrap(body, w, 1);
+    var lines = DD.Pixel.wrap(DD.t(body), w, 1);
     for (var i = 0; i < lines.length; i++) {
       if (y + i * 10 >= CONTENT.y - 8 && y + i * 10 < CONTENT.y + CONTENT.h) {
         DD.Pixel.text(lines[i], x, y + i * 10 + 1, { color: DD.C.textDim });
@@ -674,7 +708,7 @@
     selected = selected || 0;
 
     DD.Pixel.panel(HEAD.x, HEAD.y, HEAD.w, HEAD.h, {});
-    line('TIENDA DE RELIQUIAS', HEAD.x + 10, HEAD.y + 6, DD.C.text, 2);
+    line(DD.t('TIENDA DE RELIQUIAS'), HEAD.x + 10, HEAD.y + 6, DD.C.text, 2);
     var shards = DD.Progress && DD.Progress.shards ? DD.Progress.shards() : ((meta() && meta().shards) || 0);
     if (DD.Pixel.hasSprite('icon_shard')) DD.Pixel.sprite('icon_shard', HEAD.x + HEAD.w - 62, HEAD.y + 8);
     DD.Pixel.text(String(shards), HEAD.x + HEAD.w - 10, HEAD.y + 20, { align: 'right', color: DD.C.gold });
@@ -713,10 +747,10 @@
 
       var rx = x + CONTENT.w - 14;
       var stateTxt, stateCol;
-      if (equipped === cos.id) { stateTxt = 'EQUIPADO'; stateCol = DD.C.bile; }
-      else if (has) { stateTxt = 'DISPONIBLE'; stateCol = DD.C.integrity; }
-      else if (canPay) { stateTxt = 'DESBLOQUEAR'; stateCol = DD.C.gold; }
-      else { stateTxt = 'BLOQUEADO'; stateCol = DD.C.textFaint; }
+      if (equipped === cos.id) { stateTxt = DD.t('EQUIPADO'); stateCol = DD.C.bile; }
+      else if (has) { stateTxt = DD.t('DISPONIBLE'); stateCol = DD.C.integrity; }
+      else if (canPay) { stateTxt = DD.t('DESBLOQUEAR'); stateCol = DD.C.gold; }
+      else { stateTxt = DD.t('BLOQUEADO'); stateCol = DD.C.textFaint; }
       DD.Pixel.text(stateTxt, rx, y + 14, { align: 'right', color: stateCol });
       if (has) DD.Pixel.text('-', rx, y + 30, { align: 'right', color: DD.C.textFaint });
       else {
@@ -727,7 +761,7 @@
     DD.Pixel.clipPop();
 
     DD.Pixel.rect(CONTENT.x, FOOT_Y - 4, CONTENT.w, 1, DD.C.line);
-    line('Prototipo: la tienda no cobra dinero real y las esquirlas solo salen de la torre.',
+    line(DD.t('Prototipo: la tienda no cobra dinero real y las esquirlas solo salen de la torre.'),
       CONTENT.x, FOOT_Y, DD.C.textFaint, 1);
   };
 
@@ -750,46 +784,47 @@
     var left = 104, right = 328, y0 = 104;
     var panelW = 208;
 
-    DD.Pixel.panel(left, y0, panelW, 150, { title: 'LA HUÍDA', titleColor: res.col });
+    DD.Pixel.panel(left, y0, panelW, 150, { title: DD.t('LA HUÍDA'), titleColor: res.col });
     var y = y0 + 18;
-    y = stat('Bajas', String(stats.kills || 0), left + 12, y);
-    y = stat('Injertos', String(stats.grafted || 0), left + 12, y);
-    y = stat('Miembros perdidos', String(stats.lost || 0), left + 12, y);
-    y = stat('Pisos superados', (stats.floors || 0) + ' / ' + ((st && st.floorCount) || DD.FLOOR_COUNT || 4), left + 12, y);
-    y = stat('Tiempo restante', DD.clock ? DD.clock(st ? st.timeLeft : 0) : '0', left + 12, y);
+    y = stat(DD.t('Bajas'), String(stats.kills || 0), left + 12, y);
+    y = stat(DD.t('Injertos'), String(stats.grafted || 0), left + 12, y);
+    y = stat(DD.t('Miembros perdidos'), String(stats.lost || 0), left + 12, y);
+    y = stat(DD.t('Pisos superados'), (stats.floors || 0) + ' / ' + ((st && st.floorCount) || DD.FLOOR_COUNT || 4), left + 12, y);
+    y = stat(DD.t('Tiempo restante'), DD.clock ? DD.clock(st ? st.timeLeft : 0) : '0', left + 12, y);
     if (result === 'escaped') {
-      y = stat('Mejor huida', m.bestTime ? DD.clock(m.bestTime) : '-', left + 12, y);
+      y = stat(DD.t('Mejor huida'), m.bestTime ? DD.clock(m.bestTime) : '-', left + 12, y);
     } else {
-      y = stat('Mejor huida', m.bestTime ? DD.clock(m.bestTime) : 'aún ninguna', left + 12, y);
+      y = stat(DD.t('Mejor huida'), m.bestTime ? DD.clock(m.bestTime) : DD.t('aún ninguna'), left + 12, y);
     }
 
-    DD.Pixel.panel(right, y0, panelW, 150, { title: 'RECOMPENSAS', titleColor: res.col });
+    DD.Pixel.panel(right, y0, panelW, 150, { title: DD.t('RECOMPENSAS'), titleColor: res.col });
     var ry = y0 + 18;
     if (DD.Pixel.hasSprite('icon_shard')) DD.Pixel.sprite('icon_shard', right + 12, ry - 6);
-    ry = stat('Esquirlas', String((st && st.shards) || 0), right + 30, ry);
+    ry = stat(DD.t('Esquirlas'), String((st && st.shards) || 0), right + 30, ry);
     var newLimbs = base ? Math.max(0, codexCount('limbs') - base.limbs) : 0;
     var newEnemies = base ? Math.max(0, codexCount('enemies') - base.enemies) : 0;
-    ry = stat('Planos nuevos', base ? '+' + newLimbs : '-', right + 12, ry);
-    ry = stat('Bestias nuevas', base ? '+' + newEnemies : '-', right + 12, ry);
-    ry = stat('Códice', codexCount('limbs') + '/' + codexTotal('limbs') + ' planos', right + 12, ry);
-    ry = stat('Carreras', String(m.runs || 0), right + 12, ry);
-    ry = stat('Huidas', String(m.escapes || 0), right + 12, ry);
+    ry = stat(DD.t('Planos nuevos'), base ? '+' + newLimbs : '-', right + 12, ry);
+    ry = stat(DD.t('Bestias nuevas'), base ? '+' + newEnemies : '-', right + 12, ry);
+    ry = stat(DD.t('Códice'), codexCount('limbs') + '/' + codexTotal('limbs') + DD.t(' planos'), right + 12, ry);
+    ry = stat(DD.t('Carreras'), String(m.runs || 0), right + 12, ry);
+    ry = stat(DD.t('Huidas'), String(m.escapes || 0), right + 12, ry);
 
     var tail = result === 'escaped'
-      ? 'Los planos que has arrancado se quedan en el códice. La torre, también.'
-      : 'Lo que has aprendido se queda en el códice. El cuerpo, no.';
+      ? DD.t('Los planos que has arrancado se quedan en el códice. La torre, también.')
+      : DD.t('Lo que has aprendido se queda en el códice. El cuerpo, no.');
     center(tail, VW / 2, 268, DD.C.textFaint, 1);
-    center('ENTER para volver al vestíbulo', VW / 2, FOOT_Y, res.col, 1);
+    center(DD.t('ENTER para volver al vestíbulo'), VW / 2, FOOT_Y, res.col, 1);
   };
 
   /* -------------------------------------------------------------- pause */
   U.pause = function (items, index) {
     frame();
     DD.Pixel.dim(0, 0, VW, VH, 0.66, DD.C.void);
-    DD.Pixel.panel(PANEL_PAUSE.x, PANEL_PAUSE.y, PANEL_PAUSE.w, PANEL_PAUSE.h, { title: 'PAUSA' });
+    DD.Pixel.panel(PANEL_PAUSE.x, PANEL_PAUSE.y, PANEL_PAUSE.w, PANEL_PAUSE.h, { title: DD.t('PAUSA') });
     U.menu(items, index, {
       x: PANEL_PAUSE.x + 42, y: PANEL_PAUSE.y + 42, w: PANEL_PAUSE.w - 84,
-      hint: 'ESC - Seguir jugando'
+      hint: DD.t('ESC - Seguir jugando')
     });
+    U.langToggle(PANEL_PAUSE.x + Math.round((PANEL_PAUSE.w - 54) / 2), PANEL_PAUSE.y + 168);
   };
 })();

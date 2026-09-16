@@ -48,7 +48,7 @@
       }
       U.end(result);
       if (DD.Pixel && DD.Pixel.text && t >= GUARD) {
-        DD.Pixel.text('ESC - Volver al vestíbulo', DD.VW / 2, 322, {
+        DD.Pixel.text(DD.t('ESC - Volver al vestíbulo'), DD.VW / 2, 322, {
           align: 'center', color: DD.C.textFaint
         });
       }

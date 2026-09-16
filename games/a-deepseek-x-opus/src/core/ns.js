@@ -16,12 +16,12 @@
   DD.SOCKETS = ['head', 'torso', 'armL', 'armR', 'legL', 'legR'];
 
   DD.SOCKET_LABEL = {
-    head: 'Cabeza',
-    torso: 'Torso',
-    armL: 'Brazo Izq.',
-    armR: 'Brazo Der.',
-    legL: 'Pierna Izq.',
-    legR: 'Pierna Der.'
+    head: DD.t('Cabeza'),
+    torso: DD.t('Torso'),
+    armL: DD.t('Brazo Izq.'),
+    armR: DD.t('Brazo Der.'),
+    legL: DD.t('Pierna Izq.'),
+    legR: DD.t('Pierna Der.')
   };
 
   DD.TILE = 24;

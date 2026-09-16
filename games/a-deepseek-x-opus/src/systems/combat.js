@@ -168,12 +168,12 @@
     if (!e.enemies.length) {
       e.over = true;
       e.result = 'win';
-      say('No hay nada contra lo que luchar.');
+      say(DD.t('No hay nada contra lo que luchar.'));
       return e;
     }
     draw(e, OPENING_HAND + (t.openingDraw || 0));
     sfx('growl');
-    say('¡Comienza el combate! ' + DD.plural(e.enemies.length, 'enemigo', 'enemigos') + '.');
+    say(DD.t('¡Comienza el combate! ') + DD.plural(e.enemies.length, DD.t('enemigo'), DD.t('enemigos')) + '.');
     return e;
   };
 
@@ -245,7 +245,7 @@
     en.anim.shake = 0.28;
     fx(e, 'damage', through, Combat.enemySlot(en.i), en.i);
     if (blocked > 0) fx(e, 'block', blocked, Combat.enemySlot(en.i), en.i);
-    if (cardName && through > 0) say(cardName + ' inflige ' + through + ' a ' + en.name + '.');
+    if (cardName && through > 0) say(cardName + DD.t(' inflige ') + through + DD.t(' a ') + en.name + '.');
 
     var s = runState();
     if (s && s.stats) s.stats.damage = (s.stats.damage || 0) + through;
@@ -264,7 +264,7 @@
     en.hp = Math.max(1, Math.round(en.maxHp * REVIVE_HP));
     en.anim.shake = 0.3;
     sfx('graft');
-    say('¡' + en.name + ' se levanta de nuevo!');
+    say(DD.t('¡') + en.name + DD.t(' se levanta de nuevo!'));
     fx(e, 'heal', en.hp, Combat.enemySlot(en.i), en.i);
     return true;
   }
@@ -277,7 +277,7 @@
     en.block = 0;
     en.anim.death = 0.4;
     sfx('death');
-    say(en.name + ' cae desplomado.');
+    say(en.name + DD.t(' cae desplomado.'));
     if (e.target === en.i) retarget(e);
     checkWin(e);
   }
@@ -449,7 +449,7 @@
     e.energy -= (def.cost || 0);
     if (s.stats) s.stats.played = (s.stats.played || 0) + 1;
     sfx('card_play');
-    say('Juegas ' + (def.name || card.id) + '.');
+    say(DD.t('Juegas ') + (def.name || card.id) + '.');
 
     applyEffects(e, card, def, tgt);
 
@@ -489,7 +489,7 @@
     loseHp(n);
     e.player.shake = 0.2;
     fx(e, 'damage', n, Combat.playerSlot(), 'player');
-    say('La hemorragia te cuesta ' + n + ' de vida.');
+    say(DD.t('La hemorragia te cuesta ') + n + DD.t(' de vida.'));
     if (s && s.hp <= 0) lose(e);
   }
 
@@ -513,7 +513,7 @@
     if (map.poison <= 0) delete map.poison;
     loseHp(n);
     fx(e, 'damage', n, Combat.playerSlot(), 'player');
-    say('El veneno te corroe: pierdes ' + n + ' de vida.');
+    say(DD.t('El veneno te corroe: pierdes ') + n + DD.t(' de vida.'));
     if (s && s.hp <= 0) lose(e);
   }
 
@@ -541,7 +541,7 @@
       var dmg = v;
       if ((en.status.weak || 0) > 0) dmg *= 0.75;
       dmg = Math.floor(dmg);
-      say(en.name + ': ' + (it.text || 'ataca') + '.');
+      say(en.name + ': ' + (it.text || DD.t('ataca')) + '.');
       sfx(dmg >= 10 ? 'hit_heavy' : 'hit');
       damagePlayer(e, dmg);
       if (e.over) return;
@@ -554,25 +554,25 @@
     } else if (it.type === 'block') {
       en.block = (en.block || 0) + v;
       fx(e, 'block', v, Combat.enemySlot(en.i), en.i);
-      say(en.name + ': ' + (it.text || 'se protege') + '.');
+      say(en.name + ': ' + (it.text || DD.t('se protege')) + '.');
     } else if (it.type === 'heal') {
       var before = en.hp;
       en.hp = Math.min(en.maxHp, en.hp + v);
       if (en.hp > before) fx(e, 'heal', en.hp - before, Combat.enemySlot(en.i), en.i);
-      say(en.name + ': ' + (it.text || 'se regenera') + '.');
+      say(en.name + ': ' + (it.text || DD.t('se regenera')) + '.');
     } else if (it.type === 'debuff') {
       addStatus(e.player.status, it.status, v);
-      say(en.name + ': ' + (it.text || 'te maldice') + '.');
+      say(en.name + ': ' + (it.text || DD.t('te maldice')) + '.');
     } else if (it.type === 'buff') {
       /* A "buff" that names a status marks the player (the plague nurse
        * brands the herd); one without a status strengthens the enemy. */
       if (it.status) {
         addStatus(e.player.status, it.status, v);
-        say(en.name + ': ' + (it.text || 'te marca') + '.');
+        say(en.name + ': ' + (it.text || DD.t('te marca')) + '.');
       } else {
         en.block = (en.block || 0) + v;
         fx(e, 'block', v, Combat.enemySlot(en.i), en.i);
-        say(en.name + ': ' + (it.text || 'se refuerza') + '.');
+        say(en.name + ': ' + (it.text || DD.t('se refuerza')) + '.');
       }
     }
   }
@@ -600,7 +600,7 @@
       if ((en.status.stun || 0) > 0) {
         en.status.stun--;
         if (en.status.stun <= 0) delete en.status.stun;
-        say(en.name + ' está aturdido y no llega a actuar.');
+        say(en.name + DD.t(' está aturdido y no llega a actuar.'));
         continue;
       }
       enemyAct(e, en);
@@ -622,7 +622,7 @@
     }
     e.turn++;
     draw(e, PER_TURN_DRAW + (totals().drawBonus || 0));
-    say('Turno ' + e.turn + '.');
+    say(DD.t('Turno ') + e.turn + '.');
   };
 
   /* ------------------------------------------------------------- outcomes */
@@ -664,15 +664,15 @@
       for (i = 0; i < drops.length; i++) if (drops[i]) loot.push(drops[i]);
     }
     sfx('levelup');
-    say('Victoria. Recoges ' + reward + ' de residuo.');
-    if (drops.length) say('Entre los restos quedan ' + DD.plural(drops.length, 'miembro', 'miembros') + '.');
+    say(DD.t('Victoria. Recoges ') + reward + DD.t(' de residuo.'));
+    if (drops.length) say(DD.t('Entre los restos quedan ') + DD.plural(drops.length, DD.t('miembro'), DD.t('miembros')) + '.');
   }
 
   function lose(e) {
     if (!e || e.over) return;
     e.over = true;
     e.result = 'lose';
-    say('Tu cuerpo se apaga. El reloj sigue corriendo.');
+    say(DD.t('Tu cuerpo se apaga. El reloj sigue corriendo.'));
     if (DD.Run && DD.Run.die) DD.Run.die();
   }
 
@@ -692,11 +692,11 @@
       e.over = true;
       e.result = 'flee';
       sfx('escape');
-      say('Escapas cojeando. El reloj no perdona.');
+      say(DD.t('Escapas cojeando. El reloj no perdona.'));
       return true;
     }
     sfx('hit_heavy');
-    say('No consigues escapar: pierdes ' + FLEE_HP_COST + ' de vida.');
+    say(DD.t('No consigues escapar: pierdes ') + FLEE_HP_COST + DD.t(' de vida.'));
     loseHp(FLEE_HP_COST);
     fx(e, 'damage', FLEE_HP_COST, Combat.playerSlot(), 'player');
     if (s && s.hp <= 0) lose(e);

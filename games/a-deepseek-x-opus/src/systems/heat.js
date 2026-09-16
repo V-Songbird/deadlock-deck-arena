@@ -27,7 +27,7 @@
     b.integrity[socket] = Math.max(0, (b.integrity[socket] || 0) - OVERHEAT_INTEGRITY);
     b.heat[socket] = cap * 0.5;
     sfx('overheat');
-    say('¡' + label(socket) + ' se sobrecalienta! Pierdes ' + OVERHEAT_DAMAGE + ' de vida.');
+    say(DD.t('¡') + label(socket) + DD.t(' se sobrecalienta! Pierdes ') + OVERHEAT_DAMAGE + DD.t(' de vida.'));
     if (DD.Run.damage) DD.Run.damage(OVERHEAT_DAMAGE);
     if ((b.integrity[socket] || 0) <= 0) breakSocket(socket, b);
   }
@@ -41,7 +41,7 @@
     DD.Body.breakSocket(b, socket);
     if (s.stats) s.stats.lost = (s.stats.lost || 0) + 1;
     sfx('break');
-    say(label(socket) + ' se desprende y queda un muñón.');
+    say(label(socket) + DD.t(' se desprende y queda un muñón.'));
     var e = s.encounter;
     if (e) {
       e.drawPile = filterSocket(e.drawPile, socket);

@@ -3,7 +3,8 @@
 Juego web sin dependencias. ES modules nativos, Canvas 2D, Web Audio API.
 Servidor estático propio (`server.mjs`, sólo `node:http`). **Sin tests. Sin build. Sin librerías.**
 
-Todo el texto visible al jugador está en **español**. Código, comentarios e identificadores en **inglés**.
+Todo el texto visible al jugador se **escribe en español**; `src/lang.js` le superpone una capa de inglés
+(ver [docs/language-layer.md](language-layer.md)). Código, comentarios e identificadores en **inglés**.
 
 ## Resolución y estilo
 
@@ -29,6 +30,7 @@ Todo el texto visible al jugador está en **español**. Código, comentarios e i
 | `src/explore.js` | escena de exploración (lógica + dibujo) |
 | `src/ui.js` | HUD, mano de cartas, paneles, pantallas |
 | `src/audio.js` | música sintetizada + SFX guturales |
+| `src/lang.js` | idioma activo, diccionario ES->EN y `t()` |
 
 ## Escenas
 

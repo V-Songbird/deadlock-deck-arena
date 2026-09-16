@@ -197,7 +197,7 @@
 
     if (show) {
       var label = info.stump
-        ? (DD.SOCKET_LABEL[s] || s) + ' (muñón)'
+        ? (DD.SOCKET_LABEL[s] || s) + DD.t(' (muñón)')
         : ((info.limb && info.limb.name) || DD.SOCKET_LABEL[s] || s);
       P().text(clipText(label, LEGEND_W * sc, 1), lx, ly, {
         color: sel ? DD.C.text : (info.stump ? DD.C.textFaint : DD.C.textDim)
@@ -221,7 +221,7 @@
     var w = pad * 2 + Math.round(DIAG_W * sc) + legend;
     var h = head + Math.round(DIAG_H * sc) + pad;
 
-    P().panel(px, py, w, h, { title: 'Cuerpo', titleScale: sc });
+    P().panel(px, py, w, h, { title: DD.t('Cuerpo'), titleScale: sc });
 
     var ox = px + pad, oy = py + head;
     var hov = opts.interactive ? hoveredSocket(ox, oy, sc) : null;
@@ -313,7 +313,7 @@
     P().sprite('icon_shard', 60, VITALS_Y + 36);
     P().text(String(num(st.shards)), 78, VITALS_Y + 38, { color: DD.C.gold });
 
-    P().text('Piso ' + (num(st.floor) + 1) + '/' + Math.max(1, num(st.floorCount, 4)), 4, VITALS_Y + 55, { color: DD.C.textDim });
+    P().text(DD.t('Piso ') + (num(st.floor) + 1) + '/' + Math.max(1, num(st.floorCount, 4)), 4, VITALS_Y + 55, { color: DD.C.textDim });
   }
 
   /* Banner while any socket sits at tier 3: the limb is about to break. */
@@ -324,7 +324,7 @@
     }
     if (!crit) return;
     var pulse = 0.5 + 0.5 * Math.sin(t * 8);
-    var label = '¡CALOR CRÍTICO! Un miembro va a estallar';
+    var label = DD.t('¡CALOR CRÍTICO! Un miembro va a estallar');
     var w = P().textW(label, 1) + 26;
     var x = Math.round(320 - w / 2);
     P().panel(x, 2, w, 15, {

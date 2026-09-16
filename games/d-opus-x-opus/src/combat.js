@@ -3,7 +3,8 @@
 // Every card in the deck remembers the body slot it came from, so its heat lands
 // on that limb: spam one arm and the arm tears off, taking its cards with it.
 //
-// Code and comments are English; log lines, toasts and intentText are Spanish.
+// Code and comments are English; log lines, toasts and intentText are authored in
+// Spanish and pass through lang.js, which swaps them for English when asked.
 
 import { CARDS, LIMBS, ENEMIES } from './cards.js';
 import {
@@ -12,6 +13,7 @@ import {
 } from './body.js';
 import { toast, discover, saveMeta, RUN_SECONDS } from './state.js';
 import { audio } from './audio.js';
+import { t } from './lang.js';
 
 const ENEMY_DELAY = 0.5;   // seconds of enemy animation before the intent lands
 const WIN_DELAY = 0.6;     // seconds on the corpse before harvest or escape
@@ -50,13 +52,13 @@ function occupied(body, slot) {
 
 function limbName(blueprintId) {
   const bp = LIMBS[blueprintId];
-  return bp && bp.name ? bp.name : blueprintId;
+  return bp && bp.name ? t(bp.name) : blueprintId;
 }
 
 // The limb's own name when body.js keys limbs by slot, else the slot label.
 function limbLabel(body, slot) {
   const limb = body && body[slot];
-  return up(limb && limb.name ? limb.name : SLOT_NAMES[slot] || slot);
+  return up(t(limb && limb.name ? limb.name : SLOT_NAMES[slot] || slot));
 }
 
 function pushLog(combat, line) {
@@ -64,9 +66,11 @@ function pushLog(combat, line) {
   if (combat.log.length > LOG_LINES) combat.log.splice(0, combat.log.length - LOG_LINES);
 }
 
+// The reason is a player-facing toast, so it is translated here and every call
+// site keeps passing the Spanish literal.
 function deny(reason) {
   audio.sfx('deny');
-  return { ok: false, reason };
+  return { ok: false, reason: t(reason) };
 }
 
 /* ------------------------------------------------------------------ */
@@ -157,8 +161,9 @@ function breakSlot(state, slot, label) {
   const c = state.combat;
   purgeSlot(c, slot);
   trimHand(state);
-  pushLog(c, `${label} SE DESGARRA`);
-  toast(`${label} SE DESGARRA`);
+  const msg = t('{0} SE DESGARRA', label);
+  pushLog(c, msg);
+  toast(msg);
   audio.sfx('break');
 }
 
@@ -189,7 +194,7 @@ function hurtEnemyLimb(state, amount) {
   if (amount <= 0 || !pool.length) return;
   const limb = state.run.rng.pick(pool);
   limb.integrity = Math.max(0, limb.integrity - amount);
-  if (limb.integrity === 0) pushLog(c, `${limbName(limb.blueprint)} INSERVIBLE`);
+  if (limb.integrity === 0) pushLog(c, t('{0} INSERVIBLE', limbName(limb.blueprint)));
 }
 
 // Returns the damage dealt to the enemy, for the log line.
@@ -308,14 +313,14 @@ function tearLimb(state, amount) {
   const label = limbLabel(body, slot);
   const res = damageLimb(body, slot, amount) || {};
   if (res.broke) breakSlot(state, slot, label);
-  else pushLog(c, `${label} -${amount} CARNE`);
+  else pushLog(c, t('{0} -{1} CARNE', label, amount));
 }
 
 function runIntent(state) {
   const c = state.combat;
   const it = c.intent;
   if (!it) return;
-  const name = up(it.name || 'GOLPE');
+  const name = up(t(it.name || 'GOLPE'));
 
   switch (it.kind) {
     case 'attack':
@@ -341,18 +346,18 @@ function runIntent(state) {
 
     case 'block':
       c.foeBlock += Math.max(0, num(it.amount));
-      pushLog(c, `${name}: SE PROTEGE`);
+      pushLog(c, t('{0}: SE PROTEGE', name));
       break;
 
     case 'buff':
       c.foe.strength += Math.max(1, num(it.amount) || 1);
-      pushLog(c, `${name}: SE ENFURECE`);
+      pushLog(c, t('{0}: SE ENFURECE', name));
       break;
 
     case 'debuff': {
       const which = state.run.rng.chance(0.5) ? 'weak' : 'frail';
       c.self[which] += Math.max(1, num(it.amount) || 1);
-      pushLog(c, which === 'weak' ? `${name}: TE DEBILITA` : `${name}: TE VUELVE FRÁGIL`);
+      pushLog(c, t(which === 'weak' ? '{0}: TE DEBILITA' : '{0}: TE VUELVE FRÁGIL', name));
       break;
     }
 
@@ -372,12 +377,12 @@ function burnTick(state, side) {
   if (side === 'self') {
     state.run.hp -= dmg;
     c.anim.flashSelf = 0.2;
-    pushLog(c, `ARDES: -${dmg}`);
+    pushLog(c, t('ARDES: -{0}', dmg));
     checkLoss(state);
   } else {
     c.enemy.hp -= dmg;
     c.anim.flashFoe = 0.18;
-    pushLog(c, `${c.enemy.name} ARDE: -${dmg}`);
+    pushLog(c, t('{0} ARDE: -{1}', t(c.enemy.name), dmg));
     checkWin(state);
   }
 }
@@ -431,7 +436,7 @@ function checkWin(state) {
   c.phase = 'won';
   c.pending = 'win';
   c.delay = WIN_DELAY;
-  pushLog(c, `${c.enemy.name} SE DESPLOMA`);
+  pushLog(c, t('{0} SE DESPLOMA', t(c.enemy.name)));
   audio.sfx('death');
   state.run.kills += 1;
   clearRoom(state);
@@ -446,7 +451,7 @@ function checkLoss(state) {
   c.phase = 'lost';
   c.pending = null;
   c.delay = 0;
-  pushLog(c, 'TU CARNE CEDE');
+  pushLog(c, t('TU CARNE CEDE'));
   return true;
 }
 
@@ -523,7 +528,7 @@ export function startCombat(state, enemyId) {
   coolAll(body, 1);
   drawCards(state, handSize(body));
   chooseIntent(state);
-  pushLog(combat, def.quip || `APARECE ${def.name}`);
+  pushLog(combat, def.quip ? t(def.quip) : t('APARECE {0}', t(def.name)));
   state.scene = 'combat';
   audio.sfx('enemy');
   return combat;
@@ -558,7 +563,7 @@ export function playCard(state, handIndex) {
     dealt += applyEffect(state, fx, entry.slot);
     if (c.phase !== 'player') break; // the fight ended mid card
   }
-  pushLog(c, dealt > 0 ? `${card.name} -${dealt}` : card.name);
+  pushLog(c, dealt > 0 ? `${t(card.name)} -${dealt}` : t(card.name));
 
   // A card whose own limb just tore off goes with it, not to the discard.
   const torn = applyHeat(state, entry.slot, card.heat);
@@ -635,7 +640,7 @@ export function applyHarvest(state, limbIndex, slot) {
   run.maxHp = maxHp(run.body);
   run.hp = Math.min(run.hp, run.maxHp);
   audio.sfx('graft');
-  toast(`INJERTAS ${up(bp.name)}`);
+  toast(t('INJERTAS {0}', up(t(bp.name))));
 
   h.done = true;
   state.scene = 'explore';
@@ -650,18 +655,18 @@ export function skipHarvest(state) {
   state.scene = 'explore';
 }
 
-// Short Spanish label for the HUD intent badge.
+// Short label for the HUD intent badge, authored in Spanish and translated on the way out.
 export function intentText(combat) {
   const it = combat && combat.intent;
-  if (!it) return 'ESPERA';
+  if (!it) return t('ESPERA');
   const foe = combat.foe || blankStatus();
   switch (it.kind) {
-    case 'attack': return `ATACA ${outgoing(it.amount, foe)}`;
-    case 'multi': return `X${Math.max(1, num(it.times) || 1)} POR ${outgoing(it.amount, foe)}`;
-    case 'limbstrike': return 'ARRANCA MIEMBRO';
-    case 'block': return 'SE PROTEGE';
-    case 'buff': return 'SE ENFURECE';
-    case 'debuff': return 'TE DEBILITA';
-    default: return 'TRAMA ALGO';
+    case 'attack': return t('ATACA {0}', outgoing(it.amount, foe));
+    case 'multi': return t('X{0} POR {1}', Math.max(1, num(it.times) || 1), outgoing(it.amount, foe));
+    case 'limbstrike': return t('ARRANCA MIEMBRO');
+    case 'block': return t('SE PROTEGE');
+    case 'buff': return t('SE ENFURECE');
+    case 'debuff': return t('TE DEBILITA');
+    default: return t('TRAMA ALGO');
   }
 }

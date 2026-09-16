@@ -9,6 +9,7 @@ import { SLOTS, family, maxHp, coolAll, addHeat, damageLimb, repairLimb, graft }
 import { LIMBS } from './cards.js';
 import { startCombat } from './combat.js';
 import { audio } from './audio.js';
+import { t } from './lang.js';
 import * as sprites from './sprites.js';
 
 /* ----------------------------------------------------------------- layout */
@@ -74,15 +75,15 @@ function resolveTrap(run, room) {
     if (live.length) {
       const [slot, limb] = run.rng.pick(live);
       const { broke } = damageLimb(run.body, slot, 3);
-      msg = `CUCHILLAS: -${dmg} PV Y ${limb.name} ${broke ? 'ARRANCADO' : 'ABIERTO'}`;
+      msg = t('CUCHILLAS: -{0} PV Y {1} {2}', dmg, t(limb.name), t(broke ? 'ARRANCADO' : 'ABIERTO'));
     } else {
-      msg = `CUCHILLAS: -${dmg} PV SOBRE CARNE VIVA`;
+      msg = t('CUCHILLAS: -{0} PV SOBRE CARNE VIVA', dmg);
     }
   } else if (p.kind === 'steam') {
     for (const [slot] of attached(run.body)) addHeat(run.body, slot, 3);
-    msg = `VAPOR HIRVIENTE: -${dmg} PV Y TODO SE RECALIENTA`;
+    msg = t('VAPOR HIRVIENTE: -{0} PV Y TODO SE RECALIENTA', dmg);
   } else {
-    msg = `LA BÓVEDA CEDE: -${dmg} PV DE ESCOMBROS`;
+    msg = t('LA BÓVEDA CEDE: -{0} PV DE ESCOMBROS', dmg);
   }
 
   toast(msg, 2.8);
@@ -112,21 +113,21 @@ function resolveSalvage(run, room) {
       run.grafts = (run.grafts || 0) + 1;
       discover(bp.id);
       audio.sfx('graft');
-      toast(`INJERTAS: ${bp.name}`, 2.6);
+      toast(t('INJERTAS: {0}', t(bp.name)), 2.6);
     } else {
-      toast('EL INJERTO NO ENCAJA EN TU CARNE', 2.4);
+      toast(t('EL INJERTO NO ENCAJA EN TU CARNE'), 2.4);
     }
   } else if (p.kind === 'coolant') {
     coolAll(body, 99);
     for (const [slot] of attached(body)) repairLimb(body, slot, 3);
     audio.sfx('heat');
-    toast('REFRIGERANTE: CALOR PURGADO, +3 INTEGRIDAD', 2.6);
+    toast(t('REFRIGERANTE: CALOR PURGADO, +3 INTEGRIDAD'), 2.6);
   } else {
     const before = run.hp;
     run.hp = Math.min(run.maxHp, run.hp + 12);
     run.elixirs = (run.elixirs || 0) + 1;
     audio.sfx('squelch');
-    toast(`ELIXIR VISCOSO: +${Math.round(run.hp - before)} PV`, 2.4);
+    toast(t('ELIXIR VISCOSO: +{0} PV', Math.round(run.hp - before)), 2.4);
   }
 
   room.cleared = true;
@@ -142,9 +143,9 @@ function resolveForge(run, room) {
       if (a.integrity / a.maxIntegrity < b.integrity / b.maxIntegrity) worst = pair;
     }
     repairLimb(body, worst[0], 99);
-    toast(`LA FRAGUA REHACE: ${worst[1].name}`, 2.6);
+    toast(t('LA FRAGUA REHACE: {0}', t(worst[1].name)), 2.6);
   } else {
-    toast('LA FRAGUA SÓLO TE ENFRÍA: NO QUEDA NADA', 2.6);
+    toast(t('LA FRAGUA SÓLO TE ENFRÍA: NO QUEDA NADA'), 2.6);
   }
   coolAll(body, 99);
   audio.sfx('graft');
@@ -169,7 +170,7 @@ function resolveRoom(state, run, room) {
     case 'exit':
       if (run.guardAlive) {
         startCombat(state, 'archialquimista');
-        toast('EL ARCHIALQUIMISTA BLOQUEA LA SALIDA', 3);
+        toast(t('EL ARCHIALQUIMISTA BLOQUEA LA SALIDA'), 3);
       } else {
         // combat.js already counted the escape; only walk through the door.
         audio.sfx('escape');
@@ -226,7 +227,7 @@ export function update(state, dt) {
   if (room.type === 'stairs' && room.down) {
     if (pressed('f') || clickIn(DESCEND.x, DESCEND.y, DESCEND.w, DESCEND.h)) {
       enterRoom(state, room.down);
-      toast('DESCIENDES');
+      toast(t('DESCIENDES'));
       return;
     }
   }
@@ -240,7 +241,7 @@ export function update(state, dt) {
     if (adj.some((a) => a.id === r.id)) enterRoom(state, r.id);
     else {
       audio.sfx('deny');
-      toast('NO HAY CORREDOR');
+      toast(t('NO HAY CORREDOR'));
     }
     return;
   }
@@ -250,8 +251,8 @@ export function update(state, dt) {
 
 function drawMap(ctx, state, run, room, adjOrder) {
   frame(ctx, MAP.x, MAP.y, MAP.w, MAP.h, PAL.ash, PAL.ink);
-  text(ctx, `PISO ${room.floor + 1}`, MAP.x + 5, MAP.y + 4, PAL.brass);
-  text(ctx, 'MAPA', MAP.x + MAP.w - 26, MAP.y + 4, PAL.stone);
+  text(ctx, t('PISO {0}', room.floor + 1), MAP.x + 5, MAP.y + 4, PAL.brass);
+  text(ctx, t('MAPA'), MAP.x + MAP.w - 26, MAP.y + 4, PAL.stone);
 
   const floor = run.tower.floors[room.floor];
   if (!floor) return;
@@ -289,7 +290,7 @@ function drawMap(ctx, state, run, room, adjOrder) {
     }
 
     frame(ctx, b.x, b.y, NODE_W, NODE_H, border, fill);
-    textCenter(ctx, here || r.seen ? ICON[r.type] || '??' : '?', b.cx, b.y + 8, ink);
+    textCenter(ctx, here || r.seen ? t(ICON[r.type] || '??') : '?', b.cx, b.y + 8, ink);
     if (nth) text(ctx, String(nth), b.x + 2, b.y + 2, PAL.spark);
 
     if (r.down) {
@@ -306,30 +307,30 @@ function drawInfo(ctx, run, room, adj) {
   frame(ctx, INFO.x, INFO.y, INFO.w, INFO.h, PAL.ash, PAL.ink);
   const x = INFO.x + 5;
 
-  text(ctx, cut(room.name, 28), x, INFO.y + 4, PAL.pale);
-  text(ctx, `PISO ${room.floor + 1} - ${LABEL[room.type] || room.type}`, x, INFO.y + 13, PAL.brass);
+  text(ctx, cut(t(room.name), 28), x, INFO.y + 4, PAL.pale);
+  text(ctx, t('PISO {0} - {1}', room.floor + 1, t(LABEL[room.type] || room.type)), x, INFO.y + 13, PAL.brass);
 
   const lines = DESC[room.type] || [''];
-  for (let i = 0; i < lines.length; i++) text(ctx, lines[i], x, INFO.y + 24 + i * 7, PAL.bone);
+  for (let i = 0; i < lines.length; i++) text(ctx, t(lines[i]), x, INFO.y + 24 + i * 7, PAL.bone);
 
-  text(ctx, 'SALIDAS', x, INFO.y + 40, PAL.copper);
+  text(ctx, t('SALIDAS'), x, INFO.y + 40, PAL.copper);
   if (!adj.length) {
-    text(ctx, 'NINGUNA. LOS MUROS SE CIERRAN.', x, INFO.y + 50, PAL.gore);
+    text(ctx, t('NINGUNA. LOS MUROS SE CIERRAN.'), x, INFO.y + 50, PAL.gore);
   } else {
     for (let i = 0; i < adj.length; i++) {
       const r = adj[i];
       const dim = r.cleared ? PAL.ash : PAL.bone;
-      text(ctx, `${i + 1} ${cut(r.name, 24)}`, x, INFO.y + 50 + i * 8, dim);
+      text(ctx, `${i + 1} ${cut(t(r.name), 24)}`, x, INFO.y + 50 + i * 8, dim);
     }
   }
 
   if (room.type === 'stairs' && room.down) {
-    text(ctx, '[F] BAJAR', DESCEND.x, DESCEND.y, PAL.acid);
+    text(ctx, t('[F] BAJAR'), DESCEND.x, DESCEND.y, PAL.acid);
   }
 
   text(
     ctx,
-    room.cleared ? 'SALA AGOTADA' : 'TECLAS 1-6 O CLICK EN EL MAPA',
+    t(room.cleared ? 'SALA AGOTADA' : 'TECLAS 1-6 O CLICK EN EL MAPA'),
     x,
     INFO.y + 112,
     PAL.stone,

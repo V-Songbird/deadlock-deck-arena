@@ -3,6 +3,7 @@
 
 (() => {
   const D = window.DDData;
+  const T = window.DDLang.t;
   const paths = {
     heart: '<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/>',
     bolt: '<path d="m13 2-9 12h7l-1 8 10-12h-7l1-8Z"/>',
@@ -44,8 +45,8 @@
     const seconds = Math.ceil(Math.max(0, ms) / 1000);
     return `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
   };
-  const kindLabel = { head: 'Cabeza', torso: 'Torso', arm: 'Brazo', leg: 'Pierna' };
-  const tierLabel = { 1: 'Común', 2: 'Inusual', 3: 'Singular' };
+  const kindLabel = { head: T('Cabeza'), torso: T('Torso'), arm: T('Brazo'), leg: T('Pierna') };
+  const tierLabel = { 1: T('Común'), 2: T('Inusual'), 3: T('Singular') };
   const roomIcon = { start: 'skull', corridor: 'gear', combat: 'blade', cache: 'bag', trap: 'flame', workshop: 'flask', stairs: 'up', boss: 'skull', archive: 'book' };
 
   function pixelArt(type, color) {
@@ -100,8 +101,8 @@
       this.render();
       this.game.tick();
       this.setupGamepad();
-      if (this.game.state && this.game.active()) this.toast({ text: 'Partida restaurada. El reloj siguió corriendo mientras no estabas.', tone: 'warning' });
-      if (!this.game.storageAvailable) this.toast({ text: 'El guardado local no está disponible en este navegador.', tone: 'warning' });
+      if (this.game.state && this.game.active()) this.toast({ text: T('Partida restaurada. El reloj siguió corriendo mientras no estabas.'), tone: 'warning' });
+      if (!this.game.storageAvailable) this.toast({ text: T('El guardado local no está disponible en este navegador.'), tone: 'warning' });
     }
 
     button(action, label, iconName, cls = '', attrs = '') {
@@ -119,19 +120,27 @@
       setTimeout(() => item.remove(), tone === 'danger' ? 7000 : 4500);
     }
 
+    languageButtons() {
+      const current = window.DDLang.lang();
+      return [['es', 'ES', T('Español')], ['en', 'EN', T('Inglés')]].map(([id, label, title]) =>
+        this.button('lang', label, '', current === id ? 'small' : 'small quiet',
+          `data-lang="${id}" aria-pressed="${current === id}" aria-label="${title}" title="${title}"`)).join('');
+    }
+
     header() {
       return `<header class="topbar">
-        <a class="brand" href="#" data-action="home" aria-label="Deadlock Deck: inicio">
+        <a class="brand" href="#" data-action="home" aria-label="${T('Deadlock Deck: inicio')}">
           <span class="brand-mark">${icon('skull')}</span>
-          <span><strong>DEADLOCK DECK<span class="brand-dot">.</span></strong><small>EL RELOJ ANATÓMICO</small></span>
+          <span><strong>DEADLOCK DECK<span class="brand-dot">.</span></strong><small>${T('EL RELOJ ANATÓMICO')}</small></span>
         </a>
-        <div class="header-middle"><span class="live-dot"></span> LA TORRE ESTÁ ARDIENDO</div>
-        <nav class="header-actions" aria-label="Menú del juego">
-          ${this.button('archive', 'Archivo', 'book', 'quiet desktop-label')}
-          ${this.button('shop', 'Relicario', 'coin', 'quiet desktop-label')}
-          ${this.button('sound', '', this.game.meta.volume > 0 ? 'sound' : 'mute', 'icon-only quiet', `aria-label="${this.game.meta.volume > 0 ? 'Silenciar sonido' : 'Activar sonido'}" title="Sonido"`)}
-          ${this.button('help', '', 'help', 'icon-only quiet', 'aria-label="Cómo jugar y controles" title="Cómo jugar"')}
-          ${this.button('settings', '', 'settings', 'icon-only quiet', 'aria-label="Ajustes" title="Ajustes"')}
+        <div class="header-middle"><span class="live-dot"></span> ${T('LA TORRE ESTÁ ARDIENDO')}</div>
+        <nav class="header-actions" aria-label="${T('Menú del juego')}">
+          ${this.languageButtons()}
+          ${this.button('archive', T('Archivo'), 'book', 'quiet desktop-label')}
+          ${this.button('shop', T('Relicario'), 'coin', 'quiet desktop-label')}
+          ${this.button('sound', '', this.game.meta.volume > 0 ? 'sound' : 'mute', 'icon-only quiet', `aria-label="${this.game.meta.volume > 0 ? T('Silenciar sonido') : T('Activar sonido')}" title="${T('Sonido')}"`)}
+          ${this.button('help', '', 'help', 'icon-only quiet', `aria-label="${T('Cómo jugar y controles')}" title="${T('Cómo jugar')}"`)}
+          ${this.button('settings', '', 'settings', 'icon-only quiet', `aria-label="${T('Ajustes')}" title="${T('Ajustes')}"`)}
         </nav>
       </header>`;
     }
@@ -140,12 +149,12 @@
       const s = this.game.state;
       const hp = s ? Math.max(0, s.hp) : 80;
       const maxHp = s?.maxHp || 80;
-      return `<section class="status-bar" aria-label="Estado del intento">
-        <div class="subject-block"><span class="eyebrow">SUJETO REANIMADO</span><strong>N.º ${String(this.game.meta.runs || 1).padStart(3, '0')} <span class="subtle">/ ${s?.origin || 'El ensamblado'}</span></strong></div>
-        <div class="health-block"><div class="stat-line"><span>${icon('heart')} VITALIDAD</span><strong>${hp}<span> / ${maxHp}</span></strong></div><div class="health-track"><span style="width:${hp / maxHp * 100}%"></span></div></div>
-        <div class="clock-block" id="clock-block"><span class="clock-label">${icon('clock')} TIEMPO HASTA EL COLAPSO</span><strong id="clock" aria-label="Tiempo restante">${timeLabel(this.game.remaining())}</strong><div class="clock-track"><span id="clock-fill"></span></div></div>
-        <div class="resource-block"><span class="eyebrow">${icon('gear')} CHATARRA</span><strong>${s?.scraps ?? 0}</strong></div>
-        <div class="resource-block echoes-stat"><span class="eyebrow">${icon('coin')} ECOS</span><strong>${this.game.meta.souls}</strong></div>
+      return `<section class="status-bar" aria-label="${T('Estado del intento')}">
+        <div class="subject-block"><span class="eyebrow">${T('SUJETO REANIMADO')}</span><strong>${T('N.º {number}', { number: String(this.game.meta.runs || 1).padStart(3, '0') })} <span class="subtle">/ ${s?.origin || T('El ensamblado')}</span></strong></div>
+        <div class="health-block"><div class="stat-line"><span>${icon('heart')} ${T('VITALIDAD')}</span><strong>${hp}<span> / ${maxHp}</span></strong></div><div class="health-track"><span style="width:${hp / maxHp * 100}%"></span></div></div>
+        <div class="clock-block" id="clock-block"><span class="clock-label">${icon('clock')} ${T('TIEMPO HASTA EL COLAPSO')}</span><strong id="clock" aria-label="${T('Tiempo restante')}">${timeLabel(this.game.remaining())}</strong><div class="clock-track"><span id="clock-fill"></span></div></div>
+        <div class="resource-block"><span class="eyebrow">${icon('gear')} ${T('CHATARRA')}</span><strong>${s?.scraps ?? 0}</strong></div>
+        <div class="resource-block echoes-stat"><span class="eyebrow">${icon('coin')} ${T('ECOS')}</span><strong>${this.game.meta.souls}</strong></div>
       </section>`;
     }
 
@@ -153,21 +162,21 @@
       const s = this.game.state;
       const body = s?.body || this.art.defaultBody();
       const cardsCount = D.slots.reduce((n, slot) => n + (body[slot.id].id ? 2 : 1), 0);
-      return `<div class="panel-title"><h2>Tu anatomía</h2><span>${cardsCount} CARTAS</span></div>
-        <div class="anatomy-illustration"><canvas id="${modal ? 'modal-body' : 'body-canvas'}" width="200" height="148" aria-label="Tu cuerpo con los seis injertos actuales"></canvas><span class="specimen-tag">FIG. ${String(this.game.meta.runs || 1).padStart(3, '0')}</span></div>
+      return `<div class="panel-title"><h2>${T('Tu anatomía')}</h2><span>${T('{count} CARTAS', { count: cardsCount })}</span></div>
+        <div class="anatomy-illustration"><canvas id="${modal ? 'modal-body' : 'body-canvas'}" width="200" height="148" aria-label="${T('Tu cuerpo con los seis injertos actuales')}"></canvas><span class="specimen-tag">FIG. ${String(this.game.meta.runs || 1).padStart(3, '0')}</span></div>
         <div class="anatomy-slots">${D.slots.map(slot => {
           const p = body[slot.id];
           const def = p.id ? D.parts[p.id] : null;
           const warning = p.heat >= 75 || (p.integrity < 25 && def);
-          return `<button type="button" class="body-slot ${!def ? 'broken' : warning ? 'hot' : ''}" data-action="part" data-slot="${slot.id}" aria-label="${slot.label}: ${def?.name || 'Muñón'}. Calor ${p.heat} grados. Integridad ${p.integrity} por ciento.">
+          return `<button type="button" class="body-slot ${!def ? 'broken' : warning ? 'hot' : ''}" data-action="part" data-slot="${slot.id}" aria-label="${T('{slot}: {part}. Calor {heat} grados. Integridad {integrity} por ciento.', { slot: slot.label, part: def?.name || T('Muñón'), heat: p.heat, integrity: p.integrity })}">
             <span class="slot-glyph">${icon(slot.kind === 'head' ? 'skull' : slot.kind === 'torso' ? 'heart' : slot.kind === 'arm' ? 'bone' : 'foot')}</span>
-            <span class="slot-content"><span class="slot-heading">${slot.label}<b>${def ? `${p.heat}°` : 'ROTO'}</b></span><strong>${def?.name || 'Muñón · busca un reemplazo'}</strong>
+            <span class="slot-content"><span class="slot-heading">${slot.label}<b>${def ? `${p.heat}°` : T('ROTO')}</b></span><strong>${def?.name || T('Muñón · busca un reemplazo')}</strong>
             <span class="limb-meter"><i style="width:${p.integrity}%;background:${def?.color || '#b97567'}"></i></span><span class="heat-meter"><i style="width:${p.heat}%"></i></span></span>
           </button>`;
         }).join('')}</div>
-        <div class="anatomy-legend"><span><i class="integrity-dot"></i> Integridad</span><span><i class="heat-dot"></i> Calor</span></div>
-        ${this.button('bag', `Bolsa de injertos <b>${s?.inventory.length || 0}</b>`, 'bag', 'wide bag-button')}
-        <div class="consumables"><button type="button" class="consumable" data-action="heal" ${!this.game.active() ? 'disabled' : ''} title="Recupera 28 de vida · Q">${icon('flask')}<span>Suero<small>+28 vida</small></span><b>×${s?.potions || 0}</b></button><button type="button" class="consumable coolant" data-action="cool" ${!this.game.active() ? 'disabled' : ''} title="−38° y +12 integridad en todos los injertos intactos · E">${icon('snow')}<span>Refrigerante<small>−38° · repara</small></span><b>×${s?.coolants || 0}</b></button></div>`;
+        <div class="anatomy-legend"><span><i class="integrity-dot"></i> ${T('Integridad')}</span><span><i class="heat-dot"></i> ${T('Calor')}</span></div>
+        ${this.button('bag', `${T('Bolsa de injertos')} <b>${s?.inventory.length || 0}</b>`, 'bag', 'wide bag-button')}
+        <div class="consumables"><button type="button" class="consumable" data-action="heal" ${!this.game.active() ? 'disabled' : ''} title="${T('Recupera 28 de vida · Q')}">${icon('flask')}<span>${T('Suero')}<small>${T('+28 vida')}</small></span><b>×${s?.potions || 0}</b></button><button type="button" class="consumable coolant" data-action="cool" ${!this.game.active() ? 'disabled' : ''} title="${T('−38° y +12 integridad en todos los injertos intactos · E')}">${icon('snow')}<span>${T('Refrigerante')}<small>${T('−38° · repara')}</small></span><b>×${s?.coolants || 0}</b></button></div>`;
     }
 
     mapMarkup(large = false) {
@@ -191,21 +200,21 @@
         const [x2, y2] = coordinates(next);
         edges += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="${room.visited && map[next].visited ? 'visited-link' : ''}"/>`;
       }
-      return `<div class="panel-title"><h2>La torre</h2><span>${icon('tower')}</span></div>
+      return `<div class="panel-title"><h2>${T('La torre')}</h2><span>${icon('tower')}</span></div>
         <div class="floor-stack">${[2, 1, 0].map(i => `<div class="floor-row ${floor === i ? 'active' : floor > i ? 'completed' : ''}"><span class="floor-numeral">${D.floors[i].roman}</span><span>${D.floors[i].small}</span>${floor === i ? '<i class="live-dot"></i>' : floor > i ? icon('check') : icon('lock')}</div>`).join('')}</div>
-        <div class="map-heading"><span>PLANO DEL PISO ${D.floors[floor].roman}</span><span>N ↑</span></div>
-        <div class="tower-map ${large ? 'large-map' : ''}" aria-label="Plano de pasillos. Puedes entrar en las salas conectadas a tu posición.">
+        <div class="map-heading"><span>${T('PLANO DEL PISO {roman}', { roman: D.floors[floor].roman })}</span><span>N ↑</span></div>
+        <div class="tower-map ${large ? 'large-map' : ''}" aria-label="${T('Plano de pasillos. Puedes entrar en las salas conectadas a tu posición.')}">
           <svg viewBox="0 0 200 200" class="map-links" aria-hidden="true">${edges}</svg>
           ${map.map(room => {
             const [x, y] = coordinates(room.id);
             const accessible = canMove && map[current].links.includes(room.id);
-            const name = room.seen ? D.roomNames[room.type] : 'Sala desconocida';
-            return `<button type="button" class="map-node ${room.id === current ? 'current' : ''} ${room.visited ? 'visited' : ''} ${room.seen ? 'seen' : ''} ${accessible ? 'reachable' : ''} ${room.id === 3 ? 'exit-node' : ''}" style="left:${x / 2}%;top:${y / 2}%" data-action="move" data-id="${room.id}" ${accessible ? '' : 'disabled'} aria-label="${name}${room.id === current ? ', estás aquí' : accessible ? ', entrar' : ''}" title="${name}">${room.id === current ? '<span class="you-dot"></span>' : room.seen ? icon(roomIcon[room.type]) : '<span class="unknown-dot"></span>'}</button>`;
+            const name = room.seen ? D.roomNames[room.type] : T('Sala desconocida');
+            return `<button type="button" class="map-node ${room.id === current ? 'current' : ''} ${room.visited ? 'visited' : ''} ${room.seen ? 'seen' : ''} ${accessible ? 'reachable' : ''} ${room.id === 3 ? 'exit-node' : ''}" style="left:${x / 2}%;top:${y / 2}%" data-action="move" data-id="${room.id}" ${accessible ? '' : 'disabled'} aria-label="${name}${room.id === current ? T(', estás aquí') : accessible ? T(', entrar') : ''}" title="${name}">${room.id === current ? '<span class="you-dot"></span>' : room.seen ? icon(roomIcon[room.type]) : '<span class="unknown-dot"></span>'}</button>`;
           }).join('')}
         </div>
-        <div class="map-legend"><span><i class="you-dot"></i> Tú</span><span>${icon('up')} ${floor === 2 ? 'Salida' : 'Escalera'}</span><span><i class="unknown-dot"></i> Oculta</span></div>
-        <div class="objective"><span class="eyebrow">OBJETIVO ACTUAL</span><p>${floor === 2 ? 'Derrota al Rector y cruza la última puerta.' : 'Encuentra la escalera y asciende al siguiente piso.'}</p></div>
-        <div class="map-tip">${icon('flame')}<span>Los pasillos cambian a los 2 y 4 minutos. El reloj no se detiene.</span></div>`;
+        <div class="map-legend"><span><i class="you-dot"></i> ${T('Tú')}</span><span>${icon('up')} ${floor === 2 ? T('Salida') : T('Escalera')}</span><span><i class="unknown-dot"></i> ${T('Oculta')}</span></div>
+        <div class="objective"><span class="eyebrow">${T('OBJETIVO ACTUAL')}</span><p>${floor === 2 ? T('Derrota al Rector y cruza la última puerta.') : T('Encuentra la escalera y asciende al siguiente piso.')}</p></div>
+        <div class="map-tip">${icon('flame')}<span>${T('Los pasillos cambian a los 2 y 4 minutos. El reloj no se detiene.')}</span></div>`;
     }
 
     sceneMarkup() {
@@ -217,11 +226,11 @@
       const enemy = s?.enemy;
       const intent = fight ? this.game.intent() : null;
       return `<section class="scene-panel panel">
-        <div class="scene-heading"><div><span class="eyebrow">PISO ${floor.roman} <span class="separator">/</span> ${floor.name}</span><h1>${room ? D.roomNames[room.type] : 'Mesa de disección'}</h1></div><span class="phase-badge ${fight ? 'combat-badge' : ''}">${icon(fight ? 'blade' : phase === 'loot' ? 'bag' : 'eye')}${fight ? `COMBATE · TURNO ${s.turn}` : phase === 'loot' ? 'COSECHA' : phase === 'dead' ? 'EL ESPÍRITU PERMANECE' : phase === 'won' ? 'LIBERTAD' : 'EXPLORACIÓN'}</span></div>
-        <div class="scene-wrap" id="scene-wrap"><canvas id="scene" width="512" height="276" aria-label="Laboratorio gótico en pixel art. Tu abominación cambia de aspecto con cada injerto."></canvas>
-          <div class="scene-topline"><span class="location-label">${icon('tower')} TORRE DE LA MISERICORDIA</span><span class="scene-coordinates">${String(s?.current ?? 12).padStart(2, '0')} : ${floor.roman}</span></div>
-          ${fight ? `<div class="combat-info"><div class="player-chip"><span>${icon('shield')} ${s.block} DEFENSA</span></div><div class="enemy-chip"><span class="enemy-kind">${D.enemies[enemy.id].tag}</span><h3>${D.enemies[enemy.id].name}</h3><div class="enemy-health"><i style="width:${enemy.hp / enemy.maxHp * 100}%"></i></div><div class="enemy-numbers"><span>${enemy.hp} / ${enemy.maxHp} PV</span><span>${enemy.block ? `◈ ${enemy.block}` : ''}${enemy.burn ? ` · ${enemy.burn} quemadura` : ''}${enemy.weak ? ' · débil' : ''}</span></div></div></div><div class="enemy-intent ${intent.kind}">${icon(intent.icon)}<span>${intent.label}</span></div>` : ''}
-          <div class="scene-bottomline"><span>${s ? `${s.stats.rooms} salas recorridas` : 'UN NUEVO CUERPO. UNA ÚLTIMA OPORTUNIDAD.'}</span><span>${s ? `SEMILLA ${s.seed.toString(16).slice(0, 6).toUpperCase()}` : '06:00'}</span></div>
+        <div class="scene-heading"><div><span class="eyebrow">${T('PISO')} ${floor.roman} <span class="separator">/</span> ${floor.name}</span><h1>${room ? D.roomNames[room.type] : T('Mesa de disección')}</h1></div><span class="phase-badge ${fight ? 'combat-badge' : ''}">${icon(fight ? 'blade' : phase === 'loot' ? 'bag' : 'eye')}${fight ? T('COMBATE · TURNO {turn}', { turn: s.turn }) : phase === 'loot' ? T('COSECHA') : phase === 'dead' ? T('EL ESPÍRITU PERMANECE') : phase === 'won' ? T('LIBERTAD') : T('EXPLORACIÓN')}</span></div>
+        <div class="scene-wrap" id="scene-wrap"><canvas id="scene" width="512" height="276" aria-label="${T('Laboratorio gótico en pixel art. Tu abominación cambia de aspecto con cada injerto.')}"></canvas>
+          <div class="scene-topline"><span class="location-label">${icon('tower')} ${T('TORRE DE LA MISERICORDIA')}</span><span class="scene-coordinates">${String(s?.current ?? 12).padStart(2, '0')} : ${floor.roman}</span></div>
+          ${fight ? `<div class="combat-info"><div class="player-chip"><span>${icon('shield')} ${s.block} ${T('DEFENSA')}</span></div><div class="enemy-chip"><span class="enemy-kind">${D.enemies[enemy.id].tag}</span><h3>${D.enemies[enemy.id].name}</h3><div class="enemy-health"><i style="width:${enemy.hp / enemy.maxHp * 100}%"></i></div><div class="enemy-numbers"><span>${enemy.hp} / ${enemy.maxHp} ${T('PV')}</span><span>${enemy.block ? `◈ ${enemy.block}` : ''}${enemy.burn ? ` · ${enemy.burn} ${T('quemadura')}` : ''}${enemy.weak ? ` · ${T('débil')}` : ''}</span></div></div></div><div class="enemy-intent ${intent.kind}">${icon(intent.icon)}<span>${intent.label}</span></div>` : ''}
+          <div class="scene-bottomline"><span>${s ? T('{rooms} salas recorridas', { rooms: s.stats.rooms }) : T('UN NUEVO CUERPO. UNA ÚLTIMA OPORTUNIDAD.')}</span><span>${s ? `${T('SEMILLA')} ${s.seed.toString(16).slice(0, 6).toUpperCase()}` : '06:00'}</span></div>
         </div>
         ${this.eventMarkup()}
       </section>`;
@@ -229,38 +238,38 @@
 
     eventMarkup() {
       const s = this.game.state;
-      if (!s) return `<div class="room-event"><div class="event-copy"><h3>Algo dentro de ti se niega a morir.</h3><p>Tu cuerpo es tu mazo. Cada injerto, una nueva posibilidad.</p></div>${this.button('start', 'Reanimar', 'bolt', 'primary')}</div>`;
+      if (!s) return `<div class="room-event"><div class="event-copy"><h3>${T('Algo dentro de ti se niega a morir.')}</h3><p>${T('Tu cuerpo es tu mazo. Cada injerto, una nueva posibilidad.')}</p></div>${this.button('start', T('Reanimar'), 'bolt', 'primary')}</div>`;
       if (s.phase === 'combat') {
         const intent = this.game.intent();
         const projected = ['attack', 'fury'].includes(intent.kind) ? Math.max(0, intent.value - s.block) : null;
-        return `<div class="combat-guidance"><span>${icon('eye')} <strong>Tu turno.</strong> Juega cartas; después, termina el turno.</span><span>${projected !== null ? `Recibirías <b class="${projected ? 'text-red' : 'text-green'}">${projected}</b> de daño.` : intent.kind === 'heat' ? 'El vapor puede romper tus injertos.' : intent.kind === 'stunned' ? 'La intención enemiga está cancelada.' : 'El enemigo prepara su defensa.'}</span></div>`;
+        return `<div class="combat-guidance"><span>${icon('eye')} <strong>${T('Tu turno.')}</strong> ${T('Juega cartas; después, termina el turno.')}</span><span>${projected !== null ? T('Recibirías {damage} de daño.', { damage: `<b class="${projected ? 'text-red' : 'text-green'}">${projected}</b>` }) : intent.kind === 'heat' ? T('El vapor puede romper tus injertos.') : intent.kind === 'stunned' ? T('La intención enemiga está cancelada.') : T('El enemigo prepara su defensa.')}</span></div>`;
       }
       if (s.phase === 'loot') {
         const reward = s.reward;
-        return `<div class="room-event loot-event"><span class="event-emblem">${icon('bag')}</span><div class="event-copy"><span class="eyebrow text-green">ENEMIGO COSECHADO</span><h3>${D.parts[reward.id].name}</h3><p>En tu bolsa · +${reward.scraps} chatarra · +5 vida. El plano es permanente.</p></div><div class="event-actions">${this.button('bag', 'Injertar', 'bone', 'primary')}${this.button('continue-loot', reward.boss ? 'Hacia la salida' : 'Continuar', 'right')}</div></div>`;
+        return `<div class="room-event loot-event"><span class="event-emblem">${icon('bag')}</span><div class="event-copy"><span class="eyebrow text-green">${T('ENEMIGO COSECHADO')}</span><h3>${D.parts[reward.id].name}</h3><p>${T('En tu bolsa · +{scraps} chatarra · +5 vida. El plano es permanente.', { scraps: reward.scraps })}</p></div><div class="event-actions">${this.button('bag', T('Injertar'), 'bone', 'primary')}${this.button('continue-loot', reward.boss ? T('Hacia la salida') : T('Continuar'), 'right')}</div></div>`;
       }
       if (s.phase === 'dead' || s.phase === 'won') {
-        return `<div class="room-event"><div class="event-copy"><h3>${s.phase === 'won' ? 'Has escapado de la torre.' : 'La carne falla. El espíritu no.'}</h3><p>${s.reason}</p></div>${this.button('end', 'Ver resultado', 'right')}</div>`;
+        return `<div class="room-event"><div class="event-copy"><h3>${s.phase === 'won' ? T('Has escapado de la torre.') : T('La carne falla. El espíritu no.')}</h3><p>${s.reason}</p></div>${this.button('end', T('Ver resultado'), 'right')}</div>`;
       }
       const room = s.map[s.current];
       if (s.phase === 'event') {
-        if (room.type === 'cache') return `<div class="room-event"><div class="event-copy"><span class="eyebrow text-gold">SUMINISTROS</span><h3>Alguien no llegó a usarlos.</h3><p>Un injerto, chatarra, suero y refrigerante. Todo puede servir.</p></div><div class="event-actions">${this.button('cache', 'Recoger todo', 'bag', 'primary')}</div></div>`;
-        if (room.type === 'archive') return `<div class="room-event"><div class="event-copy"><span class="eyebrow text-green">CONOCIMIENTO PERMANENTE</span><h3>El conocimiento sobrevive a la carne.</h3><p>Descubre un plano. Podrás fabricarlo en las estaciones de injertos.</p></div><div class="event-actions">${this.button('search-archive', 'Guardar plano', 'book', 'primary')}</div></div>`;
-        if (room.type === 'workshop') return `<div class="room-event workshop-event"><div class="event-copy"><span class="eyebrow text-green">ESTACIÓN DE INJERTOS</span><h3>La mesa aún está tibia.</h3><p>Fabrica planos o repara +40 de integridad y enfría todos tus injertos intactos.</p></div><div class="event-actions">${this.button('archive', 'Fabricar', 'flask', 'primary')}${this.button('repair', 'Reparar · 8 chatarra', 'gear')}${this.button('leave-workshop', 'Continuar', 'right', 'quiet')}</div></div>`;
-        if (room.type === 'trap') return `<div class="room-event trap-event"><div class="event-copy"><span class="eyebrow text-red">TRAMPA · VAPOR A PRESIÓN</span><h3>El pasillo está a punto de estallar.</h3><p>Desvía la válvula, fuerza tus piernas o acepta las quemaduras.</p></div><div class="event-actions">${this.button('trap-scraps', 'Desviar · 5 chatarra', 'gear', 'primary', s.scraps < 5 ? 'disabled' : '')}${this.button('trap-legs', 'Saltar · +30° / −12 integridad', 'foot', '', !s.body.legL.id && !s.body.legR.id ? 'disabled' : '')}${this.button('trap-cross', `Cruzar · −${9 + s.floor * 2} vida`, 'flame', 'danger-outline')}</div></div>`;
+        if (room.type === 'cache') return `<div class="room-event"><div class="event-copy"><span class="eyebrow text-gold">${T('SUMINISTROS')}</span><h3>${T('Alguien no llegó a usarlos.')}</h3><p>${T('Un injerto, chatarra, suero y refrigerante. Todo puede servir.')}</p></div><div class="event-actions">${this.button('cache', T('Recoger todo'), 'bag', 'primary')}</div></div>`;
+        if (room.type === 'archive') return `<div class="room-event"><div class="event-copy"><span class="eyebrow text-green">${T('CONOCIMIENTO PERMANENTE')}</span><h3>${T('El conocimiento sobrevive a la carne.')}</h3><p>${T('Descubre un plano. Podrás fabricarlo en las estaciones de injertos.')}</p></div><div class="event-actions">${this.button('search-archive', T('Guardar plano'), 'book', 'primary')}</div></div>`;
+        if (room.type === 'workshop') return `<div class="room-event workshop-event"><div class="event-copy"><span class="eyebrow text-green">${T('ESTACIÓN DE INJERTOS')}</span><h3>${T('La mesa aún está tibia.')}</h3><p>${T('Fabrica planos o repara +40 de integridad y enfría todos tus injertos intactos.')}</p></div><div class="event-actions">${this.button('archive', T('Fabricar'), 'flask', 'primary')}${this.button('repair', T('Reparar · 8 chatarra'), 'gear')}${this.button('leave-workshop', T('Continuar'), 'right', 'quiet')}</div></div>`;
+        if (room.type === 'trap') return `<div class="room-event trap-event"><div class="event-copy"><span class="eyebrow text-red">${T('TRAMPA · VAPOR A PRESIÓN')}</span><h3>${T('El pasillo está a punto de estallar.')}</h3><p>${T('Desvía la válvula, fuerza tus piernas o acepta las quemaduras.')}</p></div><div class="event-actions">${this.button('trap-scraps', T('Desviar · 5 chatarra'), 'gear', 'primary', s.scraps < 5 ? 'disabled' : '')}${this.button('trap-legs', T('Saltar · +30° / −12 integridad'), 'foot', '', !s.body.legL.id && !s.body.legR.id ? 'disabled' : '')}${this.button('trap-cross', T('Cruzar · −{damage} vida', { damage: 9 + s.floor * 2 }), 'flame', 'danger-outline')}</div></div>`;
       }
-      if (room.type === 'stairs') return `<div class="room-event"><div class="event-copy"><span class="eyebrow text-green">HACIA ARRIBA</span><h3>La salida está un poco más cerca.</h3><p>Subir enfría tus injertos 15°. No hay vuelta al piso anterior.</p></div><div class="event-actions">${this.button('ascend', `Subir al piso ${D.floors[s.floor + 1].roman}`, 'up', 'primary')}</div></div>${this.movementMarkup()}`;
-      if (room.type === 'boss' && room.resolved) return `<div class="room-event"><div class="event-copy"><span class="eyebrow text-green">LA PUERTA ESTÁ ABIERTA</span><h3>El aire de afuera no huele a muerte.</h3><p>Cruza antes de que el reloj llegue a cero.</p></div><div class="event-actions">${this.button('escape', 'Escapar de la torre', 'right', 'primary escape-button')}</div></div>`;
-      return `<div class="room-event exploration-event"><div class="event-copy"><h3>${room.type === 'start' ? 'Levántate. Todavía queda tiempo.' : room.type === 'workshop' ? 'Aún puedes usar la estación.' : 'Sigue avanzando.'}</h3><p>${room.type === 'workshop' ? 'Los planos descubiertos se fabrican con chatarra.' : 'Escoge un pasillo conectado. La escalera está marcada en el plano.'}</p></div>${room.type === 'workshop' ? this.button('archive', 'Fabricar', 'flask') : ''}</div>${this.movementMarkup()}`;
+      if (room.type === 'stairs') return `<div class="room-event"><div class="event-copy"><span class="eyebrow text-green">${T('HACIA ARRIBA')}</span><h3>${T('La salida está un poco más cerca.')}</h3><p>${T('Subir enfría tus injertos 15°. No hay vuelta al piso anterior.')}</p></div><div class="event-actions">${this.button('ascend', T('Subir al piso {roman}', { roman: D.floors[s.floor + 1].roman }), 'up', 'primary')}</div></div>${this.movementMarkup()}`;
+      if (room.type === 'boss' && room.resolved) return `<div class="room-event"><div class="event-copy"><span class="eyebrow text-green">${T('LA PUERTA ESTÁ ABIERTA')}</span><h3>${T('El aire de afuera no huele a muerte.')}</h3><p>${T('Cruza antes de que el reloj llegue a cero.')}</p></div><div class="event-actions">${this.button('escape', T('Escapar de la torre'), 'right', 'primary escape-button')}</div></div>`;
+      return `<div class="room-event exploration-event"><div class="event-copy"><h3>${room.type === 'start' ? T('Levántate. Todavía queda tiempo.') : room.type === 'workshop' ? T('Aún puedes usar la estación.') : T('Sigue avanzando.')}</h3><p>${room.type === 'workshop' ? T('Los planos descubiertos se fabrican con chatarra.') : T('Escoge un pasillo conectado. La escalera está marcada en el plano.')}</p></div>${room.type === 'workshop' ? this.button('archive', T('Fabricar'), 'flask') : ''}</div>${this.movementMarkup()}`;
     }
 
     movementMarkup() {
       const s = this.game.state;
-      const directions = [['north', 'Norte', 'up', -4], ['west', 'Oeste', 'left', -1], ['east', 'Este', 'right', 1], ['south', 'Sur', 'down', 4]];
-      return `<nav class="movement" aria-label="Pasillos disponibles">${directions.map(([id, label, symbol, delta]) => {
+      const directions = [['north', T('Norte'), 'up', -4], ['west', T('Oeste'), 'left', -1], ['east', T('Este'), 'right', 1], ['south', T('Sur'), 'down', 4]];
+      return `<nav class="movement" aria-label="${T('Pasillos disponibles')}">${directions.map(([id, label, symbol, delta]) => {
         const target = s.current + delta;
         const enabled = s.phase === 'explore' && s.map[s.current].links.includes(target);
-        return this.button('direction', label, symbol, 'direction-button', `data-direction="${id}" ${enabled ? '' : 'disabled'} aria-label="Ir al ${label.toLowerCase()}${enabled ? '' : ', no hay pasillo'}"`);
+        return this.button('direction', label, symbol, 'direction-button', `data-direction="${id}" ${enabled ? '' : 'disabled'} aria-label="${T('Ir al {direction}', { direction: label.toLowerCase() })}${enabled ? '' : T(', no hay pasillo')}"`);
       }).join('')}<span class="movement-hint">W A S D <span>/</span> FLECHAS</span></nav>`;
     }
 
@@ -275,11 +284,11 @@
       const overheats = bodyPart?.id && (Math.max(0, bodyPart.heat - (def.cool || 0)) + def.heat >= 100
         || bodyPart.integrity <= def.wear + (bodyPart.heat + def.heat >= 75 ? 7 : 0));
       const tag = detail ? 'div' : 'button';
-      return `<${tag} ${detail ? '' : 'type="button"'} class="anatomy-card ${preview ? 'preview-card' : ''} ${overheats && !preview ? 'will-break' : ''} ${!part ? 'stump-card' : ''}" style="--part-color:${color}" ${detail ? '' : `data-action="play" data-id="${card.uid}" ${preview || !affordable ? 'disabled' : ''}`} ${detail ? '' : `aria-label="${def.name}. ${def.cost} energía. ${def.text} Calor más ${def.heat}, desgaste ${def.wear}.${overheats ? ' Atención: se romperá el injerto.' : ''}"`}>
-        <div class="card-top"><span class="energy-cost">${def.cost}</span><span class="card-origin">${slot?.short || kindLabel[part?.kind] || 'MUÑÓN'}</span><kbd>${index + 1}</kbd></div>
+      return `<${tag} ${detail ? '' : 'type="button"'} class="anatomy-card ${preview ? 'preview-card' : ''} ${overheats && !preview ? 'will-break' : ''} ${!part ? 'stump-card' : ''}" style="--part-color:${color}" ${detail ? '' : `data-action="play" data-id="${card.uid}" ${preview || !affordable ? 'disabled' : ''}`} ${detail ? '' : `aria-label="${T('{name}. {cost} energía. {text} Calor más {heat}, desgaste {wear}.', { name: def.name, cost: def.cost, text: def.text, heat: def.heat, wear: def.wear })}${overheats ? T(' Atención: se romperá el injerto.') : ''}"`}>
+        <div class="card-top"><span class="energy-cost">${def.cost}</span><span class="card-origin">${slot?.short || kindLabel[part?.kind] || T('MUÑÓN')}</span><kbd>${index + 1}</kbd></div>
         <div class="card-art">${pixelArt(def.icon, color)}</div>
         <h3>${def.name}</h3><p>${def.text}</p>
-        <div class="card-bottom">${def.heat ? `<span>${icon('flame')} +${def.heat}°</span><span>${overheats && !preview ? '¡ROTURA!' : `−${def.wear}%`}</span>` : '<span>MUÑÓN</span><span>Sin injerto</span>'}</div>
+        <div class="card-bottom">${def.heat ? `<span>${icon('flame')} +${def.heat}°</span><span>${overheats && !preview ? T('¡ROTURA!') : `−${def.wear}%`}</span>` : `<span>${T('MUÑÓN')}</span><span>${T('Sin injerto')}</span>`}</div>
       </${tag}>`;
     }
 
@@ -293,24 +302,24 @@
         return { id: part.id ? D.parts[part.id].cards[0] : fallback[slot], part: part.id, slot, uid: 0 };
       });
       const cards = combat ? s.hand : previews;
-      return `<section class="hand-section" aria-label="${combat ? 'Tu mano de cartas' : 'Cartas de tu cuerpo'}">
-        <div class="hand-header"><div><h2>${combat ? 'Tu mano' : 'Tu cuerpo es tu mazo'}</h2><span>${combat ? `${s.hand.length} CARTAS · ROBA ${s.draw.length} · DESCARTE ${s.discard.length}` : 'CADA INJERTO CAMBIA TUS CARTAS'}</span></div><button type="button" data-action="deck" class="text-button">Ver mazo ${icon('book')}</button></div>
-        <div class="hand ${cards.length > 5 ? 'many-cards' : ''}">${cards.map((card, i) => this.cardMarkup(card, i, !combat)).join('') || '<div class="empty-hand">No quedan cartas en tu mano. Termina el turno para robar otras cinco.</div>'}</div>
-        <div class="turn-bar"><div class="energy-display">${icon('bolt')}<strong>${combat ? s.energy : '—'}<small> / 3</small></strong><div><b>ENERGÍA</b><span>${combat ? 'Se recupera al terminar el turno' : 'Disponible durante el combate'}</span></div></div>${this.button('end-turn', 'Terminar turno <kbd>ESPACIO</kbd>', 'right', combat ? 'primary turn-button' : 'turn-button', combat ? '' : 'disabled')}</div>
+      return `<section class="hand-section" aria-label="${combat ? T('Tu mano de cartas') : T('Cartas de tu cuerpo')}">
+        <div class="hand-header"><div><h2>${combat ? T('Tu mano') : T('Tu cuerpo es tu mazo')}</h2><span>${combat ? T('{hand} CARTAS · ROBA {draw} · DESCARTE {discard}', { hand: s.hand.length, draw: s.draw.length, discard: s.discard.length }) : T('CADA INJERTO CAMBIA TUS CARTAS')}</span></div><button type="button" data-action="deck" class="text-button">${T('Ver mazo')} ${icon('book')}</button></div>
+        <div class="hand ${cards.length > 5 ? 'many-cards' : ''}">${cards.map((card, i) => this.cardMarkup(card, i, !combat)).join('') || `<div class="empty-hand">${T('No quedan cartas en tu mano. Termina el turno para robar otras cinco.')}</div>`}</div>
+        <div class="turn-bar"><div class="energy-display">${icon('bolt')}<strong>${combat ? s.energy : '—'}<small> / 3</small></strong><div><b>${T('ENERGÍA')}</b><span>${combat ? T('Se recupera al terminar el turno') : T('Disponible durante el combate')}</span></div></div>${this.button('end-turn', `${T('Terminar turno')} <kbd>${T('ESPACIO')}</kbd>`, 'right', combat ? 'primary turn-button' : 'turn-button', combat ? '' : 'disabled')}</div>
       </section>`;
     }
 
     modalShell(title, eyebrow, body, extraClass = '') {
-      return `<div class="modal-backdrop" data-overlay="true"><section class="modal ${extraClass}" role="dialog" aria-modal="true" aria-labelledby="modal-title"><header class="modal-header"><div><span class="eyebrow">${eyebrow}</span><h2 id="modal-title">${title}</h2></div>${this.button('close', '', 'close', 'icon-only quiet', 'aria-label="Cerrar ventana"')}</header>${this.game.active() ? '<div class="modal-clock-note">El reloj sigue corriendo. <strong class="modal-live-clock"></strong></div>' : ''}<div class="modal-body">${body}</div></section></div>`;
+      return `<div class="modal-backdrop" data-overlay="true"><section class="modal ${extraClass}" role="dialog" aria-modal="true" aria-labelledby="modal-title"><header class="modal-header"><div><span class="eyebrow">${eyebrow}</span><h2 id="modal-title">${title}</h2></div>${this.button('close', '', 'close', 'icon-only quiet', `aria-label="${T('Cerrar ventana')}"`)}</header>${this.game.active() ? `<div class="modal-clock-note">${T('El reloj sigue corriendo.')} <strong class="modal-live-clock"></strong></div>` : ''}<div class="modal-body">${body}</div></section></div>`;
     }
 
     modalMarkup() {
       const s = this.game.state;
       if (!this.modal) return '';
-      if (this.modal === 'intro') return `<div class="modal-backdrop intro-backdrop"><section class="intro-modal" role="dialog" aria-modal="true" aria-labelledby="intro-title"><div class="intro-kicker"><span></span> UN ROGUELIKE ANATÓMICO <span></span></div><div class="intro-sigil">${icon('skull')}</div><h2 id="intro-title">Un cuerpo prestado.<br><em>Seis minutos de vida.</em></h2><p>La torre arde. Cosecha a quienes te detengan.<br>Injerta sus extremidades. Escapa antes del colapso.</p><div class="intro-pillars"><span>${icon('bone')} TU CUERPO ES TU MAZO</span><span>${icon('clock')} 06:00 REALES</span></div>${this.button('start', 'Reanimar', 'bolt', 'primary intro-start')}<div class="intro-footer">${this.button('help', 'Cómo sobrevivir', 'help', 'quiet')}<span>Ratón · teclado · táctil · mando</span></div><small class="content-note">Horror anatómico estilizado · audio activado al interactuar</small></section></div>`;
+      if (this.modal === 'intro') return `<div class="modal-backdrop intro-backdrop"><section class="intro-modal" role="dialog" aria-modal="true" aria-labelledby="intro-title"><div class="intro-kicker"><span></span> ${T('UN ROGUELIKE ANATÓMICO')} <span></span></div><div class="intro-sigil">${icon('skull')}</div><h2 id="intro-title">${T('Un cuerpo prestado.')}<br><em>${T('Seis minutos de vida.')}</em></h2><p>${T('La torre arde. Cosecha a quienes te detengan.')}<br>${T('Injerta sus extremidades. Escapa antes del colapso.')}</p><div class="intro-pillars"><span>${icon('bone')} ${T('TU CUERPO ES TU MAZO')}</span><span>${icon('clock')} ${T('06:00 REALES')}</span></div>${this.button('start', T('Reanimar'), 'bolt', 'primary intro-start')}<div class="intro-footer">${this.languageButtons()}${this.button('help', T('Cómo sobrevivir'), 'help', 'quiet')}<span>${T('Ratón · teclado · táctil · mando')}</span></div><small class="content-note">${T('Horror anatómico estilizado · audio activado al interactuar')}</small></section></div>`;
       if (this.modal === 'bag') {
-        const content = s?.inventory.length ? s.inventory.map(item => this.inventoryItem(item)).join('') : `<div class="empty-state">${icon('bag')}<h3>La bolsa está vacía.</h3><p>Derrota enemigos, recoge suministros o fabrica un plano en una estación de injertos.</p></div>`;
-        return this.modalShell('Bolsa de injertos', `${s?.inventory.length || 0} EXTREMIDADES RECUPERADAS`, `<p class="modal-intro">${s?.phase === 'combat' ? '<strong>Injertar cuesta 1 de energía.</strong> Las cartas del injerto anterior desaparecen de inmediato.' : 'Elige dónde injertar. La pieza que reemplaces vuelve a la bolsa con su calor y desgaste actuales.'}</p><div class="inventory-list">${content}</div>`);
+        const content = s?.inventory.length ? s.inventory.map(item => this.inventoryItem(item)).join('') : `<div class="empty-state">${icon('bag')}<h3>${T('La bolsa está vacía.')}</h3><p>${T('Derrota enemigos, recoge suministros o fabrica un plano en una estación de injertos.')}</p></div>`;
+        return this.modalShell(T('Bolsa de injertos'), T('{count} EXTREMIDADES RECUPERADAS', { count: s?.inventory.length || 0 }), `<p class="modal-intro">${s?.phase === 'combat' ? `<strong>${T('Injertar cuesta 1 de energía.')}</strong> ${T('Las cartas del injerto anterior desaparecen de inmediato.')}` : T('Elige dónde injertar. La pieza que reemplaces vuelve a la bolsa con su calor y desgaste actuales.')}</p><div class="inventory-list">${content}</div>`);
       }
       if (this.modal === 'part') {
         const slot = D.slots.find(v => v.id === this.part);
@@ -319,18 +328,18 @@
         const fallback = { head: 'stumpHead', torso: 'stumpTorso', arm: 'stumpArm', leg: 'stumpLeg' };
         const ids = def ? def.cards : [fallback[slot.kind]];
         const available = s?.inventory.filter(p => D.parts[p.id].kind === slot.kind) || [];
-        return this.modalShell(def?.name || 'Solo queda un muñón', slot.label.toUpperCase(), `<p class="lore">${def?.lore || 'El injerto se ha roto. Todas sus cartas han desaparecido de tu mazo.'}</p><div class="part-stats"><span>${icon('flame')} Calor <b>${part.heat}° / 100°</b></span><span>${icon('shield')} Integridad <b>${part.integrity}%</b></span></div><p class="modal-intro">A 100° o 0% de integridad, el injerto se rompe. Desde 75°, cada uso causa 7 de desgaste adicional. Terminar turno enfría 12°; cambiar de sala, 7°.</p><div class="detail-cards">${ids.map((id, i) => this.cardMarkup({ id, slot: slot.id, part: part.id, uid: 0 }, i, true, true)).join('')}</div><h3 class="section-caption">Reemplazos disponibles</h3>${available.length ? available.map(item => this.inventoryItem(item, slot.id)).join('') : '<p class="muted">No tienes un reemplazo compatible. Busca enemigos o suministros.</p>'}`);
+        return this.modalShell(def?.name || T('Solo queda un muñón'), slot.label.toUpperCase(), `<p class="lore">${def?.lore || T('El injerto se ha roto. Todas sus cartas han desaparecido de tu mazo.')}</p><div class="part-stats"><span>${icon('flame')} ${T('Calor')} <b>${part.heat}° / 100°</b></span><span>${icon('shield')} ${T('Integridad')} <b>${part.integrity}%</b></span></div><p class="modal-intro">${T('A 100° o 0% de integridad, el injerto se rompe. Desde 75°, cada uso causa 7 de desgaste adicional. Terminar turno enfría 12°; cambiar de sala, 7°.')}</p><div class="detail-cards">${ids.map((id, i) => this.cardMarkup({ id, slot: slot.id, part: part.id, uid: 0 }, i, true, true)).join('')}</div><h3 class="section-caption">${T('Reemplazos disponibles')}</h3>${available.length ? available.map(item => this.inventoryItem(item, slot.id)).join('') : `<p class="muted">${T('No tienes un reemplazo compatible. Busca enemigos o suministros.')}</p>`}`);
       }
-      if (this.modal === 'body') return this.modalShell('Tu cuerpo', 'SEIS RANURAS · UN SOLO ESPÍRITU', `<div class="mobile-anatomy">${this.anatomyMarkup(true)}</div>`);
-      if (this.modal === 'map') return this.modalShell('Camino a la salida', 'LOS PASILLOS NUNCA SON LOS MISMOS', this.mapMarkup(true), 'map-modal');
+      if (this.modal === 'body') return this.modalShell(T('Tu cuerpo'), T('SEIS RANURAS · UN SOLO ESPÍRITU'), `<div class="mobile-anatomy">${this.anatomyMarkup(true)}</div>`);
+      if (this.modal === 'map') return this.modalShell(T('Camino a la salida'), T('LOS PASILLOS NUNCA SON LOS MISMOS'), this.mapMarkup(true), 'map-modal');
       if (this.modal === 'archive') {
         const known = this.game.meta.blueprints.length;
         const station = this.game.atWorkshop();
         const entries = Object.entries(D.parts).filter(([, part]) => this.filter === 'all' || part.kind === this.filter);
-        return this.modalShell('Archivo anatómico', `${known} / ${Object.keys(D.parts).length} PLANOS DESCUBIERTOS`, `<p class="modal-intro">Los planos sobreviven a la muerte. ${station ? '<strong>Estás en una estación: puedes fabricar con chatarra.</strong>' : 'Para fabricar, visita una estación de injertos en la torre.'}</p><div class="filter-tabs" role="group" aria-label="Filtrar planos">${[['all', 'Todos'], ['head', 'Cabezas'], ['torso', 'Torsos'], ['arm', 'Brazos'], ['leg', 'Piernas']].map(([id, label]) => `<button type="button" class="${this.filter === id ? 'selected' : ''}" data-action="filter" data-filter="${id}" aria-pressed="${this.filter === id}">${label}</button>`).join('')}</div><div class="blueprint-grid">${entries.map(([id, part]) => {
+        return this.modalShell(T('Archivo anatómico'), T('{known} / {total} PLANOS DESCUBIERTOS', { known, total: Object.keys(D.parts).length }), `<p class="modal-intro">${T('Los planos sobreviven a la muerte.')} ${station ? `<strong>${T('Estás en una estación: puedes fabricar con chatarra.')}</strong>` : T('Para fabricar, visita una estación de injertos en la torre.')}</p><div class="filter-tabs" role="group" aria-label="${T('Filtrar planos')}">${[['all', T('Todos')], ['head', T('Cabezas')], ['torso', T('Torsos')], ['arm', T('Brazos')], ['leg', T('Piernas')]].map(([id, label]) => `<button type="button" class="${this.filter === id ? 'selected' : ''}" data-action="filter" data-filter="${id}" aria-pressed="${this.filter === id}">${label}</button>`).join('')}</div><div class="blueprint-grid">${entries.map(([id, part]) => {
           const unlocked = this.game.meta.blueprints.includes(id);
           const cost = 6 + part.tier * 5;
-          return `<article class="blueprint ${unlocked ? '' : 'locked'}"><div class="blueprint-top"><span class="tier tier-${part.tier}">${unlocked ? tierLabel[part.tier] : 'DESCONOCIDO'}</span>${icon(unlocked ? (part.kind === 'head' ? 'skull' : part.kind === 'torso' ? 'heart' : part.kind === 'arm' ? 'bone' : 'foot') : 'lock')}</div><h3>${unlocked ? part.name : part.expansion && !this.game.meta.expansion ? 'Plano del ala prohibida' : `${kindLabel[part.kind]} sin descubrir`}</h3><p>${unlocked ? part.cards.map(card => D.cards[card].name).join(' · ') : part.expansion && !this.game.meta.expansion ? 'Desbloquea el ala en el relicario.' : 'Explora, cosecha o consulta los archivos de la torre.'}</p>${unlocked ? this.button('craft', `Fabricar · ${cost}`, 'gear', 'small', `data-id="${id}" ${!station || s.scraps < cost ? 'disabled' : ''}`) : '<span class="locked-label">EL CONOCIMIENTO PERDURA</span>'}</article>`;
+          return `<article class="blueprint ${unlocked ? '' : 'locked'}"><div class="blueprint-top"><span class="tier tier-${part.tier}">${unlocked ? tierLabel[part.tier] : T('DESCONOCIDO')}</span>${icon(unlocked ? (part.kind === 'head' ? 'skull' : part.kind === 'torso' ? 'heart' : part.kind === 'arm' ? 'bone' : 'foot') : 'lock')}</div><h3>${unlocked ? part.name : part.expansion && !this.game.meta.expansion ? T('Plano del ala prohibida') : T('{kind} sin descubrir', { kind: kindLabel[part.kind] })}</h3><p>${unlocked ? part.cards.map(card => D.cards[card].name).join(' · ') : part.expansion && !this.game.meta.expansion ? T('Desbloquea el ala en el relicario.') : T('Explora, cosecha o consulta los archivos de la torre.')}</p>${unlocked ? this.button('craft', `${T('Fabricar')} · ${cost}`, 'gear', 'small', `data-id="${id}" ${!station || s.scraps < cost ? 'disabled' : ''}`) : `<span class="locked-label">${T('EL CONOCIMIENTO PERDURA')}</span>`}</article>`;
         }).join('')}</div>`, 'wide-modal');
       }
       if (this.modal === 'deck') {
@@ -340,20 +349,20 @@
           const fallback = { head: 'stumpHead', torso: 'stumpTorso', arm: 'stumpArm', leg: 'stumpLeg' };
           return (part.id ? D.parts[part.id].cards : [fallback[slot.kind]]).map(id => ({ id, slot: slot.id, part: part.id, uid: 0 }));
         });
-        return this.modalShell('Tu mazo anatómico', `${cards.length} CARTAS · CADA UNA PERTENECE A UN INJERTO`, `<p class="modal-intro">Empiezas cada combate con 5 cartas y 3 de energía. Al terminar turno descartas la mano, enfrías 12° y robas 5. El descarte se baraja cuando se acaba el mazo. Máximo 7 cartas en mano.</p><div class="deck-grid">${cards.map((card, i) => this.cardMarkup(card, i, true, true)).join('')}</div>`, 'wide-modal');
+        return this.modalShell(T('Tu mazo anatómico'), T('{count} CARTAS · CADA UNA PERTENECE A UN INJERTO', { count: cards.length }), `<p class="modal-intro">${T('Empiezas cada combate con 5 cartas y 3 de energía. Al terminar turno descartas la mano, enfrías 12° y robas 5. El descarte se baraja cuando se acaba el mazo. Máximo 7 cartas en mano.')}</p><div class="deck-grid">${cards.map((card, i) => this.cardMarkup(card, i, true, true)).join('')}</div>`, 'wide-modal');
       }
-      if (this.modal === 'shop') return this.modalShell('El relicario', `${this.game.meta.souls} ECOS DEL ESPÍRITU`, `<div class="shop-notice">${icon('coin')}<p><strong>Sin compras con dinero real.</strong> Este prototipo usa ecos ganados al completar intentos. Los cosméticos no alteran tus estadísticas.</p></div><div class="skin-grid">${Object.entries(D.skins).map(([id, skin]) => {
+      if (this.modal === 'shop') return this.modalShell(T('El relicario'), T('{souls} ECOS DEL ESPÍRITU', { souls: this.game.meta.souls }), `<div class="shop-notice">${icon('coin')}<p><strong>${T('Sin compras con dinero real.')}</strong> ${T('Este prototipo usa ecos ganados al completar intentos. Los cosméticos no alteran tus estadísticas.')}</p></div><div class="skin-grid">${Object.entries(D.skins).map(([id, skin]) => {
         const owned = this.game.meta.skins.includes(id);
         const active = this.game.meta.skin === id;
-        return `<article class="skin-card"><div class="skin-swatch" style="--skin:${skin.color}">${pixelArt('heart', skin.color)}<span>${icon('skull')}</span></div><h3>${skin.name}</h3><p>${skin.description}</p>${this.button('buy', active ? 'Equipada' : owned ? 'Equipar' : `Desbloquear · ${skin.cost} ecos`, active ? 'check' : 'coin', active ? 'small equipped' : 'small', `data-id="${id}" ${active || (!owned && this.game.meta.souls < skin.cost) ? 'disabled' : ''}`)}</article>`;
-      }).join('')}</div><article class="expansion-card"><div><span class="eyebrow">CONTENIDO ADICIONAL</span><h3>El ala prohibida</h3><p>Abre los encuentros del Archivista de ceniza y su cráneo exclusivo, con dos nuevas cartas. Disponible en los próximos encuentros.</p></div>${this.button('buy', this.game.meta.expansion ? 'Ala desbloqueada' : 'Abrir · 30 ecos', this.game.meta.expansion ? 'check' : 'lock', 'primary small', `data-id="expansion" ${this.game.meta.expansion || this.game.meta.souls < 30 ? 'disabled' : ''}`)}</article>`, 'wide-modal');
-      if (this.modal === 'settings') return this.modalShell('Ajustes', 'LA TORRE NO ESPERA', `<div class="setting-row"><label for="volume">Volumen general<small>Música sintetizada y efectos viscerales.</small></label><div class="volume-control"><input type="range" id="volume" min="0" max="100" value="${Math.round(this.game.meta.volume * 100)}" data-preference="volume"><output id="volume-output">${Math.round(this.game.meta.volume * 100)}%</output></div></div><div class="setting-row"><label for="sfx">Efectos de sonido<small>Impactos, injertos y señales del laboratorio.</small></label><input type="checkbox" id="sfx" data-preference="sfx" ${this.game.meta.sfx ? 'checked' : ''}></div><div class="setting-row"><label for="motion">Animaciones ambientales<small>Desactiva movimiento, partículas animadas y sacudidas.</small></label><input type="checkbox" id="motion" data-preference="motion" ${this.game.meta.motion ? 'checked' : ''}></div><div class="setting-row"><div>Pantalla completa<small>Disponible cuando el navegador lo permite.</small></div>${this.button('fullscreen', 'Alternar', 'fullscreen', 'small')}</div><div class="save-note">${icon('check')} ${this.game.storageAvailable ? 'Guardado automático en este navegador. El reloj continúa al cerrar o recargar.' : 'El guardado está bloqueado. Puedes jugar, pero se perderá el progreso al cerrar.'}</div>${this.game.active() ? `<div class="abandon-row">${this.button('confirm-abandon', 'Abandonar este cuerpo', 'skull', 'danger-outline')}<p>Conservarás los planos descubiertos.</p></div>` : ''}`);
-      if (this.modal === 'confirm-abandon') return this.modalShell('¿Abandonar este cuerpo?', 'ESTE INTENTO TERMINARÁ', `<p class="modal-intro">Perderás tus injertos, suministros y chatarra de este intento. Los planos descubiertos y los ecos permanecen.</p><div class="confirm-actions">${this.button('close', 'Seguir luchando', 'shield', 'primary')}${this.button('abandon', 'Abandonar y volver a la mesa', 'skull', 'danger-outline')}</div>`);
-      if (this.modal === 'help') return this.modalShell('Cómo sobrevivir', 'EL RELOJ ANATÓMICO', `<div class="help-lead">No necesitas un mazo mejor.<br><em>Necesitas un cuerpo mejor.</em></div><div class="help-grid"><article><span>01</span><h3>Explora y asciende</h3><p>Recorre los pasillos conectados. Llega a la escalera del noreste en los pisos I y II. En el III, derrota al Rector y pulsa <strong>Escapar de la torre</strong>.</p></article><article><span>02</span><h3>Combate por turnos</h3><p>Tienes <strong>3 de energía</strong>. Las cartas muestran su coste arriba a la izquierda. La intención enemiga te dice qué ocurrirá al terminar turno. La defensa dura hasta entonces.</p></article><article><span>03</span><h3>Cosecha e injerta</h3><p>Los enemigos derrotados dejan extremidades en tu bolsa. Cada injerto aporta <strong>2 cartas</strong>. Cambiarlo quita las anteriores; en combate cuesta 1 de energía.</p></article><article><span>04</span><h3>No te consumas</h3><p>A <strong>100° o 0% de integridad</strong>, el injerto se rompe y solo te queda una carta de muñón. Desde 75°, cada uso añade 7 de desgaste. Enfría 12° por turno o 7° al moverte.</p></article><article><span>05</span><h3>Usa lo que encuentres</h3><p>Suero: +28 vida. Refrigerante: −38° y +12 integridad. Fabrica los planos descubiertos con chatarra en las estaciones de injertos.</p></article><article><span>06</span><h3>Muere, aprende, vuelve</h3><p>Son <strong>6 minutos de tiempo real</strong>, incluso en menús o fuera de la pestaña. Al morir vuelves a una mesa con otro cuerpo y otra torre. Los planos y ecos permanecen.</p></article></div><div class="controls-grid"><div>${icon('settings')}<h3>Teclado y ratón</h3><p>WASD / flechas: moverse<br>1–7: jugar carta · Espacio: terminar turno<br>Q: suero · E: refrigerante<br>I: injertos · M: mapa · Esc: cerrar</p></div><div>${icon('gamepad')}<h3>Táctil y mando</h3><p>Toca las cartas, pasillos y botones.<br>Mando estándar: cruceta / stick para moverte o elegir · A: confirmar · B: cerrar<br>RB: terminar turno · X / Y: suministros</p></div></div><p class="help-fineprint">Quemadura: daño al terminar turno, baja 1 por turno. Debilidad: reduce un 40% el ataque. Aturdimiento: cancela la siguiente intención. El tiempo no se pausa.</p>`,'wide-modal');
-      if (this.modal === 'log') return this.modalShell('Bitácora del cuerpo', 'LOS ÚLTIMOS 24 ACONTECIMIENTOS', `<ol class="journal-list">${(s?.log || ['Aún no has despertado.']).map(line => `<li>${escapeHtml(line)}</li>`).join('')}</ol>`);
+        return `<article class="skin-card"><div class="skin-swatch" style="--skin:${skin.color}">${pixelArt('heart', skin.color)}<span>${icon('skull')}</span></div><h3>${skin.name}</h3><p>${skin.description}</p>${this.button('buy', active ? T('Equipada') : owned ? T('Equipar') : T('Desbloquear · {cost} ecos', { cost: skin.cost }), active ? 'check' : 'coin', active ? 'small equipped' : 'small', `data-id="${id}" ${active || (!owned && this.game.meta.souls < skin.cost) ? 'disabled' : ''}`)}</article>`;
+      }).join('')}</div><article class="expansion-card"><div><span class="eyebrow">${T('CONTENIDO ADICIONAL')}</span><h3>${T('El ala prohibida')}</h3><p>${T('Abre los encuentros del Archivista de ceniza y su cráneo exclusivo, con dos nuevas cartas. Disponible en los próximos encuentros.')}</p></div>${this.button('buy', this.game.meta.expansion ? T('Ala desbloqueada') : T('Abrir · 30 ecos'), this.game.meta.expansion ? 'check' : 'lock', 'primary small', `data-id="expansion" ${this.game.meta.expansion || this.game.meta.souls < 30 ? 'disabled' : ''}`)}</article>`, 'wide-modal');
+      if (this.modal === 'settings') return this.modalShell(T('Ajustes'), T('LA TORRE NO ESPERA'), `<div class="setting-row"><label for="volume">${T('Volumen general')}<small>${T('Música sintetizada y efectos viscerales.')}</small></label><div class="volume-control"><input type="range" id="volume" min="0" max="100" value="${Math.round(this.game.meta.volume * 100)}" data-preference="volume"><output id="volume-output">${Math.round(this.game.meta.volume * 100)}%</output></div></div><div class="setting-row"><label for="sfx">${T('Efectos de sonido')}<small>${T('Impactos, injertos y señales del laboratorio.')}</small></label><input type="checkbox" id="sfx" data-preference="sfx" ${this.game.meta.sfx ? 'checked' : ''}></div><div class="setting-row"><label for="motion">${T('Animaciones ambientales')}<small>${T('Desactiva movimiento, partículas animadas y sacudidas.')}</small></label><input type="checkbox" id="motion" data-preference="motion" ${this.game.meta.motion ? 'checked' : ''}></div><div class="setting-row"><div>${T('Pantalla completa')}<small>${T('Disponible cuando el navegador lo permite.')}</small></div>${this.button('fullscreen', T('Alternar'), 'fullscreen', 'small')}</div><div class="save-note">${icon('check')} ${this.game.storageAvailable ? T('Guardado automático en este navegador. El reloj continúa al cerrar o recargar.') : T('El guardado está bloqueado. Puedes jugar, pero se perderá el progreso al cerrar.')}</div>${this.game.active() ? `<div class="abandon-row">${this.button('confirm-abandon', T('Abandonar este cuerpo'), 'skull', 'danger-outline')}<p>${T('Conservarás los planos descubiertos.')}</p></div>` : ''}`);
+      if (this.modal === 'confirm-abandon') return this.modalShell(T('¿Abandonar este cuerpo?'), T('ESTE INTENTO TERMINARÁ'), `<p class="modal-intro">${T('Perderás tus injertos, suministros y chatarra de este intento. Los planos descubiertos y los ecos permanecen.')}</p><div class="confirm-actions">${this.button('close', T('Seguir luchando'), 'shield', 'primary')}${this.button('abandon', T('Abandonar y volver a la mesa'), 'skull', 'danger-outline')}</div>`);
+      if (this.modal === 'help') return this.modalShell(T('Cómo sobrevivir'), T('EL RELOJ ANATÓMICO'), `<div class="help-lead">${T('No necesitas un mazo mejor.')}<br><em>${T('Necesitas un cuerpo mejor.')}</em></div><div class="help-grid"><article><span>01</span><h3>${T('Explora y asciende')}</h3><p>${T('Recorre los pasillos conectados. Llega a la escalera del noreste en los pisos I y II. En el III, derrota al Rector y pulsa {action}.', { action: `<strong>${T('Escapar de la torre')}</strong>` })}</p></article><article><span>02</span><h3>${T('Combate por turnos')}</h3><p>${T('Tienes {energy}. Las cartas muestran su coste arriba a la izquierda. La intención enemiga te dice qué ocurrirá al terminar turno. La defensa dura hasta entonces.', { energy: `<strong>${T('3 de energía')}</strong>` })}</p></article><article><span>03</span><h3>${T('Cosecha e injerta')}</h3><p>${T('Los enemigos derrotados dejan extremidades en tu bolsa. Cada injerto aporta {cards}. Cambiarlo quita las anteriores; en combate cuesta 1 de energía.', { cards: `<strong>${T('2 cartas')}</strong>` })}</p></article><article><span>04</span><h3>${T('No te consumas')}</h3><p>${T('A {limit}, el injerto se rompe y solo te queda una carta de muñón. Desde 75°, cada uso añade 7 de desgaste. Enfría 12° por turno o 7° al moverte.', { limit: `<strong>${T('100° o 0% de integridad')}</strong>` })}</p></article><article><span>05</span><h3>${T('Usa lo que encuentres')}</h3><p>${T('Suero: +28 vida. Refrigerante: −38° y +12 integridad. Fabrica los planos descubiertos con chatarra en las estaciones de injertos.')}</p></article><article><span>06</span><h3>${T('Muere, aprende, vuelve')}</h3><p>${T('Son {time}, incluso en menús o fuera de la pestaña. Al morir vuelves a una mesa con otro cuerpo y otra torre. Los planos y ecos permanecen.', { time: `<strong>${T('6 minutos de tiempo real')}</strong>` })}</p></article></div><div class="controls-grid"><div>${icon('settings')}<h3>${T('Teclado y ratón')}</h3><p>${T('WASD / flechas: moverse')}<br>${T('1–7: jugar carta · Espacio: terminar turno')}<br>${T('Q: suero · E: refrigerante')}<br>${T('I: injertos · M: mapa · Esc: cerrar')}</p></div><div>${icon('gamepad')}<h3>${T('Táctil y mando')}</h3><p>${T('Toca las cartas, pasillos y botones.')}<br>${T('Mando estándar: cruceta / stick para moverte o elegir · A: confirmar · B: cerrar')}<br>${T('RB: terminar turno · X / Y: suministros')}</p></div></div><p class="help-fineprint">${T('Quemadura: daño al terminar turno, baja 1 por turno. Debilidad: reduce un 40% el ataque. Aturdimiento: cancela la siguiente intención. El tiempo no se pausa.')}</p>`,'wide-modal');
+      if (this.modal === 'log') return this.modalShell(T('Bitácora del cuerpo'), T('LOS ÚLTIMOS 24 ACONTECIMIENTOS'), `<ol class="journal-list">${(s?.log || [T('Aún no has despertado.')]).map(line => `<li>${escapeHtml(line)}</li>`).join('')}</ol>`);
       if (this.modal === 'end' && s) {
         const won = s.phase === 'won';
-        return `<div class="modal-backdrop end-backdrop"><section class="end-modal ${won ? 'won' : ''}" role="dialog" aria-modal="true" aria-labelledby="end-title"><div class="end-symbol">${icon(won ? 'tower' : 'skull')}</div><span class="eyebrow">${won ? 'EL CIELO TODAVÍA EXISTE' : 'EL ESPÍRITU HA ENCONTRADO OTRA MESA'}</span><h2 id="end-title">${won ? 'Este cuerpo es tuyo.' : 'La carne no era eterna.'}</h2><p>${s.reason}</p><div class="result-grid"><div><strong>${s.stats.kills}</strong><span>ENEMIGOS COSECHADOS</span></div><div><strong>${s.stats.grafts}</strong><span>INJERTOS REALIZADOS</span></div><div><strong>${s.stats.discovered}</strong><span>PLANOS DESCUBIERTOS</span></div><div><strong>+${s.earnedSouls || 0}</strong><span>ECOS CONSERVADOS</span></div></div><div class="result-clock">${icon('clock')} ${won ? `Escapaste en ${timeLabel(360000 - s.remainingAtEnd)} · ${timeLabel(s.remainingAtEnd)} restantes` : `Piso ${D.floors[s.floor].roman} · ${s.stats.rooms} salas recorridas`}</div><div class="end-actions">${this.button('start', 'Reanimar otro cuerpo', 'bolt', 'primary')}${this.button('shop', 'Abrir relicario', 'coin')}</div><small>Tus ${this.game.meta.blueprints.length} planos permanecen. Tu próxima torre será distinta.</small></section></div>`;
+        return `<div class="modal-backdrop end-backdrop"><section class="end-modal ${won ? 'won' : ''}" role="dialog" aria-modal="true" aria-labelledby="end-title"><div class="end-symbol">${icon(won ? 'tower' : 'skull')}</div><span class="eyebrow">${won ? T('EL CIELO TODAVÍA EXISTE') : T('EL ESPÍRITU HA ENCONTRADO OTRA MESA')}</span><h2 id="end-title">${won ? T('Este cuerpo es tuyo.') : T('La carne no era eterna.')}</h2><p>${s.reason}</p><div class="result-grid"><div><strong>${s.stats.kills}</strong><span>${T('ENEMIGOS COSECHADOS')}</span></div><div><strong>${s.stats.grafts}</strong><span>${T('INJERTOS REALIZADOS')}</span></div><div><strong>${s.stats.discovered}</strong><span>${T('PLANOS DESCUBIERTOS')}</span></div><div><strong>+${s.earnedSouls || 0}</strong><span>${T('ECOS CONSERVADOS')}</span></div></div><div class="result-clock">${icon('clock')} ${won ? T('Escapaste en {time} · {left} restantes', { time: timeLabel(360000 - s.remainingAtEnd), left: timeLabel(s.remainingAtEnd) }) : T('Piso {roman} · {rooms} salas recorridas', { roman: D.floors[s.floor].roman, rooms: s.stats.rooms })}</div><div class="end-actions">${this.button('start', T('Reanimar otro cuerpo'), 'bolt', 'primary')}${this.button('shop', T('Abrir relicario'), 'coin')}</div><small>${T('Tus {count} planos permanecen. Tu próxima torre será distinta.', { count: this.game.meta.blueprints.length })}</small></section></div>`;
       }
       return '';
     }
@@ -362,7 +371,7 @@
       const part = D.parts[item.id];
       const slots = D.slots.filter(slot => slot.kind === part.kind && (!onlySlot || slot.id === onlySlot));
       const energy = this.game.state?.phase !== 'combat' || this.game.state.energy >= 1;
-      return `<article class="inventory-item"><div class="inventory-symbol" style="color:${part.color}">${icon(part.kind === 'head' ? 'skull' : part.kind === 'torso' ? 'heart' : part.kind === 'arm' ? 'bone' : 'foot')}</div><div class="inventory-description"><span class="eyebrow">${kindLabel[part.kind]} · ${tierLabel[part.tier]} <span class="inventory-condition">${item.integrity}% / ${item.heat}°</span></span><h3>${part.name}</h3><p>${part.cards.map(id => D.cards[id].name).join(' · ')}</p><div class="inventory-actions">${slots.map(slot => this.button('equip', `Injertar: ${slot.short}`, 'bone', 'small', `data-id="${item.uid}" data-slot="${slot.id}" ${energy ? '' : 'disabled'}`)).join('')}${this.button('salvage', `Desguazar +${part.tier * 3}`, 'gear', 'small quiet', `data-id="${item.uid}"`)}</div></div></article>`;
+      return `<article class="inventory-item"><div class="inventory-symbol" style="color:${part.color}">${icon(part.kind === 'head' ? 'skull' : part.kind === 'torso' ? 'heart' : part.kind === 'arm' ? 'bone' : 'foot')}</div><div class="inventory-description"><span class="eyebrow">${kindLabel[part.kind]} · ${tierLabel[part.tier]} <span class="inventory-condition">${item.integrity}% / ${item.heat}°</span></span><h3>${part.name}</h3><p>${part.cards.map(id => D.cards[id].name).join(' · ')}</p><div class="inventory-actions">${slots.map(slot => this.button('equip', `${T('Injertar')}: ${slot.short}`, 'bone', 'small', `data-id="${item.uid}" data-slot="${slot.id}" ${energy ? '' : 'disabled'}`)).join('')}${this.button('salvage', `${T('Desguazar')} +${part.tier * 3}`, 'gear', 'small quiet', `data-id="${item.uid}"`)}</div></div></article>`;
     }
 
     render() {
@@ -373,7 +382,7 @@
       const s = this.game.state;
       document.body.classList.toggle('reduce-motion', !this.game.meta.motion);
       document.body.classList.toggle('has-modal', Boolean(this.modal));
-      this.root.innerHTML = `${this.header()}<main class="game-shell" ${this.modal ? 'inert' : ''}>${this.statusBar()}<div class="game-grid"><aside class="panel anatomy-panel">${this.anatomyMarkup()}</aside><div class="center-column">${this.sceneMarkup()}${this.handMarkup()}</div><aside class="panel map-panel">${this.mapMarkup()}<div class="run-record"><span class="eyebrow">EL ESPÍRITU RECUERDA</span><div><span>Planos</span><strong>${this.game.meta.blueprints.length} / ${Object.keys(D.parts).length}</strong></div><div><span>Escapes</span><strong>${this.game.meta.wins}</strong></div>${this.game.meta.best ? `<div><span>Mejor tiempo</span><strong>${timeLabel(this.game.meta.best)}</strong></div>` : ''}</div></aside></div><footer class="game-footer"><button type="button" class="journal-preview" data-action="log">${icon('log')}<span>${escapeHtml(s?.log[0] || 'La muerte es solo el principio del procedimiento.')}</span>${icon('right')}</button><span class="version-label">PROTOTIPO 1.0 <i></i> GUARDADO ${this.game.storageAvailable ? 'LOCAL' : 'NO DISPONIBLE'}</span></footer></main><nav class="mobile-toolbar" aria-label="Paneles del juego" ${this.modal ? 'inert' : ''}>${this.button('body', 'Cuerpo', 'skull', 'quiet')}${this.button('bag', `Injertos${s?.inventory.length ? ` · ${s.inventory.length}` : ''}`, 'bag', 'quiet')}${this.button('map', 'Mapa', 'map', 'quiet')}${this.button('archive', 'Planos', 'book', 'quiet')}</nav>${this.modalMarkup()}`;
+      this.root.innerHTML = `${this.header()}<main class="game-shell" ${this.modal ? 'inert' : ''}>${this.statusBar()}<div class="game-grid"><aside class="panel anatomy-panel">${this.anatomyMarkup()}</aside><div class="center-column">${this.sceneMarkup()}${this.handMarkup()}</div><aside class="panel map-panel">${this.mapMarkup()}<div class="run-record"><span class="eyebrow">${T('EL ESPÍRITU RECUERDA')}</span><div><span>${T('Planos')}</span><strong>${this.game.meta.blueprints.length} / ${Object.keys(D.parts).length}</strong></div><div><span>${T('Escapes')}</span><strong>${this.game.meta.wins}</strong></div>${this.game.meta.best ? `<div><span>${T('Mejor tiempo')}</span><strong>${timeLabel(this.game.meta.best)}</strong></div>` : ''}</div></aside></div><footer class="game-footer"><button type="button" class="journal-preview" data-action="log">${icon('log')}<span>${escapeHtml(s?.log[0] || T('La muerte es solo el principio del procedimiento.'))}</span>${icon('right')}</button><span class="version-label">${T('PROTOTIPO 1.0')} <i></i> ${T('GUARDADO')} ${this.game.storageAvailable ? T('LOCAL') : T('NO DISPONIBLE')}</span></footer></main><nav class="mobile-toolbar" aria-label="${T('Paneles del juego')}" ${this.modal ? 'inert' : ''}>${this.button('body', T('Cuerpo'), 'skull', 'quiet')}${this.button('bag', `${T('Injertos')}${s?.inventory.length ? ` · ${s.inventory.length}` : ''}`, 'bag', 'quiet')}${this.button('map', T('Mapa'), 'map', 'quiet')}${this.button('archive', T('Planos'), 'book', 'quiet')}</nav>${this.modalMarkup()}`;
       this.root.querySelector('.topbar')?.toggleAttribute('inert', Boolean(this.modal));
       this.art.bind();
       if (this.root.querySelector('#modal-body')) this.art.anatomy = this.root.querySelector('#modal-body');
@@ -399,7 +408,7 @@
       if (clockBlock) clockBlock.classList.toggle('critical', remaining < 60000 && this.game.active());
       for (const element of document.querySelectorAll('.modal-live-clock')) element.textContent = timeLabel(remaining);
       const header = this.root.querySelector('.header-middle');
-      if (header && !this.game.active() && this.game.state) header.innerHTML = `<span class="live-dot"></span> ${this.game.state.phase === 'won' ? 'HAS ESCAPADO DE LA TORRE' : 'EL ESPÍRITU PERMANECE'}`;
+      if (header && !this.game.active() && this.game.state) header.innerHTML = `<span class="live-dot"></span> ${this.game.state.phase === 'won' ? T('HAS ESCAPADO DE LA TORRE') : T('EL ESPÍRITU PERMANECE')}`;
     }
 
     openModal(name) {
@@ -421,6 +430,7 @@
       this.audio.unlock();
       const action = el.dataset.action;
       const g = this.game;
+      if (action === 'lang') { window.DDLang.set(el.dataset.lang); return; }
       if (action === 'start') { this.modal = null; g.start(); return; }
       if (action === 'home') { this.openModal(g.state ? 'help' : 'intro'); return; }
       if (action === 'close') { this.closeModal(); return; }
@@ -434,8 +444,8 @@
       }
       if (action === 'fullscreen') {
         if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
-        else if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => this.toast({ text: 'Este navegador no permite pantalla completa aquí.' }));
-        else this.toast({ text: 'Este navegador no ofrece pantalla completa.' });
+        else if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => this.toast({ text: T('Este navegador no permite pantalla completa aquí.') }));
+        else this.toast({ text: T('Este navegador no ofrece pantalla completa.') });
         return;
       }
       if (action === 'buy') { g.buy(el.dataset.id); return; }
@@ -456,7 +466,7 @@
       if (action === 'continue-loot') { g.continueAfterLoot(); return; }
       if (action === 'ascend') { g.ascend(); return; }
       if (action === 'escape') { g.escape(); return; }
-      if (action === 'abandon') { this.modal = null; g.finish(false, 'Has dejado atrás este cuerpo. Tu espíritu encuentra otra mesa de disección.'); }
+      if (action === 'abandon') { this.modal = null; g.finish(false, T('Has dejado atrás este cuerpo. Tu espíritu encuentra otra mesa de disección.')); }
     }
 
     handleInput(event) {
@@ -535,7 +545,7 @@
         try { pads = navigator.getGamepads ? [...navigator.getGamepads()] : []; } catch (_) { /* Some embedded browsers disable this API. */ }
         const pad = pads.find(Boolean);
         if (pad) {
-          if (!connected) { connected = true; this.toast({ text: 'Mando conectado · A confirma · B cierra · RB termina turno', tone: 'good' }); }
+          if (!connected) { connected = true; this.toast({ text: T('Mando conectado · A confirma · B cierra · RB termina turno'), tone: 'good' }); }
           const pressed = pad.buttons.map(button => button.pressed);
           const edge = i => pressed[i] && !previous[i];
           const axisX = pad.axes[0] || 0;
@@ -568,7 +578,8 @@
     } catch (error) {
       console.error('Deadlock Deck:', error);
       const root = document.getElementById('app');
-      root.innerHTML = '<main class="boot-error"><h1>No se pudo reanimar el juego.</h1><p>Recarga la página en un navegador actualizado. No se han borrado tus planos.</p><button type="button" id="retry-boot">Recargar</button></main>';
+      const L = window.DDLang.t;
+      root.innerHTML = `<main class="boot-error"><h1>${L('No se pudo reanimar el juego.')}</h1><p>${L('Recarga la página en un navegador actualizado. No se han borrado tus planos.')}</p><button type="button" id="retry-boot">${L('Recargar')}</button></main>`;
       document.getElementById('retry-boot').addEventListener('click', () => location.reload());
     }
   });

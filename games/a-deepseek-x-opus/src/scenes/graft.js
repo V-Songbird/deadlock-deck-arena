@@ -103,7 +103,7 @@
     if (gone) return;
     gone = true;
     if (DD.Explore) DD.Explore.pendingGraft = null;
-    if (DD.Run && DD.Run.say) DD.Run.say('Dejas el miembro en el suelo. Se pierde.');
+    if (DD.Run && DD.Run.say) DD.Run.say(DD.t('Dejas el miembro en el suelo. Se pierde.'));
     sfx('ui_move');
     DD.Scenes.pop();
   }
