@@ -164,3 +164,54 @@ Checked against a local `python -m http.server` in a Chromium browser:
 Not verified: behaviour with a real screen reader, and behaviour on iOS Safari. The games
 themselves are canvas-driven and are not keyboard- or screen-reader-accessible; the hub around them
 is.
+
+## 7. Bilingual games
+
+The five games shipped Spanish-only. A language layer was added afterwards, one agent per build, so
+each game resolves its language from `?lang=`, then `localStorage['dd-lang']`, then falls back to
+Spanish, and exposes its own ES/EN control. The hub passes the visitor's choice into the game it
+launches. This is the only change made to the delivered code, and it sits in commits after the
+`as-built-2026-09` tag.
+
+Each build got the shape that fitted it, not one shared module:
+
+| Build | Module | Dictionary | Control |
+|---|---|---|---|
+| A | [src/core/lang.js](../games/a-deepseek-x-opus/src/core/lang.js) | 566 entries | two canvas cells on the menu and the pause screen |
+| B | [src/i18n.js](../games/b-opus-x-deepseek/src/i18n.js) | 261 entries | a DOM button beside the sound toggle |
+| C | [js/i18n.js](../games/c-fable-x-deepseek-opus/js/i18n.js) | 303 entries | two `.btn.small` buttons in the footer row |
+| D | [src/lang.js](../games/d-opus-x-opus/src/lang.js) | 409 entries | two canvas cells on the title and the slab |
+| E | [src/i18n.js](../games/e-astra/src/i18n.js) | 519 entries | two header buttons, mirrored in the intro modal |
+
+Three decisions are worth recording because they are not obvious:
+
+- **Build D translates at the point of drawing, not in its data tables.** Its combat code compares
+  enemy move *names* to stop the same move repeating three times in a row
+  ([src/combat.js:280](../games/d-opus-x-opus/src/combat.js)). Translating `cards.js` and
+  `tower.js` would have broken that rule.
+- **Canvas builds needed a glyph audit.** Builds A, B and D draw text with a fixed pixel font that
+  has no lowercase and a short punctuation set. English wordings were checked against each font's
+  glyph table so nothing renders as `?`; build B's audit covered the 52 strings that can reach its
+  renderer.
+- **Build E ships the game twice.** `Deadlock-Deck.html` turned out to be a byte-identical
+  concatenation of `src/*.js`, so the single-file copy was regenerated from the modular one and
+  each block compared back.
+
+### Verified by operating each build
+
+Loaded from a local static server in a fresh Chromium profile, at `?lang=en` and with no parameter
+at all:
+
+| Build | `?lang=en` | Default (no parameter) |
+|---|---|---|
+| A | title, warning screen, menu and help in English; document title swapped | Spanish, unchanged |
+| B | canvas title screen, HUD and all six anatomy slots in English | Spanish, unchanged |
+| C | intro, button, stats and key hints in English | Spanish, unchanged |
+| D | title plate, intro panel and control list in English | Spanish, unchanged |
+| E | header, anatomy panel, tower panel and intro modal in English | Spanish, unchanged |
+
+No console errors in any build, in either language.
+
+Known limitation, inherited from build E's architecture: it stores log lines as rendered text, so
+switching language mid-run leaves earlier log entries in the previous language. New entries use the
+new language.
