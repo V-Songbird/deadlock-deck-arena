@@ -1,10 +1,11 @@
 // Deadlock Deck: El Reloj Anatómico — static game data (DD.data).
 // Limbs (anatomical blueprints), cards, enemies, traps and cosmetic palettes.
-// Ids are shared with sprites.js (do not rename). Player-facing text is Spanish.
+// Ids are shared with sprites.js (do not rename). Player-facing text is written in Spanish and
+// translated once here (src/i18n.js), so every consumer reads the active language for free.
 (function () {
   const cards = {};
   // id, name, cost (energy 0-3), heat (added to the card's limb when played), desc, fx
-  const C = (id, name, cost, heat, desc, fx) => { cards[id] = { id, name, cost, heat, desc, fx }; };
+  const C = (id, name, cost, heat, desc, fx) => { cards[id] = { id, name: DD.t(name), cost, heat, desc: DD.t(desc), fx }; };
 
   // Stump: the only card of a broken slot.
   C('golpe_munon', 'Golpe de muñón', 1, 0, 'Inflige 3 de daño.', { dmg: 3 });
@@ -83,7 +84,7 @@
   const limbs = {};
   // id, name, type, source (enemy id or null for base limbs), maxHeat, hpBonus, cards, desc
   const L = (id, name, type, source, maxHeat, hpBonus, cardIds, desc) => {
-    limbs[id] = { id, name, type, base: !source, source, maxHeat, hpBonus, cards: cardIds, desc };
+    limbs[id] = { id, name: DD.t(name), type, base: !source, source, maxHeat, hpBonus, cards: cardIds, desc: DD.t(desc) };
   };
   // Base limbs (dissection table).
   L('cabeza_reanimada', 'Cabeza Reanimada', 'head', null, 8, 0, ['chispazo', 'mirada_fija', 'recordar'], 'Una cabeza cualquiera con la chispa aún tibia.');
@@ -115,7 +116,7 @@
   const enemies = {};
   const atk = (dmg, hits) => (hits > 1 ? { type: 'attack', dmg, hits } : { type: 'attack', dmg });
   // id, name, hp, elite, floors (1-based), drops, pattern, desc
-  const E = (id, name, hp, elite, floors, drops, pattern, desc) => { enemies[id] = { id, name, hp, elite, floors, drops, pattern, desc }; };
+  const E = (id, name, hp, elite, floors, drops, pattern, desc) => { enemies[id] = { id, name: DD.t(name), hp, elite, floors, drops, pattern, desc: DD.t(desc) }; };
   E('homunculo', 'Homúnculo', 14, false, [1, 2], ['brazo_homunculo', 'pierna_homunculo'],
     [atk(5), atk(3, 2), { type: 'block', amt: 4 }], 'Un engendro de tarro, rápido y rabioso.');
   E('sabueso', 'Sabueso Suturado', 18, false, [1, 2], ['cabeza_sabueso', 'pierna_sabueso'],
@@ -135,16 +136,16 @@
   DD.data = {
     limbs, cards, enemies,
     traps: {
-      vapor: { id: 'vapor', name: 'Trampa de vapor', desc: 'Un chorro de vapor calienta una extremidad (+3 calor).' },
-      cuchillas: { id: 'cuchillas', name: 'Suelo de cuchillas', desc: 'Cuchillas ocultas te cortan (-6 PV).' },
-      reloj: { id: 'reloj', name: 'Reloj saboteado', desc: 'Un engranaje maldito roba tiempo (-20 segundos).' },
-      acido: { id: 'acido', name: 'Charco de ácido', desc: 'El ácido corroe todas tus extremidades (+2 calor).' },
+      vapor: { id: 'vapor', name: DD.t('Trampa de vapor'), desc: DD.t('Un chorro de vapor calienta una extremidad (+3 calor).') },
+      cuchillas: { id: 'cuchillas', name: DD.t('Suelo de cuchillas'), desc: DD.t('Cuchillas ocultas te cortan (-6 PV).') },
+      reloj: { id: 'reloj', name: DD.t('Reloj saboteado'), desc: DD.t('Un engranaje maldito roba tiempo (-20 segundos).') },
+      acido: { id: 'acido', name: DD.t('Charco de ácido'), desc: DD.t('El ácido corroe todas tus extremidades (+2 calor).') },
     },
     palettes: [
-      { id: 'palido', name: 'Pálido', price: 0, unlock: 0 },
-      { id: 'verdoso', name: 'Verdoso', price: 0, unlock: 6 },
-      { id: 'cobre', name: 'Cobre', price: 25, unlock: 0 },
-      { id: 'ebano', name: 'Ébano', price: 50, unlock: 0 },
+      { id: 'palido', name: DD.t('Pálido'), price: 0, unlock: 0 },
+      { id: 'verdoso', name: DD.t('Verdoso'), price: 0, unlock: 6 },
+      { id: 'cobre', name: DD.t('Cobre'), price: 25, unlock: 0 },
+      { id: 'ebano', name: DD.t('Ébano'), price: 50, unlock: 0 },
     ],
     STUMP_CARD: 'golpe_munon',
   };

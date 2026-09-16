@@ -38,7 +38,7 @@ DD.body = {
     run.body[slot] = { id: limbId, heat: 0 };
     run.maxHp = DD.body.maxHp(run.body);
     run.hp = DD.clamp(run.maxHp - missing, 1, run.maxHp);
-    DD.log('Injertas ' + DD.data.limbs[limbId].name + ' (' + DD.SLOT_NAME[slot] + ')');
+    DD.log(DD.t('Injertas {0} ({1})', DD.data.limbs[limbId].name, DD.SLOT_NAME[slot]));
     DD.audio.sfx('graft');
   },
 
@@ -52,7 +52,7 @@ DD.body = {
     run.body[slot] = null;
     run.maxHp = DD.body.maxHp(run.body);
     run.hp = Math.min(run.hp, run.maxHp);
-    DD.log('¡' + def.name + ' se rompe! Ahora es un muñón.');
+    DD.log(DD.t('¡{0} se rompe! Ahora es un muñón.', def.name));
     DD.audio.sfx('break');
     return true;
   },

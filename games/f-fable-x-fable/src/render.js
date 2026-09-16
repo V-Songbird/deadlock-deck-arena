@@ -295,7 +295,7 @@
           if (o.showHeat) ui.bar(ctx, bx + 68, by + 2, 32, 5, ratio, ratio < 0.5 ? '#5cc85c' : ratio < 0.8 ? '#e8a030' : '#e03030');
           if (o.labels) ui.text(ctx, def ? def.name : limb.id, bx, by + 9, { color: C.bone });
         } else {
-          ui.text(ctx, 'MUÑÓN', bx + 68, by, { color: C.blood });
+          ui.text(ctx, DD.t('MUÑÓN'), bx + 68, by, { color: C.blood });
         }
         by += rowH;
       }

@@ -147,3 +147,16 @@ messages at any point. Verified with screenshots and JS state reads:
 
 Temporary files: only the session scratchpad (server script, worker smoke
 tests). `.claude/launch.json` (created for the preview server) was removed.
+
+## 2026-09-16 — Spanish/English text layer
+
+Added `src/i18n.js` (loaded before `core.js`), a 319-entry dictionary keyed by the
+exact Spanish string, and wrapped every player-facing literal in `DD.t(...)`, with
+templates (`{0}`, `{1}`) wherever a string carried a number or a name. A small
+`English` / `Español` button sits on the title screen next to the sound toggle;
+`?lang=` then `localStorage['dd-lang']` then Spanish decides the language at load.
+`core.js` now merges into the namespace (`Object.assign(window.DD, { ... })`) and
+`data.js` translates the roster inside its `C`/`L`/`E` helpers. English wordings
+were sized against the measured canvas boxes (tightest: card name 10 chars × 2
+lines, combat log 22 chars/line) — 0 overflows. Full rationale, the width table
+and the verification output: `docs/i18n.md`.

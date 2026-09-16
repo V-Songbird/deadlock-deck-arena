@@ -23,7 +23,7 @@
     if (!run.floor) run.floor = DD.tower.generateFloor(run.floorIndex);
     reveal(here());
     prevBucket = Math.ceil(run.timeLeft / DD.MUTATE_EVERY);
-    DD.log('Despiertas en la mesa de disección. ¡Huye!');
+    DD.log(DD.t('Despiertas en la mesa de disección. ¡Huye!'));
     DD.setScreen(DD.explore);
   }
 
@@ -42,7 +42,7 @@
     if (bucket < prevBucket && run.timeLeft > 0) {
       DD.tower.mutate(run.floor);
       DD.audio.sfx('mutate');
-      DD.log('La torre se retuerce');
+      DD.log(DD.t('La torre se retuerce'));
       banner = BANNER_TIME;
     }
     prevBucket = bucket;
@@ -72,9 +72,9 @@
   // Applies a room once; combat rooms are cleared later by resume().
   function trigger(cell) {
     switch (cell.type) {
-      case 'vial': cell.cleared = true; run.hp = Math.min(run.maxHp, run.hp + 10); DD.log('Bebes un vial: +10 PV'); DD.audio.sfx('heal'); break;
-      case 'coolant': cell.cleared = true; DD.body.cool(run, 5); DD.log('Refrigerante: -5 de calor en cada miembro'); DD.audio.sfx('pickup'); break;
-      case 'ichor': { cell.cleared = true; const n = 5 + DD.rand(6); run.ichor += n; DD.log('Recoges ' + n + ' de Ichor'); DD.audio.sfx('pickup'); break; }
+      case 'vial': cell.cleared = true; run.hp = Math.min(run.maxHp, run.hp + 10); DD.log(DD.t('Bebes un vial: +10 PV')); DD.audio.sfx('heal'); break;
+      case 'coolant': cell.cleared = true; DD.body.cool(run, 5); DD.log(DD.t('Refrigerante: -5 de calor en cada miembro')); DD.audio.sfx('pickup'); break;
+      case 'ichor': { cell.cleared = true; const n = 5 + DD.rand(6); run.ichor += n; DD.log(DD.t('Recoges {0} de Ichor', n)); DD.audio.sfx('pickup'); break; }
       case 'trap': cell.cleared = true; springTrap(cell.trapId); break;
       case 'enemy': case 'elite': cb.onCombat(cell.enemyId, cell); break;
       case 'exit': cb.onCombat('maestro', cell); break;              // the guard; resume(cell, true) -> onEscape()
@@ -82,7 +82,7 @@
         run.floorIndex++;
         run.floor = DD.tower.generateFloor(run.floorIndex);        // the player starts at the new floor's 'start'
         DD.audio.sfx('stairs');
-        DD.log('Subes a la planta ' + (run.floorIndex + 1) + ': ' + run.floor.name);
+        DD.log(DD.t('Subes a la planta {0}: {1}', run.floorIndex + 1, run.floor.name));
         break;
       default: cell.cleared = true;                                   // start, empty
     }
@@ -91,10 +91,10 @@
   function springTrap(id) {
     const name = DD.data.traps[id].name, intact = DD.SLOTS.filter(s => run.body[s]);
     DD.audio.sfx('trap');
-    if (id === 'cuchillas') { run.hp -= 6; DD.log('¡' + name + '! -6 PV'); }
-    else if (id === 'reloj') { run.timeLeft -= 20; DD.log('¡' + name + '! -20 segundos'); }
-    else if (id === 'acido') { DD.log('¡' + name + '! +2 de calor en cada miembro'); for (const s of intact) DD.body.heat(run, s, 2); }
-    else if (id === 'vapor') { const s = DD.pick(intact); DD.log('¡' + name + '!' + (s ? ' +3 de calor en ' + DD.SLOT_NAME[s] : '')); if (s) DD.body.heat(run, s, 3); }
+    if (id === 'cuchillas') { run.hp -= 6; DD.log(DD.t('¡{0}! -6 PV', name)); }
+    else if (id === 'reloj') { run.timeLeft -= 20; DD.log(DD.t('¡{0}! -20 segundos', name)); }
+    else if (id === 'acido') { DD.log(DD.t('¡{0}! +2 de calor en cada miembro', name)); for (const s of intact) DD.body.heat(run, s, 2); }
+    else if (id === 'vapor') { const s = DD.pick(intact); DD.log(s ? DD.t('¡{0}! +3 de calor en {1}', name, DD.SLOT_NAME[s]) : DD.t('¡{0}!', name)); if (s) DD.body.heat(run, s, 3); }
   }
 
   function wall(ctx, x, y, w, h, door) {
@@ -151,13 +151,13 @@
       py = cy(move.from) + (cy(move.to) - cy(move.from)) * k;
     }
     DD.ui.drawBody(ctx, Math.round(px), Math.round(py + CELL / 2 - 3), run.body, { scale: 1, palette: run.palette });
-    DD.ui.text(ctx, 'Planta ' + (run.floorIndex + 1) + '/' + DD.FLOORS + ' - ' + floor.name, DD.W / 2, 27, { size: 1, color: COLOR.gold, align: 'center' });
+    DD.ui.text(ctx, DD.t('Planta {0}/{1} - {2}', run.floorIndex + 1, DD.FLOORS, floor.name), DD.W / 2, 27, { size: 1, color: COLOR.gold, align: 'center' });
     DD.ui.log(ctx, run, GX, GY + 4 * CELL + 8, 7 * CELL);
-    DD.ui.text(ctx, 'Toca una sala contigua o usa las flechas', DD.W / 2, 349, { size: 1, color: COLOR.dim, align: 'center' });
+    DD.ui.text(ctx, DD.t('Toca una sala contigua o usa las flechas'), DD.W / 2, 349, { size: 1, color: COLOR.dim, align: 'center' });
     DD.ui.hud(ctx, run);
     if (banner > 0) {
       DD.ui.panel(ctx, 160, 118, 320, 36, { color: COLOR.red });
-      DD.ui.text(ctx, 'LA TORRE SE RETUERCE', DD.W / 2, 129, { size: 2, color: COLOR.red, align: 'center' });
+      DD.ui.text(ctx, DD.t('LA TORRE SE RETUERCE'), DD.W / 2, 129, { size: 2, color: COLOR.red, align: 'center' });
     }
   }
 

@@ -8,7 +8,7 @@
     { key: 'e', opp: 'w', dx: 1, dy: 0 },
     { key: 'w', opp: 'e', dx: -1, dy: 0 },
   ];
-  const floorNames = ['Sótano de Disección', 'Galería de Especímenes', 'Laboratorio Superior'];
+  const floorNames = ['Sótano de Disección', 'Galería de Especímenes', 'Laboratorio Superior'].map(n => DD.t(n));
 
   function cellAt(floor, x, y) {
     return x >= 0 && y >= 0 && x < floor.w && y < floor.h ? floor.cells[y * floor.w + x] : null;

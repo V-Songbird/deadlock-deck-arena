@@ -8,7 +8,9 @@ and mobile browsers (touch), which covers the "PC, consoles, mobile" platforms
 of the concept as far as a prototype goes.
 
 Language rules: code identifiers, comments and docs in **English**; every
-string the player sees in **Spanish** (with proper accents: á é í ó ú ñ ¿ ¡).
+string the player sees is **written in Spanish** (with proper accents:
+á é í ó ú ñ ¿ ¡) and wrapped in `DD.t(...)`, which returns Spanish or English
+depending on the active language. See `docs/i18n.md`.
 
 ## Files, load order and owners
 
@@ -16,6 +18,7 @@ string the player sees in **Spanish** (with proper accents: á é í ó ú ñ ¿
 
 | # | file | global | owner |
 |---|------|--------|-------|
+| 0 | `src/i18n.js` | `DD.i18n`, `DD.t` (creates `window.DD`) | orchestrator (done) |
 | 1 | `src/core.js` | `DD` (namespace, constants, helpers) | orchestrator (done) |
 | 2 | `src/data.js` | `DD.data` | Worker A |
 | 3 | `src/sprites.js` | `DD.sprites` | Worker C |
@@ -44,7 +47,7 @@ DD.MUTATE_EVERY = 45;               // seconds between tower mutations
 DD.FLOORS = 3;
 DD.SLOTS = ['head','torso','armL','armR','legL','legR'];
 DD.SLOT_TYPE = { head:'head', torso:'torso', armL:'arm', armR:'arm', legL:'leg', legR:'leg' };
-DD.SLOT_NAME = { head:'Cabeza', torso:'Torso', armL:'Brazo izq.', ... };
+DD.SLOT_NAME = { head:DD.t('Cabeza'), torso:DD.t('Torso'), armL:DD.t('Brazo izq.'), ... };
 DD.run, DD.screen, DD.setScreen(screen)
 DD.rand(n) DD.pick(arr) DD.shuffle(arr) DD.chance(p) DD.clamp(v,a,b)
 DD.fmtTime(seconds) -> 'm:ss'
@@ -388,3 +391,8 @@ title screen, music 'title'.
   before the context runs is remembered; `sfx()` is dropped while suspended.
 - `DD.data.enemies.maestro.elite` is `'boss'`; tower.js never places the maestro in
   random cells (`e.id !== 'maestro'` and `e.elite === true` filters).
+- `src/i18n.js` loads first and creates `window.DD`, so `core.js` merges into it with
+  `Object.assign(window.DD, { ... })` instead of replacing it. `data.js` translates the
+  roster once inside its `C`/`L`/`E` helpers, so `limb.name`, `card.desc`, `enemy.name`,
+  trap names, palette names and `DD.tower.floorNames` are already in the active language
+  wherever they are read. The language never changes without a page reload.

@@ -4,7 +4,7 @@
 (function () {
   const ENERGY = 3, DRAW = 5, HAND_CAP = 8, GAP = 4;
   const PLAYER_X = 120, ENEMY_X = 500;
-  const TYPE_NAME = { head: 'Cabeza', torso: 'Torso', arm: 'Brazo', leg: 'Pierna' };
+  const TYPE_NAME = { head: DD.t('Cabeza'), torso: DD.t('Torso'), arm: DD.t('Brazo'), leg: DD.t('Pierna') };
   let S = null;   // active combat state; null when no combat is running
   let uid = 0;
 
@@ -21,7 +21,7 @@
       energy: ENERGY, block: 0, weak: 0, turn: 0,
       phase: 'player', wait: 0, hurt: 0, floats: [], hover: -1, harvest: null,
     };
-    DD.log('¡' + def.name + ' te cierra el paso!');
+    DD.log(DD.t('¡{0} te cierra el paso!', def.name));
     DD.audio.sfx('growl');
     startTurn();
   }
@@ -65,7 +65,7 @@
     amount -= blocked;
     e.hp -= amount;
     if (amount > 0) e.hurt = 0.2;
-    addFloat(ENEMY_X, 120, amount > 0 ? '-' + amount : 'Bloqueado', amount > 0 ? '#ff5a4a' : '#8fb4ff');
+    addFloat(ENEMY_X, 120, amount > 0 ? '-' + amount : DD.t('Bloqueado'), amount > 0 ? '#ff5a4a' : '#8fb4ff');
     DD.audio.sfx(amount > 0 ? 'hit' : 'block');
     return amount;
   }
@@ -76,7 +76,7 @@
     const def = DD.data.cards[card.cardId];
     if (def.cost > S.energy) {
       DD.audio.sfx('error');
-      DD.log('No tienes energía para ' + def.name + '.');
+      DD.log(DD.t('No tienes energía para {0}.', def.name));
       return;
     }
     S.energy -= def.cost;
@@ -87,22 +87,22 @@
     if (fx.dmg) {
       let total = 0;
       for (let h = 0; h < (fx.hits || 1); h++) total += hitEnemy(fx.dmg);
-      msgs.push(total + ' de daño');
+      msgs.push(DD.t('{0} de daño', total));
     }
-    if (fx.block) { S.block += fx.block; msgs.push('+' + fx.block + ' de bloqueo'); DD.audio.sfx('block'); }
+    if (fx.block) { S.block += fx.block; msgs.push(DD.t('+{0} de bloqueo', fx.block)); DD.audio.sfx('block'); }
     if (fx.heal) {
       const before = run.hp;
       run.hp = Math.min(run.maxHp, run.hp + fx.heal);
-      msgs.push('+' + (run.hp - before) + ' PV');
+      msgs.push(DD.t('+{0} PV', run.hp - before));
       DD.audio.sfx('heal');
     }
-    if (fx.energy) { S.energy += fx.energy; msgs.push('+' + fx.energy + ' de energía'); }
+    if (fx.energy) { S.energy += fx.energy; msgs.push(DD.t('+{0} de energía', fx.energy)); }
     if (fx.draw) drawCards(fx.draw);
     if (fx.cool) DD.body.cool(run, fx.cool, card.slot);
     if (fx.coolAll) DD.body.cool(run, fx.coolAll);
-    if (fx.weak) { e.weak += fx.weak; msgs.push('enemigo débil ' + fx.weak); }
-    if (fx.vuln) { e.vuln += fx.vuln; msgs.push('enemigo vulnerable ' + fx.vuln); }
-    DD.log(def.name + ': ' + (msgs.join(', ') || 'efecto') + '.');
+    if (fx.weak) { e.weak += fx.weak; msgs.push(DD.t('enemigo débil {0}', fx.weak)); }
+    if (fx.vuln) { e.vuln += fx.vuln; msgs.push(DD.t('enemigo vulnerable {0}', fx.vuln)); }
+    DD.log(DD.t('{0}: {1}.', def.name, msgs.join(', ') || DD.t('efecto')));
     if (def.heat > 0 && DD.body.heat(run, card.slot, def.heat)) breakSlot(card.slot);
     if (e.hp <= 0) win();
   }
@@ -143,30 +143,30 @@
         total += d;
       }
       if (total > 0) S.hurt = 0.2;
-      addFloat(PLAYER_X, 90, total > 0 ? '-' + total : 'Bloqueado', total > 0 ? '#ff5a4a' : '#8fb4ff');
+      addFloat(PLAYER_X, 90, total > 0 ? '-' + total : DD.t('Bloqueado'), total > 0 ? '#ff5a4a' : '#8fb4ff');
       DD.audio.sfx(total > 0 ? 'hit' : 'block');
-      DD.log(e.def.name + ' ataca: ' + total + ' de daño.');
+      DD.log(DD.t('{0} ataca: {1} de daño.', e.def.name, total));
       if (run.hp <= 0) { run.hp = 0; finish({ won: false }); return; }
     } else if (it.type === 'block') {
       e.block += it.amt;
       DD.audio.sfx('block');
-      DD.log(e.def.name + ' se cubre: ' + it.amt + ' de bloqueo.');
+      DD.log(DD.t('{0} se cubre: {1} de bloqueo.', e.def.name, it.amt));
     } else if (it.type === 'heat') {
       const slots = DD.SLOTS.filter(s => run.body[s]);
       if (slots.length) {
         const slot = DD.pick(slots);
         DD.audio.sfx('heat');
-        DD.log('El vapor calienta tu ' + DD.SLOT_NAME[slot].toLowerCase() + ' (+' + it.amt + ').');
+        DD.log(DD.t('El vapor calienta tu {0} (+{1}).', DD.SLOT_NAME[slot].toLowerCase(), it.amt));
         if (DD.body.heat(run, slot, it.amt)) breakSlot(slot);
       }
     } else if (it.type === 'weak') {
       S.weak += it.turns;
       DD.audio.sfx('growl');
-      DD.log(e.def.name + ' te debilita ' + it.turns + ' turno' + (it.turns > 1 ? 's' : '') + '.');
+      DD.log(DD.t(it.turns > 1 ? '{0} te debilita {1} turnos.' : '{0} te debilita {1} turno.', e.def.name, it.turns));
     } else if (it.type === 'heal') {
       e.hp = Math.min(e.maxHp, e.hp + it.amt);
       DD.audio.sfx('heal');
-      DD.log(e.def.name + ' se cura ' + it.amt + ' PV.');
+      DD.log(DD.t('{0} se cura {1} PV.', e.def.name, it.amt));
     }
     if (e.weak > 0) e.weak--;
   }
@@ -176,14 +176,14 @@
     switch (it.type) {
       case 'attack': {
         const d = e.weak > 0 ? Math.round(it.dmg * 0.75) : it.dmg;
-        return 'Intención: ataque ' + d + (it.hits > 1 ? ' x' + it.hits : '');
+        return it.hits > 1 ? DD.t('Intención: ataque {0} x{1}', d, it.hits) : DD.t('Intención: ataque {0}', d);
       }
-      case 'block': return 'Intención: bloqueo ' + it.amt;
-      case 'heat': return 'Intención: vapor +' + it.amt + ' calor';
-      case 'weak': return 'Intención: debilitar';
-      case 'heal': return 'Intención: curación ' + it.amt;
+      case 'block': return DD.t('Intención: bloqueo {0}', it.amt);
+      case 'heat': return DD.t('Intención: vapor +{0} calor', it.amt);
+      case 'weak': return DD.t('Intención: debilitar');
+      case 'heal': return DD.t('Intención: curación {0}', it.amt);
     }
-    return 'Intención: ?';
+    return DD.t('Intención: ?');
   }
 
   // ---- victory / harvest -------------------------------------------------
@@ -194,7 +194,7 @@
     run.kills++;
     for (const id of def.drops) if (!run.discovered.includes(id)) run.discovered.push(id);
     S.harvest = { drops: def.drops.slice(), picked: null };
-    DD.log('¡' + def.name + ' cae! Cosecha sus restos.');
+    DD.log(DD.t('¡{0} cae! Cosecha sus restos.', def.name));
     DD.audio.sfx('harvest');
   }
 
@@ -235,18 +235,18 @@
     ui.drawBody(ctx, PLAYER_X, 214, run.body, { scale: 3, palette: run.palette, showHeat: true, labels: true });
     if (S.hurt > 0) { ctx.fillStyle = 'rgba(255,40,40,0.25)'; ctx.fillRect(0, 22, 300, 212); }
     const pst = [];
-    if (S.block > 0) pst.push('Bloqueo ' + S.block);
-    if (S.weak > 0) pst.push('Débil ' + S.weak);
+    if (S.block > 0) pst.push(DD.t('Bloqueo {0}', S.block));
+    if (S.weak > 0) pst.push(DD.t('Débil {0}', S.weak));
     if (pst.length) ui.text(ctx, pst.join('  '), 8, 26, { size: 1, color: '#8fb4ff' });
 
     // Enemy (right).
     ui.text(ctx, e.def.name, ENEMY_X, 28, { size: 2, align: 'center', color: '#e8d9b0' });
     ui.bar(ctx, ENEMY_X - 70, 46, 140, 8, DD.clamp(e.hp / e.maxHp, 0, 1), '#c8323c', '#2a1218');
-    ui.text(ctx, Math.max(0, e.hp) + '/' + e.maxHp + ' PV', ENEMY_X, 57, { size: 1, align: 'center', color: '#e8d9b0' });
+    ui.text(ctx, DD.t('{0}/{1} PV', Math.max(0, e.hp), e.maxHp), ENEMY_X, 57, { size: 1, align: 'center', color: '#e8d9b0' });
     const est = [];
-    if (e.block > 0) est.push('Bloqueo ' + e.block);
-    if (e.weak > 0) est.push('Débil ' + e.weak);
-    if (e.vuln > 0) est.push('Vulnerable ' + e.vuln);
+    if (e.block > 0) est.push(DD.t('Bloqueo {0}', e.block));
+    if (e.weak > 0) est.push(DD.t('Débil {0}', e.weak));
+    if (e.vuln > 0) est.push(DD.t('Vulnerable {0}', e.vuln));
     if (est.length) ui.text(ctx, est.join('  '), ENEMY_X, 68, { size: 1, align: 'center', color: '#8fb4ff' });
     ui.text(ctx, intentText(), ENEMY_X, 80, { size: 1, align: 'center', color: '#ffd166' });
     ui.drawEnemy(ctx, e.id, ENEMY_X, 214, { scale: 3, hurt: e.hurt > 0 });
@@ -255,9 +255,9 @@
     for (const f of S.floats) ui.text(ctx, f.text, f.x, f.y, { size: 2, align: 'center', color: f.color });
 
     // Bottom strip: energy, piles, end turn.
-    ui.text(ctx, 'Energía ' + S.energy + '/' + ENERGY, 8, 238, { size: 2, color: '#ffd166' });
-    ui.text(ctx, 'Mazo ' + S.draw.length + '   Descarte ' + S.discard.length + '   Turno ' + S.turn, 150, 244, { size: 1, color: '#bfb3a0' });
-    if (ui.button(ctx, 516, 236, 116, 20, 'Fin de turno', { small: true, disabled: S.phase !== 'player' })) {
+    ui.text(ctx, DD.t('Energía {0}/{1}', S.energy, ENERGY), 8, 238, { size: 2, color: '#ffd166' });
+    ui.text(ctx, DD.t('Mazo {0}   Descarte {1}   Turno {2}', S.draw.length, S.discard.length, S.turn), 150, 244, { size: 1, color: '#bfb3a0' });
+    if (ui.button(ctx, 516, 236, 116, 20, DD.t('Fin de turno'), { small: true, disabled: S.phase !== 'player' })) {
       endTurn();
       if (!S) return;
     }
@@ -281,35 +281,37 @@
     const ui = DD.ui, run = S.run, h = S.harvest;
     ctx.fillStyle = 'rgba(0,0,0,0.6)';
     ctx.fillRect(0, 0, DD.W, DD.H);
-    ui.panel(ctx, 40, 30, 560, 300, { title: 'Cosecha' });
+    ui.panel(ctx, 40, 30, 560, 300, { title: DD.t('Cosecha') });
     if (!h.picked) {
-      ui.text(ctx, 'Restos de ' + S.enemy.def.name + '. Elige una extremidad para injertar:', 56, 52, { size: 1, color: '#e8d9b0', maxWidth: 528 });
+      ui.text(ctx, DD.t('Restos de {0}. Elige una extremidad para injertar:', S.enemy.def.name), 56, 52, { size: 1, color: '#e8d9b0', maxWidth: 528 });
       for (let i = 0; i < h.drops.length; i++) {
         const limb = DD.data.limbs[h.drops[i]], y = 68 + i * 60;
         if (ui.button(ctx, 56, y, 190, 20, limb.name, { small: true })) h.picked = limb.id;
-        ui.text(ctx, TYPE_NAME[limb.type] + ' - calor máx. ' + limb.maxHeat + (limb.hpBonus ? ' - +' + limb.hpBonus + ' PV máx.' : ''), 256, y + 2, { size: 1, color: '#bfb3a0' });
+        ui.text(ctx, limb.hpBonus
+          ? DD.t('{0} - calor máx. {1} - +{2} PV máx.', TYPE_NAME[limb.type], limb.maxHeat, limb.hpBonus)
+          : DD.t('{0} - calor máx. {1}', TYPE_NAME[limb.type], limb.maxHeat), 256, y + 2, { size: 1, color: '#bfb3a0' });
         const names = limb.cards.map(id => DD.data.cards[id].name).join(', ');
-        ui.wrap('Cartas: ' + names, 328, 1).slice(0, 2).forEach((line, j) => ui.text(ctx, line, 256, y + 14 + j * 10, { size: 1, color: '#e8d9b0' }));
+        ui.wrap(DD.t('Cartas: {0}', names), 328, 1).slice(0, 2).forEach((line, j) => ui.text(ctx, line, 256, y + 14 + j * 10, { size: 1, color: '#e8d9b0' }));
         ui.text(ctx, limb.desc, 56, y + 36, { size: 1, color: '#8fa88f', maxWidth: 528 });
       }
-      if (ui.button(ctx, 250, 296, 140, 22, 'Descartar', { small: true })) finish({ won: true, drops: h.drops });
+      if (ui.button(ctx, 250, 296, 140, 22, DD.t('Descartar'), { small: true })) finish({ won: true, drops: h.drops });
       return;
     }
     const limb = DD.data.limbs[h.picked];
-    ui.text(ctx, 'Injertar ' + limb.name + ' en:', 56, 52, { size: 1, color: '#e8d9b0', maxWidth: 528 });
+    ui.text(ctx, DD.t('Injertar {0} en:', limb.name), 56, 52, { size: 1, color: '#e8d9b0', maxWidth: 528 });
     const slots = DD.SLOTS.filter(s => DD.body.fits(s, h.picked));
     for (let i = 0; i < slots.length; i++) {
       const slot = slots[i], cur = run.body[slot];
-      const label = DD.SLOT_NAME[slot] + ': ' + (cur
-        ? DD.data.limbs[cur.id].name + ' (calor ' + cur.heat + '/' + DD.data.limbs[cur.id].maxHeat + ')'
-        : 'muñón (vacío)');
+      const label = cur
+        ? DD.t('{0}: {1} (calor {2}/{3})', DD.SLOT_NAME[slot], DD.data.limbs[cur.id].name, cur.heat, DD.data.limbs[cur.id].maxHeat)
+        : DD.t('{0}: muñón (vacío)', DD.SLOT_NAME[slot]);
       if (ui.button(ctx, 90, 72 + i * 30, 460, 22, label, { small: true })) {
         DD.body.graft(run, slot, h.picked);
         finish({ won: true, drops: h.drops });
         return;
       }
     }
-    if (ui.button(ctx, 250, 296, 140, 22, 'Atrás', { small: true })) h.picked = null;
+    if (ui.button(ctx, 250, 296, 140, 22, DD.t('Atrás'), { small: true })) h.picked = null;
   }
 
   DD.combat = { begin, update, draw };
