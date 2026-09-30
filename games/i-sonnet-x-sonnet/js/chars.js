@@ -1186,7 +1186,7 @@
     var hx = -3 + dx + hd, hy = ty - 10;
     for (i = 0; i < 3; i++) { R(g, '#c8c8d0', hx - 8, hy - 1 + i * 2, 3 - (i & 1), 1); R(g, '#c8c8d0', hx + 5, hy - 1 + i * 2, 3 - (i & 1), 1); }
     ov(g, sk[0], hx, hy, 6.5, 7.5); R(g, sk[2], hx + 2, hy - 2, 4, 8); ov(g, sk[1], hx - 2, hy - 2, 3, 3);
-    R(g, sk[0], hx - 2, hy + 6, 5, 4);
+    R(g, sk[0], hx - 2, hy + 6, 5, 9); R(g, sk[2], hx + 2, hy + 6, 1, 9); R(g, '#efe6cc', hx - 3, hy + 12, 7, 3); R(g, C.blood, hx - 1, hy + 13, 3, 2);
     tline(g, sk[2], hx - 7, hy + 1, hx - 9, hy + 3, 2);
     ov(g, B[2], hx - 3.5, hy - 1, 5, 5); ov(g, B[0], hx - 3.5, hy - 1, 4.2, 4.2); ov(g, '#a8e8f4', hx - 3.5, hy - 1, 3.2, 3.2);
     if (s.dead) { R(g, OL, hx - 5, hy - 2, 1, 1); R(g, OL, hx - 3, hy - 2, 1, 1); R(g, OL, hx - 4, hy - 1, 1, 1); R(g, OL, hx - 5, hy, 1, 1); R(g, OL, hx - 3, hy, 1, 1); }
