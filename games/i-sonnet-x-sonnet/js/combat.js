@@ -117,6 +117,7 @@
   }
   function note(text) { S.note = { text: text, t: 0 }; }
   function pose(who, name, dur) { if (who.pose === 'dead') return; who.pose = name; who.until = S.clock + dur; who.t0 = S.clock; who.dur = dur; }
+  function pself() { return [PX + 38, FLOOR_Y - 66]; }                       // flotantes propios (bloqueo, curación...)
   function anchor(slot) { var a = ANCHOR[slot]; return [PX + a[0] + S.pp.dx, FLOOR_Y + a[1]]; }
 
   /* ---------- reglas ---------- */
@@ -213,9 +214,9 @@
   }
 
   /* ---------- efectos de carta (tabla de despacho) ---------- */
-  function hitEnemy(dmg, d) {
+  function hitEnemy(dmg, d, k) {
     var e = S.en, ab = Math.min(e.block, dmg), lost = dmg - ab;
-    var x = EX + rnd(-14, 14), y = FLOOR_Y - 34 + rnd(-10, 10);
+    var x = EX + (k % 3 - 1) * 14, y = FLOOR_Y - 34 - k * 7;
     e.block -= ab; e.hp = Math.max(0, e.hp - lost);
     later(d, function () {
       if (!alive()) return;
@@ -224,7 +225,7 @@
         fl(x, y, '-' + lost, lost >= 15 ? C.heatHi : C.ink, 2);
         burst(x, y, C.bloodHi, 5, 70);
         sfx(dmg >= 14 ? 'hitHeavy' : 'hit'); DD.fx.shake(Math.min(5, 1 + lost / 5), 0.14);
-        if (ab > 0) fl(x + 14, y + 12, 'bloq -' + ab, STATUS_COL.block, 1);
+        if (ab > 0) fl(x + 18, y + 10, 'bloq -' + ab, STATUS_COL.block, 1);
       } else {
         fl(x, y, dmg > 0 ? 'Bloqueado' : '0', STATUS_COL.block, 1);
         sfx('block');
@@ -235,27 +236,27 @@
   var FX = {
     dmg: function (f, c) {
       var n = f.n || 1, per = calc(f.v + c.st.dmg, S.pl.weak > 0, S.en.vuln > 0);
-      for (var i = 0; i < n; i++) hitEnemy(per, c.d + i * 0.09);
+      for (var i = 0; i < n; i++) hitEnemy(per, c.d + i * 0.09, i);
       c.d += n * 0.09; c.hits += n;
     },
     block: function (f, c) {
       var g = f.v + c.st.block;
       S.pl.block += g; S.pl.blockFlash = 1;
-      fl(PX, FLOOR_Y - 92, '+' + g + ' bloqueo', STATUS_COL.block, 1, c.d);
+      fl(pself()[0], pself()[1], '+' + g + ' bloqueo', STATUS_COL.block, 1, c.d);
       later(c.d, function () { sfx('block'); });
     },
     heal: function (f, c) {
       var got = DD.Run.heal(f.v);
-      fl(PX, FLOOR_Y - 92, '+' + got + ' PV', C.acid, 2, c.d);
+      fl(pself()[0], pself()[1], '+' + got + ' PV', C.acid, 2, c.d);
       later(c.d, function () { sfx('heal'); });
     },
     draw: function (f, c) {
       var got = drawCards(f.v);
-      fl(PX, FLOOR_Y - 92, got ? '+' + got + (got === 1 ? ' carta' : ' cartas') : 'Sin cartas', C.ether, 1, c.d);
+      fl(pself()[0], pself()[1], got ? '+' + got + (got === 1 ? ' carta' : ' cartas') : 'Sin cartas', C.ether, 1, c.d);
     },
     energy: function (f, c) {
       S.pl.energy += f.v; S.pl.energyFlash = 1;
-      fl(PX, FLOOR_Y - 92, '+' + f.v + ' energía', C.warn, 1, c.d);
+      fl(pself()[0], pself()[1], '+' + f.v + ' energía', C.warn, 1, c.d);
     },
     burn: function (f, c) {
       S.en.burn += f.v;
@@ -394,12 +395,12 @@
   }
 
   // Golpe del enemigo: el bloqueo se consume primero
-  function hitPlayer(dmg) {
+  function hitPlayer(dmg, k) {
     if (!alive()) return;
-    var p = S.pl, ab = Math.min(p.block, dmg), lost = dmg - ab, x = PX + rnd(-10, 10), y = FLOOR_Y - 50 + rnd(-10, 10);
+    var p = S.pl, ab = Math.min(p.block, dmg), lost = dmg - ab, x = PX + ((k || 0) % 3 - 1) * 14, y = FLOOR_Y - 50 - (k || 0) * 7;
     p.block -= ab;
     pose(S.pp, 'hurt', 0.25); S.pp.flash = 1;
-    if (ab > 0) fl(x + 16, y + 14, 'bloq -' + ab, STATUS_COL.block, 1);
+    if (ab > 0 && lost > 0) fl(x + 18, y + 10, 'bloq -' + ab, STATUS_COL.block, 1);
     if (lost > 0) {
       fl(x, y, '-' + lost, C.bloodHi, 2);
       burst(x, y, C.bloodHi, 6, 70);
@@ -416,7 +417,7 @@
   var MOVES = {
     attack: function (mv) {
       var n = mv.n || 1, per = enemyHit(mv.v);
-      for (var i = 0; i < n; i++) after(0.1 + i * 0.11, function () { hitPlayer(per); });
+      for (var i = 0; i < n; i++) after(0.1 + i * 0.11, hitPlayer.bind(null, per, i));
       return 0.1 + (n - 1) * 0.11 + 0.2;
     },
     block: function (mv) {
@@ -440,7 +441,7 @@
         fl(p[0], p[1], '-' + mv.v + ' integ.', C.copper, 2);
         burst(p[0], p[1], C.bone, 8, 70);
         sfx('hit', 0.6); DD.fx.shake(3, 0.15);
-        if (r.broke) breakLimb(slot, 'Te la arrancan.');
+        if (r.broke) breakLimb(slot, isFem(slot) ? 'Te la arrancan.' : 'Te lo arrancan.');
       });
       return 0.4;
     },
@@ -465,7 +466,7 @@
       var p = S.pl, key = mv.status;
       p[key] = (p[key] || 0) + mv.v;
       var label = { burn: 'Quemadura ', vuln: 'Vulnerable ', weak: 'Débil ' }[key] || '';
-      fl(PX, FLOOR_Y - 92, label + mv.v, STATUS_COL[key] || C.ink, 1);
+      fl(pself()[0], pself()[1], label + mv.v, STATUS_COL[key] || C.ink, 1);
       sfx(key === 'burn' ? 'burn' : 'debuff');
       return 0.35;
     },
@@ -581,7 +582,7 @@
       S.sel = In.pressed('left') ? (S.sel <= 0 ? n : S.sel - 1) : (S.sel < 0 || S.sel >= n ? 0 : S.sel + 1);
     }
     if (S.sel > n) S.sel = n;
-    if (S.armed !== null && (!S.hand[S.sel] || S.hand[S.sel].uid !== S.armed)) S.armed = null;
+    if (S.armed !== null && (In.pressed('back') || !S.hand[S.sel] || S.hand[S.sel].uid !== S.armed)) S.armed = null;
     if (In.pressed('endTurn')) req = { end: true };
     else if (num && num <= n) req = { uid: S.hand[num - 1].uid };
     else if (In.pressed('ok')) req = S.sel >= 0 && S.sel < n ? { uid: S.hand[S.sel].uid } : (S.sel === n ? { end: true } : null);
@@ -805,7 +806,7 @@
   function drawMsgs(ctx) {
     var y = 39;
     S.msgs.forEach(function (m) {
-      var a = Math.max(0, Math.min(1, m.t * 10, (m.life - m.t) * 2.5)), size = m.h.length * 12 <= 330 ? 2 : 1;
+      var a = Math.max(0, Math.min(1, m.t * 10, (m.life - m.t) * 2.5)), size = m.h.length * 12 <= 380 ? 2 : 1;
       var w = Math.max(DD.textWidth(m.h, size), DD.textWidth(m.s, 1)) + 14, h = (size === 2 ? 27 : 19);
       ctx.globalAlpha = a;
       veil(ctx, 204 - w / 2, y - 3, w, h, 0.62 * a);
@@ -1076,7 +1077,7 @@
     H.t += dt;
     if (H.mode === 'done') {
       H.done.t += dt;
-      if (H.done.t > 0.45) { H.mode = 'gone'; DD.Run.backToExplore(); }
+      if (H.done.t > 0.35) { H.mode = 'gone'; DD.Run.backToExplore(); }
     } else if (H.mode === 'slot' && H.t > 0.2) updateSlotMode();
     else if (H.mode === 'choose' && H.t > 0.2) updateChoose();         // un instante de gracia: evita toques sobrantes
   }
@@ -1167,7 +1168,7 @@
       txt(ctx, '←/→ o toca un hueco · Enter: injertar · Atrás: cancelar', 320, by + 36, C.dim, { align: 'center' });
     }
     if (H.done) {
-      ctx.globalAlpha = Math.max(0, Math.min(1, (0.45 - H.done.t) * 6));
+      ctx.globalAlpha = Math.max(0, Math.min(1, (0.35 - H.done.t) * 6));
       txt(ctx, H.done.text, 320, 120, H.done.col, { size: 3, align: 'center' });
       ctx.globalAlpha = 1;
     }

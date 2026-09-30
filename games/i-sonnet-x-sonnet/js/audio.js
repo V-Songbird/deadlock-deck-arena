@@ -593,15 +593,15 @@
     table: { key: 36, bpm: 46, bars: 8, tempo: 0, sc: SC.phr, fade: 0.8,      // do frigio, goteo
       prog: [[0, 'm'], [0, 'm'], [1, 'M'], [0, 'm'], [8, 'M'], [1, 'M'], [0, 'm'], [6, 'd']],
       layers: [
-        { v: 'drone', p: ONE, len: 32, pedal: 1, oct: -12, g: 0.35, cut: 150 },
-        { v: 'strings', p: BAR, len: 16, tones: [1, 2], oct: 24, g: 0.3, cut: 500 },
+        { v: 'drone', p: ONE, len: 32, pedal: 1, oct: 0, g: 0.4, cut: 200 },
+        { v: 'strings', p: BAR, len: 16, tones: [1, 2], oct: 24, g: 0.5, cut: 500 },
         { v: 'drip', p: sprinkle(128, { 5: '3', 14: '5', 22: '1', 35: '4', 41: '2', 58: '6', 63: '3', 77: '5', 84: '1', 97: '4', 103: '0', 118: '2' }),
-          m: 's', oct: 36, g: 0.8, echo: 1 },
-        { v: 'heart', p: sprinkle(32, { 0: 'X', 3: 'x' }), g: 0.6 },
-        { v: 'bell', p: sprinkle(128, { 20: 'x', 84: 'x' }), oct: 48, dec: 2.5, g: 0.22, echo: 1 },
-        { v: 'gear', p: sprinkle(128, { 38: 'x', 101: 'x' }), len: 6, g: 0.35 },
-        { v: 'glug', p: sprinkle(128, { 60: 'x', 92: 'x' }), f: 150, g: 0.4 },
-        { v: 'rise', p: sprinkle(128, { 112: 'x' }), len: 16, g: 0.3 }
+          m: 's', oct: 36, g: 1, echo: 1 },
+        { v: 'heart', p: sprinkle(32, { 0: 'X', 3: 'x' }), g: 0.85 },
+        { v: 'bell', p: sprinkle(128, { 20: 'x', 84: 'x' }), oct: 48, dec: 2.5, g: 0.3, echo: 1 },
+        { v: 'gear', p: sprinkle(128, { 38: 'x', 101: 'x' }), len: 6, g: 0.5 },
+        { v: 'glug', p: sprinkle(128, { 60: 'x', 92: 'x' }), f: 150, g: 0.8 },
+        { v: 'rise', p: sprinkle(128, { 112: 'x' }), len: 16, g: 0.45 }
       ] },
     explore: { key: 40, bpm: 76, bars: 8, tempo: 0.34, tense: 1, sc: SC.phr, fade: 0.5,   // mi frigio, pulso que crece
       prog: [[0, 'm'], [0, 'm'], [1, 'M'], [0, 'm'], [10, 'M'], [8, 'M'], [1, 'M'], [7, 'p']],
@@ -648,7 +648,11 @@
         { v: 'squelch', p: sprinkle(64, { 38: 'x' }), g: 0.5 },
         { v: 'tick', p: 'x...x...x...x...', g: 0.25, from: 0.3 },
         { v: 'timp', p: 'X' + dots(31), g: 0.8, from: 0.4 },
-        { v: 'metal', p: sprinkle(64, { 44: 'x' }), f: 380, g: 0.3, from: 0.6 }
+        { v: 'metal', p: sprinkle(64, { 44: 'x' }), f: 380, g: 0.3, from: 0.6 },
+        { v: 'heart', p: '........X..x....', g: 0.7, from: 0.5 },
+        { v: 'gear', p: sprinkle(128, { 70: 'x', 118: 'x' }), len: 6, g: 0.4, from: 0.5 },
+        { v: 'brass', p: 'X.......x.......', tones: [0, 2], oct: 12, len: 4, g: 0.5, from: 0.7 },
+        { v: 'rise', p: sprinkle(128, { 112: 'x' }), len: 16, g: 0.4, from: 0.6 }
       ] },
     death: { key: 38, bpm: 46, bars: 4, tempo: 0, sc: SC.phr, fade: 0.25,      // re, descendente
       prog: [[0, 'm'], [-2, 'M'], [-4, 'M'], [-5, 's']],

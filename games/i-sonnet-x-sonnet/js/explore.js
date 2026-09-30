@@ -49,9 +49,9 @@
 
   /* ---------- Textos flotantes y partículas ---------- */
   function say(str, x, y, color) {
-    var dy = 0;
-    floats.forEach(function (f) { if (f.t < 0.5 && Math.abs(f.x - x) < 40 && Math.abs(f.y - y) < 10) dy = Math.max(dy, 9); });
-    floats.push({ s: str, x: x, y: y - dy, t: 0, c: color || C.ink });
+    var n = 0;                                   // los avisos simultáneos se apilan en vez de pisarse
+    floats.forEach(function (f) { if (f.t < 0.6 && Math.abs(f.x - x) < 50 && Math.abs(f.y - y) < 40) n++; });
+    floats.push({ s: str, x: x, y: y - n * 9, t: 0, c: color || C.ink });
   }
   function sayAtPlayer(str, color) { say(str, W.p.x, W.p.y - 10, color); }
 
@@ -165,7 +165,7 @@
       W.fire[i] -= dt; W.fireAge[i] += dt;
       if (W.fire[i] <= 0) { W.fire[i] = 0; W.fireList.splice(k, 1); }
     }
-    W.fireAcc += (0.15 + 1.5 * Math.pow(fl, 1.3)) * dt;            // ignición por segundo: sube con el reloj
+    W.fireAcc += (0.15 + 1.2 * Math.pow(fl, 1.3)) * dt;            // ignición por segundo: sube con el reloj
     while (W.fireAcc >= 1) {
       W.fireAcc -= 1;
       if (W.fireList.length >= fireCap(W)) continue;
@@ -455,9 +455,9 @@
   function note(str, it, color) {                // aviso de "no hace falta", sin repetirse
     if (W.noteCd > 0) return;
     W.noteCd = 2;
-    say(str, it.x * TS + TS / 2, it.y * TS, color || C.dim);
+    say(str, it.x * TS + TS / 2, it.y * TS, color || C.bone);
   }
-  function collect(it, st) {                     // true si se recoge (el tarro cambia de escena)
+  function collect(it) {                     // true si se recoge (el tarro cambia de escena)
     var run = DD.run, body = run.body, x = it.x * TS + TS / 2, y = it.y * TS, n;
     if (it.kind === 'vial') {
       if (run.hp >= run.hpMax) { note('PV al máximo', it); return false; }
@@ -478,13 +478,13 @@
     it.taken = true;
     return true;
   }
-  function pickups(st) {
+  function pickups() {
     var p = W.p;
     for (var i = 0; i < W.items.length; i++) {
       var it = W.items[i];
       if (it.taken) continue;
       var dx = p.x - (it.x * TS + TS / 2), dy = p.y - (it.y * TS + TS / 2);
-      if (dx * dx + dy * dy < 9 * 9 && collect(it, st) && it.kind === 'jar') return true;
+      if (dx * dx + dy * dy < 9 * 9 && collect(it) && it.kind === 'jar') return true;
     }
     return false;
   }
@@ -513,13 +513,12 @@
     }
     if (W.warning && !W.beeped && W.shiftT <= SHIFT_WARN * 0.5) { W.beeped = true; sfx('gateWarn'); }
     if (W.shiftT > 0) return;
-    var res = DD.Tower.applyShift(W, pt, occupied());
+    DD.Tower.applyShift(W, pt, occupied());
     W.warning = false; W.shiftT = SHIFT_EVERY; W.ver++;
     sfx('gate');
     DD.fx.shake(2.5, 0.35);
     updateVision(true, st);
     W.field = null;
-    return res;
   }
 
   /* ---------- Salida ---------- */
@@ -548,15 +547,15 @@
     if (updateTraps(dt, st) || !alive()) return;
     updateFire(dt);
     if (updateBurning(dt, st) || !alive()) return;
-    if (pickups(st) || !alive()) return;
+    if (pickups() || !alive()) return;
     if (checkExit()) return;
     updateShift(dt, st);
     W.cool += CFG.COOL_SEC * dt;                 // enfriamiento fuera de combate (Body.coolAll redondea: se acumula aquí)
     if (W.cool >= 1) { var whole = Math.floor(W.cool); DD.Body.coolAll(DD.run.body, whole); W.cool -= whole; }
-    updateFx(dt, st);
+    updateFx(dt);
   }
 
-  function updateFx(dt, st) {
+  function updateFx(dt) {
     var i, k;
     for (k = floats.length - 1; k >= 0; k--) { floats[k].t += dt; if (floats[k].t > 1.2) floats.splice(k, 1); }
     for (k = parts.length - 1; k >= 0; k--) {
@@ -621,9 +620,10 @@
     W.gates.forEach(function (g) {
       if (!g.warn || !seen[idx(g.x, g.y)]) return;
       S.draw(ctx, 'gateWarn', g.x * TS, g.y * TS, { frame: ((t * 6) | 0) & 1 });
-      ctx.globalAlpha = 0.25 + 0.2 * Math.sin(t * 12);
-      ctx.fillStyle = g.open ? C.bloodHi : C.acid;      // rojo: va a cerrarse; verde: va a abrirse
-      ctx.fillRect(g.x * TS, g.y * TS, TS, TS);
+      ctx.globalAlpha = 0.55 + 0.45 * Math.sin(t * 12);
+      ctx.strokeStyle = g.open ? C.bloodHi : C.acid;      // marco rojo: va a cerrarse; verde: va a abrirse
+      ctx.lineWidth = 1;
+      ctx.strokeRect(g.x * TS + 0.5, g.y * TS + 0.5, TS - 1, TS - 1);
       ctx.globalAlpha = 1;
     });
     W.traps.forEach(function (tr) {
@@ -664,7 +664,7 @@
     ctx.globalAlpha = 1;
   }
 
-  function drawEnemy(ctx, S, e, t) {
+  function drawEnemy(ctx, S, e) {
     var x = Math.round(e.px) - 8, y = Math.round(e.py) - 10;
     if (e.state === 'chase') {                   // aura roja para que se distinga quien te persigue
       ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 0.45;
@@ -750,7 +750,7 @@
       DD.text(ctx, '¡LAS COMPUERTAS VAN A CAMBIAR!', 320, 25, { align: 'center', color: f ? C.warn : C.bloodHi, shadow: C.bg });
     }
     if (W.hint > 0) {
-      DD.text(ctx, 'Flechas o WASD para moverte · o mantén pulsado para ir hacia el puntero', 320, 310, { align: 'center', color: C.dim, alpha: Math.min(1, W.hint / 2) });
+      DD.text(ctx, 'Flechas o WASD para moverte · o mantén pulsado para ir hacia el puntero', 320, 311, { align: 'center', color: C.dim, alpha: Math.min(1, W.hint / 2) });
     }
     if (W.banner > 0) {
       var fl = DD.FLOORS && DD.FLOORS[W.floor], a = Math.min(1, W.banner / 0.8);
@@ -775,7 +775,7 @@
     drawFire(ctx, S, t);
     drawFog(ctx, st);
     drawLights(ctx, t);
-    W.enemies.forEach(function (e) { if (!e.dead && W.vis[idx(tileOf(e.px), tileOf(e.py))]) drawEnemy(ctx, S, e, t); });
+    W.enemies.forEach(function (e) { if (!e.dead && W.vis[idx(tileOf(e.px), tileOf(e.py))]) drawEnemy(ctx, S, e); });
     drawPlayer(ctx, S, t);
     W.enemies.forEach(function (e) {
       if (!e.dead && e.alert > 0 && W.vis[idx(tileOf(e.px), tileOf(e.py))]) DD.text(ctx, '!', Math.round(e.px), Math.round(e.py) - 20, { align: 'center', color: C.bloodHi, shadow: C.bg });

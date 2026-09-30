@@ -221,7 +221,8 @@ var START_TRIES = 6;                                   // esquinas candidatas pa
     }
     function put(list, ok, min) {                        // intenta con separación min y la relaja si no hay sitio
       var t = take(list, function (x, y, tt) { return far(x, y, min) && (!ok || ok(x, y, tt)); });
-      return t >= 0 ? t : take(list, ok);
+      if (t < 0) t = take(list, ok);
+      return t >= 0 ? t : take(list, null);
     }
 
     // Enemigos: lejos del inicio; a lo sumo un élite, y en el piso 2 siempre uno (si el pool lo trae)
