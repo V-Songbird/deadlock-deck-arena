@@ -718,7 +718,7 @@
   }
 
   function runSteps(E, inst, until) {                      // programa los pasos que caen antes de «until»
-    var D = inst.def, now = E.ctx.currentTime, srcs = inst.srcs, rng = E.rng, loop = D.bars * 16, i, k = 0, T;
+    var D = inst.def, now = E.ctx.currentTime, sr = E.ctx.sampleRate, srcs = inst.srcs, rng = E.rng, loop = D.bars * 16, i, k = 0, T;
     for (i = 0; i < srcs.length; i++) if (srcs[i].ddEnd > now) srcs[k++] = srcs[i];
     srcs.length = k;
     if (inst.next < now - 0.1) inst.next = now + 0.03;     // tras un atasco no se recuperan notas pasadas
@@ -727,7 +727,7 @@
       while (inst.next < until) {
         T = D.tense ? clamp(E.tensionFn ? E.tensionFn(inst.next) : E.tension, 0, 1) : 0;
         E.rng = lcg(hash(inst.step % loop) * 4294967296);   // azar por paso: el bucle se repite idéntico
-        playStep(E, inst, inst.step % loop, inst.next, T);
+        playStep(E, inst, inst.step % loop, (Math.round(inst.next * sr) + 0.25) / sr, T);   // al fotograma de audio: sin fluctuaciones entre vueltas
         inst.next += 15 / (D.bpm * (1 + D.tempo * T));
         inst.step++;
       }
@@ -758,29 +758,34 @@
       var now, i;
       if (!ready()) return;
       syncMute();
-      if (isMuted() || ctx.state !== 'running') return;
       now = ctx.currentTime;
       for (i = old.length - 1; i >= 0; i--) if (old[i].dead <= now) { release(old[i], now); old.splice(i, 1); }
-      if (cur) runSteps(E, cur, now + LOOK);
       for (i = live.length - 1; i >= 0; i--) if (live[i].end < now) live.splice(i, 1);
+      if (cur && !isMuted() && ctx.state === 'running') runSteps(E, cur, now + LOOK);
       if (!cur && !old.length) { clearInterval(timer); timer = null; }
     } catch (e) { /* el audio nunca debe romper el juego */ }
   }
 
-  function switchTrack(name) {
-    var now = ctx.currentTime;
-    if (cur) { fadeOut(cur, now, FADE_TC); cur.dead = now + FADE_END; old.push(cur); cur = null; }
-    while (old.length > MAX_TRACKS - 1) { fadeOut(old[0], now, 0.01); release(old[0], now + 0.05); old.shift(); }
+  function retire(inst, now, tc, life) {                   // la pista se desvanece y se libera pasado «life»
+    if (inst.step === 0) { release(inst, now); return; }   // nunca sonó: se descarta sin más
+    fadeOut(inst, now, tc); inst.dead = now + life; old.push(inst);
+  }
+
+  function switchTrack(name) {                             // fundido cruzado; pistas simultáneas acotadas
+    var now = ctx.currentTime, i;
+    if (cur) { retire(cur, now, FADE_TC, FADE_END); cur = null; }
+    for (i = 0; i < old.length - (MAX_TRACKS - 1); i++) { fadeOut(old[i], now, 0.01); old[i].dead = Math.min(old[i].dead, now + 0.12); }
     if (name) cur = newInst(E, name, now + 0.06, false);
     ensureTimer();
   }
 
   function killAll() {                                     // silencio inmediato (mute)
     var now = ctx.currentTime, i;
-    old.concat(cur ? [cur] : []).forEach(function (p) { fadeOut(p, now, 0.01); release(p, now + 0.05); });
-    cur = null; old = [];
+    if (cur) { retire(cur, now, 0.01, 0.12); cur = null; }
+    for (i = 0; i < old.length; i++) { fadeOut(old[i], now, 0.01); old[i].dead = Math.min(old[i].dead, now + 0.12); }
     for (i = 0; i < live.length; i++) live[i].g.gain.setTargetAtTime(0, now, 0.01);
     live = [];
+    ensureTimer();
   }
 
   function syncMute() {                                    // aplica el estado de mute (también si lo cambia el guardado)
