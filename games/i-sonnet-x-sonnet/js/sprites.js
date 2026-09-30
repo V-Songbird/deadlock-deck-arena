@@ -85,7 +85,7 @@
       acc: C.acid, moss: '#2f5a26'
     },
     { // 2 observatorio de latón con luz roja
-      fl: '#2a2530', fl2: '#3d3643', fl3: '#15111a', wl: '#6e5830', wl2: '#b39554', wl3: '#3a2c14', wlm: '#1a1208',
+      fl: '#2a2530', fl2: '#3d3643', fl3: '#15111a', wl: '#5f4b27', wl2: '#9f8447', wl3: '#33260f', wlm: '#1a1208',
       acc: '#e0502a', moss: '#6a2117'
     }
   ];
@@ -196,14 +196,12 @@
     for (x = 2; x < 15; x += 2) R(g, k, x, 1, 1, 14);                       // cepillado vertical
     R(g, p.wl2, 0, 0, 16, 1); R(g, p.wl2, 0, 0, 1, 16);                     // bisel de luz
     R(g, p.wl3, 0, 15, 16, 1); R(g, p.wl3, 15, 0, 1, 16);
-    R(g, dk(p.wl, 0.3), 2, 2, 12, 1); R(g, dk(p.wl, 0.3), 2, 2, 1, 12);     // placa hundida
-    R(g, lit(p.wl, 0.2), 2, 13, 12, 1); R(g, lit(p.wl, 0.2), 13, 2, 1, 12);
     [[3, 3], [11, 3], [3, 11], [11, 11]].forEach(function (q) {              // remaches
       R(g, p.wl3, q[0], q[1] + 1, 2, 1); R(g, p.wl2, q[0], q[1], 2, 1); P(g, '#fff0c0', q[0], q[1]);
     });
-    disc(g, 8, 8, 3, 3, function (nx, ny, d) {                               // relieve de engranaje
-      if (d < 0.12) return p.wl3;
-      if (d > 0.6) return nx + ny < 0 ? p.wl2 : p.wl3;
+    disc(g, 8, 8, 4.5, 4.5, function (nx, ny, d) {                             // relieve de engranaje
+      if (d < 0.1) return p.wl3;
+      if (d > 0.62) return nx + ny < 0 ? p.wl2 : p.wl3;
       return null;
     });
   }
@@ -757,6 +755,12 @@
     if (alpha != null && alpha !== 1) g.restore();
   }
 
+  // Ángulo de un engranaje de n2 dientes que encaja con otro de n1 (en rot 0) cuyo centro queda en (dx, dy)
+  function meshRot(n1, n2, dx, dy) {
+    var th = Math.atan2(dy, dx), p1 = th / (2 * Math.PI / n1);
+    p1 -= Math.floor(p1);
+    return th + Math.PI - (2 * Math.PI / n2) * (0.22 - p1);
+  }
   // Columnas de llamas (live): 4 capas anidadas, altura por ruido senoidal
   function flameRow(g, x0, x1, base, hmax, t, seed) {
     var x, u, env, n, h, L, hh;
@@ -959,10 +963,11 @@
     g.restore();
     vignette(g, 0.85);
     veil(g, 300, 215, 190, 130, '#06040a', 0.42);
-    var set1 = gearSet(30, 16, 6, 12, { base: '#6a5228', hi: '#a98a44', lo: '#3a2c14', edge: '#1a1208' });
-    var set2 = gearSet(20, 11, 5, 12, { base: '#6a5228', hi: '#a98a44', lo: '#3a2c14', edge: '#1a1208' });
-    var set3 = gearSet(26, 14, 6, 12, { base: '#56606c', hi: '#8797a8', lo: '#2c333c', edge: '#14181e' });
-    var setBg = gearSet(70, 20, 6, 10, { base: '#1c1626', hi: '#2c2238', lo: '#100c18', edge: '#08060c' });
+    var set1 = gearSet(30, 16, 4, 12, { base: '#6a5228', hi: '#a98a44', lo: '#3a2c14', edge: '#1a1208' });
+    var set2 = gearSet(20, 12, 4, 12, { base: '#6a5228', hi: '#a98a44', lo: '#3a2c14', edge: '#1a1208' });
+    var set3 = gearSet(26, 12, 6, 12, { base: '#56606c', hi: '#8797a8', lo: '#2c333c', edge: '#14181e' });
+    var setBg = gearSet(70, 20, 5, 12, { base: '#1c1626', hi: '#2c2238', lo: '#100c18', edge: '#08060c' });
+    var mesh12 = meshRot(16, 12, 455 - 418, 254 - 226);
     var glowTop = glowCv(150, 110, '#ff6a20', 0.6, 1.3), glowWin = glowCv(16, 22, '#ffaa40', 0.8, 0.9);
     var puffs = [glowCv(14, 10, '#0c0812', 0.55, 0.5), glowCv(20, 14, '#0c0812', 0.5, 0.5), glowCv(28, 18, '#0c0812', 0.45, 0.5)];
     BD.title = {
@@ -971,7 +976,7 @@
         var fl = 0.75 + 0.25 * Math.sin(t * 9) * Math.sin(t * 5.3 + 1) + 0.1 * Math.sin(t * 23);
         // engranajes gigantes de fondo (abajo a la izquierda)
         drawGear(g2, setBg, 40, 356, t * 0.12, 0.9); drawGear(g2, setBg, 560, 360, -t * 0.1, 0.9);
-        drawGear(g2, set1, 418, 226, t * 0.3); drawGear(g2, set2, 457, 256, -t * 0.3 * 16 / 11 * 0.69 - 0.12);
+        drawGear(g2, set1, 418, 226, t * 0.3); drawGear(g2, set2, 455, 254, mesh12 - t * 0.3 * 16 / 12);
         drawGear(g2, set3, 524, 244, -t * 0.22);
         // ventanas
         var wi = [[452, 212], [472, 212], [492, 212], [452, 250], [492, 250]];
@@ -1352,14 +1357,14 @@
     g.restore();
     vignette(g, 0.9);
     veil(g, 320, 175, 190, 100, '#070406', 0.4);
-    var setA = gearSet(54, 18, 6, 10, { base: '#4a3a1c', hi: '#8a6a30', lo: '#231a0c', edge: '#0f0a04' });
-    var setB = gearSet(30, 11, 5, 10, { base: '#4a3a1c', hi: '#8a6a30', lo: '#231a0c', edge: '#0f0a04' });
-    var setC = gearSet(40, 14, 6, 10, { base: '#3c4654', hi: '#6a7888', lo: '#1c222a', edge: '#0c0f12' });
-    var red = glowCv(200, 50, '#ff4a1a', 0.45, 1.0);
+    var setA = gearSet(54, 18, 6, 12, { base: '#4a3a1c', hi: '#8a6a30', lo: '#231a0c', edge: '#0f0a04' });
+    var setB = gearSet(30, 12, 4, 12, { base: '#4a3a1c', hi: '#8a6a30', lo: '#231a0c', edge: '#0f0a04' });
+    var setC = gearSet(40, 12, 6, 12, { base: '#3c4654', hi: '#6a7888', lo: '#1c222a', edge: '#0c0f12' });
+    var red = glowCv(200, 50, '#ff4a1a', 0.45, 1.0), meshB = meshRot(18, 12, 124 - 70, 176 - 118);
     BDC[2] = {
       img: c,
       live: function (g2, t) {
-        drawGear(g2, setA, 70, 118, t * 0.22); drawGear(g2, setB, 124, 176, -t * 0.22 * 18 / 11, 1);
+        drawGear(g2, setA, 70, 118, t * 0.22); drawGear(g2, setB, 124, 176, meshB - t * 0.22 * 18 / 12, 1);
         drawGear(g2, setC, 590, 66, -t * 0.18);
         var fl = 0.7 + 0.3 * Math.sin(t * 2.4) * Math.sin(t * 7.1 + 1);
         blit(g2, red, 320, 300, 'lighter', 0.6 * fl);
@@ -1479,7 +1484,7 @@
     g.restore();
     vignette(g, 0.8);
     veil(g, 320, 182, 180, 120, '#060a14', 0.28);
-    var setG = gearSet(40, 12, 6, 10, { base: '#26345a', hi: '#3c4e80', lo: '#182040', edge: '#0c1226' });
+    var setG = gearSet(40, 12, 6, 12, { base: '#26345a', hi: '#3c4e80', lo: '#182040', edge: '#0c1226' });
     var dust = glowCv(26, 26, '#ffb860', 0.55, 1.1);
     BD.codex = {
       img: c,
@@ -1587,7 +1592,7 @@
     g.drawImage(glowCv(260, 70, '#3a0c0c', 0.85, 1.0), 320 - 260, 330 - 70);
     g.restore();
     vignette(g, 1);
-    var setD = gearSet(64, 18, 6, 10, { base: '#140e14', hi: '#1f1520', lo: '#0a060a', edge: '#050306' });
+    var setD = gearSet(64, 18, 6, 12, { base: '#140e14', hi: '#1f1520', lo: '#0a060a', edge: '#050306' });
     var red = glowCv(230, 60, '#8a1a10', 0.6, 1.0);
     BD.death = {
       img: c,
@@ -1610,7 +1615,7 @@
   }
   function buildWin() {
     var c = cv(640, 360), g = gx(c), rnd = DD.mulberry32(111), i, x, y;
-    vgrad(g, 0, 0, 640, 300, [[0, '#14143c'], [0.3, '#3c2a6a'], [0.55, '#9a4a7a'], [0.75, '#e8805a'], [0.92, '#ffc878'], [1, '#ffe6a0']], 36);
+    vgrad(g, 0, 0, 640, 340, [[0, '#14143c'], [0.26, '#3c2a6a'], [0.48, '#9a4a7a'], [0.66, '#e8805a'], [0.81, '#ffc878'], [0.88, '#ffe6a0'], [1, '#ffe6a0']], 36);
     stars(g, rnd, 50, 0, 90, ['#b9b0d8', '#8a80b0', '#e8dcc0']);
     g.drawImage(glowCv(220, 160, '#ffb860', 0.7, 1.3), 190 - 220, 290 - 160);
     disc(g, 190, 292, 38, 38, function (nx, ny, d) { return d > 0.82 ? '#ffd98a' : (d > 0.4 ? '#fff0b8' : '#fffbe6'); });

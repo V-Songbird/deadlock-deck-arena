@@ -1337,5 +1337,118 @@
     ctx.restore();
   };
 
+
+  /* ====================================================================== */
+  /*  SPRITES PEQUEÑOS 16×16 (exploración): 4 fotogramas de caminar           */
+  /* ====================================================================== */
+  function hline(g, col, x0, y0, x1, y1) {       // línea de 1 px
+    var c = lineCells(x0, y0, x1, y1);
+    g.fillStyle = col;
+    for (var i = 0; i < c.length; i++) g.fillRect(c[i][0], c[i][1], 1, 1);
+  }
+  // --- abominación pequeña: se compone con lo que lleva el cuerpo (cabeza, torso, brazos, piernas) ---
+  function smHead(g, id, k, b) {
+    var y = 1 + b, sm = k.sm, e = k.ey[0], F = MAT.fur, hair = '#2a2230', Fz = MAT.scale;
+    if (id === 'cab_sabueso') {
+      R(g, F[0], 4, y + 1, 8, 5); R(g, F[2], 4, y, 2, 2); R(g, F[2], 10, y, 2, 2); R(g, MAT.furLt[0], 6, y + 3, 4, 3);
+      R(g, e, 5, y + 2, 2, 1); R(g, e, 9, y + 2, 2, 1); R(g, '#0f0b10', 7, y + 3, 2, 1); P(g, MAT.bone[1], 6, y + 5); P(g, MAT.bone[1], 9, y + 5);
+    } else if (id === 'cab_relojero') {
+      R(g, sm[0], 4, y + 1, 8, 5); R(g, MAT.brass[0], 4, y, 8, 2); R(g, MAT.brass[2], 4, y + 1, 8, 1); cog(g, { fr: 0 }, 8, y - 1);
+      R(g, e, 5, y + 2, 2, 1); R(g, MAT.brass[0], 8, y + 2, 3, 3); R(g, '#9fe6f2', 9, y + 3, 1, 1); P(g, k.ey[1], 9, y + 3); R(g, sm[1], 5, y + 5, 6, 1);
+    } else if (id === 'cab_quimera') {
+      R(g, Fz[0], 4, y + 1, 8, 5); R(g, C.fire2, 3, y, 10, 1); R(g, C.fire1, 4, y - 1, 2, 1); R(g, C.fire3, 7, y - 1, 2, 1); R(g, C.fire1, 10, y - 1, 2, 1);
+      R(g, MAT.bone[0], 3, y + 1, 1, 2); R(g, MAT.bone[0], 12, y + 1, 1, 2); R(g, '#e8a060', 6, y + 3, 4, 3);
+      R(g, e, 5, y + 2, 2, 1); R(g, e, 9, y + 2, 2, 1); P(g, '#3a1410', 7, y + 3); P(g, MAT.bone[1], 6, y + 5); P(g, MAT.bone[1], 9, y + 5);
+    } else if (id === 'cab_plaga') {
+      R(g, '#2e2630', 4, y + 1, 8, 2); R(g, '#2e2630', 5, y, 6, 1); R(g, '#2e2630', 3, y + 2, 10, 1); R(g, MAT.leather[0], 4, y + 3, 8, 3);
+      R(g, e, 5, y + 3, 2, 1); R(g, e, 9, y + 3, 2, 1); R(g, MAT.bone[0], 7, y + 4, 2, 2); P(g, MAT.bone[2], 8, y + 5);
+    } else {       // cab_cosido y desconocidas
+      R(g, sm[0], 4, y + 1, 8, 5); R(g, sm[2], 4, y + 1, 1, 4); R(g, hair, 4, y, 8, 2); R(g, MAT.steel[0], 3, y + 4, 1, 2); R(g, MAT.steel[0], 12, y + 4, 1, 2);
+      for (var i = 4; i < 12; i += 2) P(g, k.st, i, y + 1);
+      R(g, e, 5, y + 3, 2, 1); R(g, e, 9, y + 3, 2, 1); R(g, sm[1], 5, y + 2, 6, 1); R(g, k.st, 6, y + 5, 4, 1);
+    }
+  }
+  function smTorso(g, id, k, b) {
+    var y = 7 + b, sm = k.sm;
+    if (id === 'tor_caldera') {
+      R(g, MAT.copper[0], 4, y, 8, 5); R(g, MAT.brass[0], 4, y + 1, 8, 1); R(g, MAT.brass[0], 4, y + 4, 8, 1); R(g, '#1a0f0a', 6, y + 2, 4, 2); R(g, C.fire2, 7, y + 2, 2, 2); P(g, C.fire3, 7, y + 3);
+      R(g, MAT.iron[0], 4, y - 1, 1, 2); R(g, MAT.iron[0], 11, y - 1, 1, 2);
+    } else if (id === 'tor_costillar') {
+      R(g, '#1b1420', 4, y, 8, 5); R(g, MAT.steel[0], 4, y, 8, 1); for (var i = 1; i < 4; i++) R(g, i & 1 ? MAT.steel[1] : MAT.steel[0], 5, y + i, 6, 1);
+      R(g, MAT.steel[2], 7, y + 1, 2, 3); P(g, C.blood, 9, y + 2); R(g, MAT.steel[0], 4, y + 4, 8, 1);
+    } else if (id === 'tor_alambique') {
+      R(g, sm[1], 4, y, 8, 5); R(g, MAT.brass[0], 4, y, 8, 1); R(g, '#16302c', 5, y + 1, 6, 4); R(g, '#5fbf3a', 5, y + 2, 6, 3); R(g, '#b6ef7a', 5, y + 2, 6, 1);
+      P(g, '#ffffff', 6, y + 1); R(g, MAT.brass[0], 7, y - 1, 2, 1); R(g, MAT.leather[0], 4, y + 4, 8, 1);
+    } else {       // tor_remendado
+      R(g, sm[0], 4, y, 8, 5); R(g, sm[2], 4, y, 1, 4); R(g, sm[1], 11, y, 1, 4);
+      R(g, MAT.leather[0], 8, y + 1, 3, 3); R(g, MAT.cloth[0], 5, y + 2, 2, 2); P(g, k.st, 7, y + 1); P(g, k.st, 7, y + 2); P(g, k.st, 7, y + 3);
+      R(g, MAT.leather[1], 4, y + 4, 8, 1); P(g, MAT.brass[0], 8, y + 4);
+    }
+  }
+  function smArm(g, id, k, b, side, swing) {      // side: 0 izquierdo (x 1..3), 1 derecho (x 12..14)
+    var x = side ? 12 : 1, y = 7 + b + swing, sm = k.sm, o = side ? 1 : 0;
+    function X(dx, w) { return side ? 15 - dx - w : dx; }       // espeja posiciones relativas al borde izquierdo de la caja 1..3
+    if (id === 'bra_sierra') {
+      R(g, sm[0], x + 1 - o, y, 2, 2); R(g, MAT.brass[0], x + 1 - o, y + 2, 2, 2); R(g, MAT.steel[1], x + 1 - o, y + 4, 2, 4); P(g, MAT.steel[0], x + (side ? 3 : 0), y + 5); P(g, MAT.steel[0], x + (side ? 3 : 0), y + 7);
+    } else if (id === 'bra_golem') {
+      R(g, MAT.stone[0], x + 1 - o, y, 2, 3); R(g, MAT.stone[0], x, y + 3, 3, 4); R(g, MAT.stone[2], x + (side ? 0 : 2), y + 3, 1, 4); R(g, MAT.iron[0], x, y + 3, 3, 1);
+    } else if (id === 'bra_tijera') {
+      R(g, sm[0], x + 1 - o, y, 2, 2); R(g, MAT.steel[0], x + 1 - o, y + 2, 2, 2); R(g, MAT.steel[1], x + (side ? 1 : 0), y + 4, 1, 4); R(g, MAT.steel[1], x + (side ? 3 : 2), y + 4, 1, 4 - 1);
+    } else if (id === 'bra_piston') {
+      R(g, sm[0], x + 1 - o, y, 2, 1); R(g, MAT.brass[0], x + 1 - o, y + 1, 2, 4); P(g, MAT.brass[2], x + 1 - o, y + 3); R(g, MAT.steel[0], x + 1 + (side ? 0 : 0), y + 5, 1, 2); R(g, MAT.steel[1], x, y + 7, 3, 1);
+    } else if (id === 'bra_tentaculo') {
+      R(g, MAT.plum[0], x + 1 - o, y, 2, 4); R(g, MAT.plum[0], x + (side ? 0 : 2) , y + 3, 1, 3); R(g, MAT.plum[0], x + 1 , y + 6, 2, 1); P(g, '#f0c8e0', x + 1 - o, y + 2); P(g, '#7fe04a', x + (side ? 3 : 0), y + 7);
+    } else {       // bra_muerto
+      R(g, sm[0], x + 1 - o, y, 2, 5); R(g, sm[0], x + (side ? 0 : 1) - 0, y + 5, 2, 2); P(g, sm[1], x + 1 - o, y + 2); P(g, k.st, x + 1 - o, y + 2); P(g, k.st, x + 2 - o, y + 2);
+    }
+  }
+  function smLeg(g, id, k, x, up) {       // x = columna izquierda de la pierna (2 px), up = 1 si está levantada un píxel
+    var sm = k.sm, top = 12, bot = 15 - up;
+    if (id === 'pie_sabueso') {
+      R(g, MAT.fur[0], x, top, 2, bot - top); R(g, MAT.furLt[0], x - 1, bot, 3, 1); P(g, MAT.bone[1], x - 1, bot);
+    } else if (id === 'pie_resorte') {
+      for (var y = top; y < bot - 1; y++) R(g, (y & 1) ? MAT.steel[1] : MAT.steel[2], x, y, 2, 1);
+      R(g, MAT.brass[0], x - 1, bot - 1, 4, 1); R(g, MAT.rubber[0], x - 1, bot, 4, 1);
+    } else if (id === 'pie_arana') {
+      hline(g, MAT.steel[0], x, top, x - 1, top + 1); hline(g, MAT.steel[0], x - 1, top + 1, x, bot); P(g, MAT.brass[0], x - 1, top + 1);
+    } else if (id === 'pie_pesada') {
+      R(g, MAT.iron[0], x, top, 2, bot - top - 1); R(g, MAT.iron[1], x, top, 1, bot - top - 1); R(g, MAT.iron[0], x - 1, bot - 2, 4, 2); R(g, MAT.brass[0], x - 1, bot - 2, 4, 1); R(g, MAT.rubber[0], x - 1, bot, 4, 1);
+    } else {       // pie_muerta
+      R(g, sm[0], x, top, 2, bot - top); R(g, sm[1], x + 1, top, 1, bot - top); R(g, sm[0], x - 1, bot, 3, 1); P(g, k.st, x, top + 1);
+    }
+  }
+  var SP_STEP = [[1, 0], [0, 0], [0, 1], [0, 0]];       // pierna izquierda/derecha levantada por fotograma
+  function paintSmallPlayer(g, ids, k, fr) {
+    var b = (fr & 1) ? 0 : 1, sp = SP_STEP[fr], sw = [1, 0, -1, 0][fr];
+    smLeg(g, ids.legL, k, 5, sp[0]); smLeg(g, ids.legR, k, 9, sp[1]);
+    smTorso(g, ids.torso, k, b);
+    smArm(g, ids.armL, k, b, 0, sw); smArm(g, ids.armR, k, b, 1, -sw);
+    smHead(g, ids.head, k, b);
+  }
+  var smallCache = {};
+  function smallSprite(key, fn) {
+    var o = smallCache[key];
+    if (!o) { o = mk(16, 16); fn(o.g); outline(o, OL); smallCache[key] = o; }
+    return o;
+  }
+  var SF = mk(16, 16);
+  function blit16(ctx, src, x, y, flip, flash, alpha) {
+    ctx.save();
+    if (alpha != null) ctx.globalAlpha *= alpha;
+    x = Math.round(x); y = Math.round(y);
+    if (flash > 0) { SF.g.clearRect(0, 0, 16, 16); SF.g.drawImage(src, 0, 0); tint(SF.g, 16, 16, flash); src = SF.c; }
+    if (flip) { ctx.translate(x + 16, y); ctx.scale(-1, 1); ctx.drawImage(src, 0, 0); } else ctx.drawImage(src, x, y);
+    ctx.restore();
+  }
+  S.drawPlayer = function (ctx, body, x, y, opt) {
+    opt = opt || {};
+    var cos = cosmetics(opt.equip), fr = (opt.frame | 0) & 3, ids = {}, key = 'P', i;
+    for (i = 0; i < DD.SLOTS.length; i++) { ids[DD.SLOTS[i]] = artOf(body, DD.SLOTS[i]); key += '|' + ids[DD.SLOTS[i]]; }
+    var o = smallSprite(key + '|' + fr + '|' + cos.key, function (g) {
+      paintSmallPlayer(g, ids, { sk: cos.sk, sm: cos.sm, st: cos.st, ey: cos.ey }, fr);
+    });
+    blit16(ctx, o.c, x, y, opt.dir === -1, opt.flash, opt.alpha);
+  };
+
   //@@END
 })();

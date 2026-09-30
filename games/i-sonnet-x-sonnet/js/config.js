@@ -33,8 +33,8 @@
     HEAT_HOT: 70,           // desde aquí la extremidad se muestra "caliente" (aviso)
     OVERHEAT_RESET: 55,     // calor al que vuelve tras sobrecalentar
     OVERHEAT_DMG: 12,       // integridad que pierde la extremidad al sobrecalentar
-    COOL_TURN: 12,          // calor que pierde cada extremidad al acabar tu turno (+ pasiva cool)
-    COOL_SEC: 3,            // calor por segundo que se disipa fuera de combate
+    COOL_TURN: 8,           // calor que pierde cada extremidad al acabar tu turno (+ pasiva cool)
+    COOL_SEC: 1.5,          // calor por segundo que se disipa fuera de combate (lento: el calor se arrastra entre combates)
     GRAFT_FRAC: 0.75,       // integridad (fracción del máximo) de una extremidad recién injertada
     TABLE_GRAFTS: 3,        // injertos de plano permitidos en la mesa de disección
     DEVOUR_HEAL: 12,        // PV al devorar una extremidad
