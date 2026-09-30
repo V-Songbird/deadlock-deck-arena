@@ -1,6 +1,6 @@
 # Deadlock Deck Arena
 
-Nine playable browser games built from one identical prompt by nine different AI
+Ten playable browser games built from one identical prompt by ten different AI
 orchestrator/worker pairings, with a hub that launches any of them or runs several side by side
 in the same window.
 
@@ -11,7 +11,7 @@ your card deck is your body, limbs overheat and break, and you have six real min
 burning tower. Nobody intervened while the agents built it. What each pairing handed back is in
 this repository, unedited apart from the language layer described below.
 
-## The nine builds
+## The ten builds
 
 | | Orchestrator | Worker | Files | Lines | Rendering |
 |---|---|---|---|---|---|
@@ -24,9 +24,10 @@ this repository, unedited apart from the language layer described below.
 | **G** | Fable 5.1 | Opus 5 | 13 | 4 466 | one 480×270 canvas |
 | **H** | Opus 5.5 | Sonnet 5.5 | 15 | 7 415 | one 640×360 canvas |
 | **I** | Sonnet 5.5 | Sonnet 5.5 | 18 | 10 098 | one 640×360 canvas |
+| **J** | Sonnet 5.5 | Opus 5.5 | 16 | 6 285 | one 384×216 canvas |
 
 Line counts cover the JS, CSS and HTML files in each folder, measured on 16 September 2026
-(builds H and I on 30 September). They describe size, not quality.
+(builds H to J on 30 September). They describe size, not quality.
 
 ## Play
 
@@ -35,7 +36,7 @@ press **Compare**. The URL carries the whole state, so `play.html?g=b,d` is a sh
 that exact pairing.
 
 The hub and builds A to G run in Spanish and English. The switch is in the top bar, and each of
-those games carries its own ES/EN control. Builds H and I have no language layer yet and play in
+those games carries its own ES/EN control. Builds H to J have no language layer yet and play in
 Spanish whatever the switch says. `?lang=en` works on any page, and the hub passes your choice
 into the game it launches.
 
@@ -51,25 +52,27 @@ call at runtime.
 
 ## How the experiment was run
 
-All nine runs had the same conditions:
+All ten runs had the same conditions:
 
 - **The same prompt**, word for word. It is reproduced in full on the hub, in the original
   Spanish, and in [docs/experiment.md](docs/experiment.md).
 - **Maximum reasoning effort** on every orchestrator: `xhigh`, or DeepSeek-V4.1-Flash's own ceiling.
-  The orchestrator effort of builds H and I was not recorded.
+  The orchestrator effort of builds H to J was not recorded, and build J asked its workers for
+  `medium` effort.
 - **No owner in the loop.** Each orchestrator planned the work, dispatched its workers and
   integrated the result on its own.
 - **No dependencies allowed.** Every build came out as plain HTML, CSS and JavaScript.
 
 Only the orchestrator and worker models changed between runs. Builds F and G share an
 orchestrator and differ only in the worker. Builds H and I share a worker and differ only in the
-orchestrator. Those are the two cleanest pairs to compare side by side.
+orchestrator. Builds I and J share an orchestrator and differ only in the worker, though J's
+workers ran at a lower effort. H and J swap the same two models between the roles.
 
 ## What this does not show
 
 One run per pairing is an anecdote, not a benchmark. The differences you can see — build size,
 architecture, how far each one got with the six-minute loop — come from a single sample each, with
-no repeats and no controlled scoring. Read it as nine concrete artefacts to compare by hand, not
+no repeats and no controlled scoring. Read it as ten concrete artefacts to compare by hand, not
 as a ranking.
 
 ## Repository layout
@@ -87,6 +90,7 @@ games/f-fable-x-fable/          build F
 games/g-fable-x-opus/           build G
 games/h-opus-x-sonnet/          build H
 games/i-sonnet-x-sonnet/        build I
+games/j-sonnet-x-opus/          build J
 docs/experiment.md      method, measurements and the full prompt
 docs/provenance/        build history recovered from build B's own git repository
 ```
@@ -98,9 +102,10 @@ with each other in places; that is part of the record.
 
 Tag [`as-built-2026-09`](https://github.com/V-Songbird/deadlock-deck-arena/releases/tag/as-built-2026-09)
 points at the first commit, which holds the first five games exactly as the agents delivered them.
-Builds F and G arrived later and are tagged separately. Builds H and I have no tag yet; their raw
-output ends at commits [`278f0a5`](https://github.com/V-Songbird/deadlock-deck-arena/commit/278f0a5)
-and [`14bdc54`](https://github.com/V-Songbird/deadlock-deck-arena/commit/14bdc54). Every
+Builds F and G arrived later and are tagged separately. Builds H to J have no tag yet; their raw
+output ends at commits [`278f0a5`](https://github.com/V-Songbird/deadlock-deck-arena/commit/278f0a5),
+[`14bdc54`](https://github.com/V-Songbird/deadlock-deck-arena/commit/14bdc54) and
+[`b1d3b16`](https://github.com/V-Songbird/deadlock-deck-arena/commit/b1d3b16). Every
 later change to a game — currently only the Spanish/English layer — sits in commits after it, so
 the raw output stays recoverable.
 

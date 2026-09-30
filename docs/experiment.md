@@ -1,15 +1,15 @@
 # Deadlock Deck Arena — method, measurements and hub design
 
-What was investigated: how nine orchestrator/worker agent pairings differ when they are given one
-identical game brief, and how to present the nine results so a visitor can compare them.
+What was investigated: how ten orchestrator/worker agent pairings differ when they are given one
+identical game brief, and how to present the ten results so a visitor can compare them.
 
 Everything below is recorded from the repository itself. Commands are reproducible from the
 repository root.
 
 ## 1. The experiment
 
-Nine runs of the same prompt, each producing a complete browser game. The only variable was the
-model pairing. Builds A to E were run first; F and G were added afterwards, then H and I.
+Ten runs of the same prompt, each producing a complete browser game. The only variable was the
+model pairing. Builds A to E were run first; F and G were added afterwards, then H, I and J.
 
 | Build | Orchestrator | Worker | Folder |
 |---|---|---|---|
@@ -22,23 +22,28 @@ model pairing. Builds A to E were run first; F and G were added afterwards, then
 | G | Fable 5.1 | Opus 5 | `games/g-fable-x-opus/` |
 | H | Opus 5.5 | Sonnet 5.5 | `games/h-opus-x-sonnet/` |
 | I | Sonnet 5.5 | Sonnet 5.5 | `games/i-sonnet-x-sonnet/` |
+| J | Sonnet 5.5 | Opus 5.5 | `games/j-sonnet-x-opus/` |
 
-Constant across all nine runs:
+Constant across all ten runs:
 
 - the same prompt, word for word (reproduced in §5);
-- the orchestrator at maximum reasoning effort — `xhigh`, or DeepSeek-V4.1-Flash's own ceiling (the orchestrator effort of builds H and I was not recorded; both prompts asked for Sonnet 5.5 workers at `high`, which build I's log says its agent tool could not set);
+- the orchestrator at maximum reasoning effort — `xhigh`, or DeepSeek-V4.1-Flash's own ceiling (the orchestrator effort of builds H to J was not recorded; H and I asked for Sonnet 5.5 workers at `high`, which build I's log says its agent tool could not set, and J asked for Opus 5.5 workers at `medium`, also not enforced);
 - fully autonomous operation, with no owner input during the build;
 - no dependencies, no build step, no tests.
 
 ### What this does not establish
 
 One run per pairing. No repeats, no controlled scoring, no held-out rubric. The measurements below
-describe nine artefacts; they do not rank nine models.
+describe ten artefacts; they do not rank ten models.
 
 Two pairs isolate a single variable. F and G share the Fable 5.1 orchestrator and differ only in
 the worker. H and I share Sonnet 5.5 workers and differ only in the orchestrator: Opus 5.5 against
 Sonnet 5.5. Those two gaps are the closest this set comes to a controlled comparison — still one
 run each.
+
+I and J share the Sonnet 5.5 orchestrator and differ in the worker, Sonnet 5.5 against Opus 5.5.
+That pair is weaker, because J's workers were asked for `medium` effort instead of `high`. H and J
+swap the same two models between the orchestrator and worker roles.
 
 ## 2. Measurements
 
@@ -66,6 +71,7 @@ Result, 16 September 2026:
 | G | 13 | 9 | 4 466 |
 | H | 15 | 12 | 7 415 |
 | I | 18 | 15 | 10 098 |
+| J | 16 | 12 | 6 285 |
 
 Build E's single-file bundle `Deadlock-Deck.html` is excluded from the line count because it
 duplicates the rest of that folder.
@@ -74,7 +80,8 @@ The spread is the most visible result: build A is about 3.7× the size of build 
 brief. F and G share an orchestrator and still diverge: F spreads the job over 14 code files and
 3 524 lines, G over 9 files and 4 466 lines. H and I were measured on 30 September 2026. I is the
 second largest, with 15 code files and 10 098 lines. H follows with 12 code files and 7 415 lines,
-so with the same workers I has about 36% more lines than H.
+so with the same workers I has about 36% more lines than H. J, measured the same day, has 12 code
+files and 6 285 lines: the smallest of the three 30 September builds.
 
 ## 3. Structural differences
 
@@ -91,6 +98,7 @@ Verified by reading the entry points.
 | G | [index.html](../games/g-fable-x-opus/index.html), [js/core.js:2](../games/g-fable-x-opus/js/core.js) | One 480×270 canvas, 7 scripts each exposing its own global: `Core`, `Sprites`, `Data`, `Sound`, `Tower`, `Combat`, `Game`. |
 | H | [index.html](../games/h-opus-x-sonnet/index.html), [docs/design.md](../games/h-opus-x-sonnet/docs/design.md) | One 640×360 canvas, 10 classic scripts on a single `window.DD` namespace, built by four workers in parallel against a design contract the orchestrator wrote first, then a fifth QA worker. |
 | I | [index.html](../games/i-sonnet-x-sonnet/index.html), [docs/design.md](../games/i-sonnet-x-sonnet/docs/design.md) | One 640×360 canvas, 13 classic scripts on a single `window.DD` namespace, built by eleven agents in three stages against a design contract and shared `config.js` the orchestrator wrote first; the last stage was two QA agents, one balancing with bot runs and one checking the brief. |
+| J | [index.html](../games/j-sonnet-x-opus/index.html), [docs/knowledge/architecture.md](../games/j-sonnet-x-opus/docs/knowledge/architecture.md) | One 384×216 canvas, 11 classic scripts on a single `window.DD` namespace, built by nine workers against an architecture contract the orchestrator wrote first, each worker the only writer of its files. |
 
 Build E is the only one that did not follow the prompt's "Pixel Art" instruction at the page level.
 
@@ -127,14 +135,17 @@ and systems, then the UI layer, then a review pass. None of the other four build
 record. Builds H and I later kept their own: the contract in each `docs/design.md`
 ([H](../games/h-opus-x-sonnet/docs/design.md), [I](../games/i-sonnet-x-sonnet/docs/design.md)) and
 a build log ([H](../games/h-opus-x-sonnet/docs/build-log.md),
-[I](../games/i-sonnet-x-sonnet/docs/build-log.md)).
+[I](../games/i-sonnet-x-sonnet/docs/build-log.md)). Build J kept its contract in
+[docs/knowledge/architecture.md](../games/j-sonnet-x-opus/docs/knowledge/architecture.md). Its
+own orchestration record was a private task note, which the run's `.gitignore` excludes, so it is
+not in this repository.
 
 ## 5. The prompt
 
 Reproduced verbatim on the hub, inside the **Read the full prompt** panel on
 [index.html](../index.html), in whichever language the page is set to.
 
-The Spanish text is the evidence: it is what the nine agents actually received, and it is what the
+The Spanish text is the evidence: it is what the ten agents actually received, and it is what the
 Spanish side of the panel shows, unedited. The English side is a reading translation, labelled as
 one, with a link back to the original. The two are never presented as interchangeable, because the
 prompt is the experiment's input and a translated input would be a different experiment.
@@ -148,7 +159,7 @@ Nothing is stored in a custom history stack, so browser back, forward and a copi
 correctly, and a specific comparison is shareable. An overlay on the hub was rejected because it
 would need manual history handling and could not be linked.
 
-**Static HTML first.** The nine cards, their play links and the all-builds compare link are plain
+**Static HTML first.** The ten cards, their play links and the all-builds compare link are plain
 markup. Scripting adds the compare tray, the language switch and the pixel headline; with
 scripting off the page still reads and every game is still one click away.
 
@@ -164,7 +175,7 @@ page would manufacture urgency with no task behind it. The real clock starts ins
 **The footer's six limb slots carry real links** — repository, prompt, conditions, method, as-built
 tag, licence — so the chrome that echoes the game's anatomy bar is also the site's navigation.
 
-**Unique accessible names.** Nine cards each with a control named "Play" is a screen-reader
+**Unique accessible names.** Ten cards each with a control named "Play" is a screen-reader
 problem, so every card control carries a visually hidden build letter: "Play build A", "Compare
 build A", "Source of build A".
 
@@ -184,7 +195,7 @@ Checked against a local `python -m http.server` in a Chromium browser:
 | The language switch rewrites internal links so a copied URL keeps the language | verified — links read `play.html?g=a&lang=en` after switching |
 | Ticking two cards shows the tray with the right target | verified — `play.html?g=a,b&lang=es`, label "ABRIR 2 LADO A LADO" |
 | Each card's compare control has a unique accessible name | verified — label text reads "Comparar la construcción A" |
-| All nine games load and run at once in `play.html?g=a,b,c,d,e,f,g,h,i` | verified, 3×3 grid |
+| All ten games load and run at once in `play.html?g=a,b,c,d,e,f,g,h,i,j` | verified, 5+5 grid; build I shows its own "rotate the device" note when its pane is taller than wide |
 | No console errors on the hub or the player | verified |
 | Mobile layout at 375×812 | verified — cards stack, health bar hides, targets stay ≥44 px |
 
@@ -213,6 +224,7 @@ Each build got the shape that fitted it, not one shared module:
 | G | [js/i18n.js](../games/g-fable-x-opus/js/i18n.js) | 281 entries | a canvas button on the title, victory and death screens |
 | H | — | — | none yet: Spanish only |
 | I | — | — | none yet: Spanish only |
+| J | — | — | none yet: Spanish only |
 
 Three decisions are worth recording because they are not obvious:
 
