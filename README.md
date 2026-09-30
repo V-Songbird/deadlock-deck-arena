@@ -95,8 +95,8 @@ with each other in places; that is part of the record.
 
 Tag [`as-built-2026-09`](https://github.com/V-Songbird/deadlock-deck-arena/releases/tag/as-built-2026-09)
 points at the first commit, which holds the first five games exactly as the agents delivered them.
-Builds F and G arrived later and are tagged separately, and so is build H
-([`as-built-h-2026-09`](https://github.com/V-Songbird/deadlock-deck-arena/releases/tag/as-built-h-2026-09)). Every
+Builds F and G arrived later and are tagged separately. Build H has no tag yet; its raw output
+ends at commit [`278f0a5`](https://github.com/V-Songbird/deadlock-deck-arena/commit/278f0a5). Every
 later change to a game — currently only the Spanish/English layer — sits in commits after it, so
 the raw output stays recoverable.
 
