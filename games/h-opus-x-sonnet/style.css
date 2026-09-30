@@ -1,0 +1,50 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #e8dcc0;
+  font-family: "Courier New", Courier, monospace;
+}
+
+#game {
+  display: block;
+  /* fit inside the window keeping 16:9 */
+  width: min(100vw, 177.7778vh);
+  height: min(100vh, 56.25vw);
+  background: #0d0b12;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  image-rendering: pixelated;
+  touch-action: none;
+  outline: none;
+}
+
+@supports (height: 100dvh) {
+  #game {
+    width: min(100vw, 177.7778dvh);
+    height: min(100dvh, 56.25vw);
+  }
+}
+
+noscript {
+  position: absolute;
+  top: 45%;
+  width: 100%;
+  text-align: center;
+}
