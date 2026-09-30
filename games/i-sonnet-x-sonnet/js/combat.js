@@ -687,7 +687,7 @@
     limbIcon(ctx, hi ? hi.limb.id : null, slot, x + 3, y + 3, 1);
     var words = slotWord(slot).split(' ');
     txt(ctx, words[0], x + 21, words[1] ? y + 5 : y + 9, C.bone);
-    if (words[1]) txt(ctx, words[1], x + 21, y + 14, C.dim);
+    if (words[1]) txt(ctx, words[1], x + 21, y + 14, C.bone);
     // coste
     rect(ctx, C.bg, x + w - 19, y + 4, 16, 11);
     rect(ctx, afford ? C.steelDk : C.blood, x + w - 18, y + 5, 14, 9);
@@ -984,7 +984,8 @@
   // «Vida máx. +3, Daño +1»: cómo cambian tus estadísticas al injertar limbId en slot
   function statDiff(slot, limbId) {
     var b2 = JSON.parse(JSON.stringify(DD.run.body)), a = Body.stats(DD.run.body), out = '', more = false;
-    try { Body.graft(b2, slot, limbId, CFG.GRAFT_FRAC); } catch (e) { return ''; }
+    if (DD.LIMBS[limbId].type !== DD.SLOT_TYPE[slot]) return '';
+    Body.graft(b2, slot, limbId, CFG.GRAFT_FRAC);
     var b = Body.stats(b2);
     STAT_NAMES.forEach(function (n) {
       var d = Math.round((b[n[0]] - a[n[0]]) * n[2]), piece = n[1] + ' ' + (d > 0 ? '+' : '') + d + (n[3] || '');
@@ -1158,7 +1159,7 @@
     });
     DD.ui.button(ctx, LEAVE_BTN.x, LEAVE_BTN.y, LEAVE_BTN.w, LEAVE_BTN.h, 'Dejar\n(seguir)', { disabled: !act, selected: act && H.row === 2 });
     if (slotMode) {                                 // aviso sobre los botones (desactivados): qué hueco y qué se pierde
-      var cs = cand[H.slotIdx], id = H.opts[H.slotOpt], by = PANEL_Y + PANEL_H - 66;
+      var cs = cand[H.slotIdx], id = H.opts[H.slotOpt], by = PANEL_Y + 158;
       rect(ctx, C.bg2, 0, by - 4, 640, 54);
       rect(ctx, C.brass, 0, by - 4, 640, 1); rect(ctx, C.brass, 0, by + 49, 640, 1);
       txt(ctx, 'Injertar ' + DD.LIMBS[id].name + ' en ' + slotWord(cs), 320, by + 2, C.heatHi, { align: 'center' });

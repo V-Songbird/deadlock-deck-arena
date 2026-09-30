@@ -134,6 +134,10 @@
     document.addEventListener('visibilitychange', function () {
       if (document.hidden && runActive()) DD.run.paused = true;
     });
+    // Al perder el foco de la ventana también: no se reanuda sola al volver
+    window.addEventListener('blur', function () {
+      if (runActive()) DD.run.paused = true;
+    });
 
     try {
       DD.setScene('title');

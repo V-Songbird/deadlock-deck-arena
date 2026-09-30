@@ -29,9 +29,9 @@
   var CW = (MW - 1) >> 1, CH = (MH - 1) >> 1;           // laberinto de 15×8 celdas
 
   /* ---------- Rangos (§10.1) ---------- */
-  var ENEMY_N = [[4, 5], [5, 6], [6, 7]];                // por piso
+  var ENEMY_N = [[3, 4], [4, 5], [5, 6]];                // por piso
   var TRAP_N = [6, 10];
-  var RES_N = { vial: [3, 4], coolant: [2, 3], suture: [2, 3], ether: [4, 6], jar: [1, 2] };
+  var RES_N = { vial: [2, 3], coolant: [2, 3], suture: [2, 3], ether: [4, 6], jar: [1, 2] };
   var GATE_N = [10, 16];
   var ROOM_N = [2, 4];
   var LOOPS_N = [6, 10];                                 // muros extra que se quitan (bucles)

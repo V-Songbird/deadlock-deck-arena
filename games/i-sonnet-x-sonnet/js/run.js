@@ -162,7 +162,6 @@
   };
 
   Run.startCombat = function (entity) {
-    DD.run.fromScene = DD.sceneName;
     music('combat');
     DD.setScene('combat', { enemy: entity });
   };
@@ -324,7 +323,7 @@
     if (DD.Sprites && DD.Sprites.drawLimbIcon) DD.Sprites.drawLimbIcon(ctx, limb.id, cx + 3, cy + 2);
     else { rect(ctx, C.line, cx + 3, cy + 2, 16, 16); }
     DD.text(ctx, SHORT[slot], cx + 22, cy + 3, { color: C.bone });
-    DD.text(ctx, limbShort(limb.name, 13), cx + 22, cy + 13, { color: inf < 0.25 ? C.bloodHi : C.dim });
+    DD.text(ctx, limbShort(limb.name, 13), cx + 22, cy + 13, { color: inf < 0.25 ? C.bloodHi : (hot ? C.bone : C.dim) });
 
     var bw = cw - 18;
     icon(ctx, 'i_heat', cx + 3, cy + 19);

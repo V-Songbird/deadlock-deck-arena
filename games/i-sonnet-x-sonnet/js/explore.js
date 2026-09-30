@@ -19,7 +19,7 @@
   var SHIFT_EVERY = 18, SHIFT_FIRST = 13, SHIFT_WARN = 2;
   var FIRE_CAP = 0.18, FIRE_LIFE = [20, 45];   // tope de fuego (fracción del piso) y duración de cada casilla (s)
   var FIRE_SAFE = 10;                          // el fuego inicial nace a ≥ 10 casillas de CAMINO del inicio: nunca cierra la salida de la sala de partida
-  var FIRE_DMG = 4, FIRE_CD = 0.7, FIRE_LEG_HEAT = 6;
+  var FIRE_DMG = 5, FIRE_CD = 0.7, FIRE_LEG_HEAT = 6;
   var SPIKE_DMG = 5, SPIKE_CD = 1.2, ACID_DMG = 3, ACID_WEAR = 6, ACID_CD = 1.5, STEAM_HEAT = 18, STEAM_CD = 1.2;
   var TIER_W = [[6, 3, 1], [3, 5, 2], [1, 4, 6]];          // peso de los tarros por tier (1..3) según el piso
   var BROKE = { head: '¡Cabeza rota!', torso: '¡Torso roto!', arm: '¡Brazo roto!', leg: '¡Pierna rota!' };
@@ -93,6 +93,7 @@
     var n = MW * MH, i;
     w.built = true; w.rng = rng; w.t = 0; w.ver = 0;
     w.seen = new Uint8Array(n); w.vis = new Uint8Array(n);
+    w.seen[idx(w.exit.x, w.exit.y)] = 1;           // la salida brilla entre la niebla desde el principio (no se revela nada más)
     w.p = { x: w.start.x * TS + TS / 2, y: w.start.y * TS + TS / 2, dir: 1, walked: 0, step: 0, moving: false, invuln: 0, vx: -1, vy: -1, vr: -1 };
     w.shiftT = SHIFT_FIRST; w.warning = false; w.beeped = false;
     w.torchAt = new Uint8Array(n);
@@ -606,7 +607,7 @@
   function floorKey(x, y) { return (((x * 73856093) ^ (y * 19349663)) >>> 0) % 5 === 0 ? 'floorB' : 'floor'; }
 
   function drawMap(ctx, S, t) {
-    var tiles = W.tiles, seen = W.seen, vis = W.vis, x, y, i, k;
+    var tiles = W.tiles, seen = W.seen, x, y, i, k;
     for (y = 0; y < MH; y++) {
       for (x = 0; x < MW; x++) {
         i = idx(x, y);
@@ -706,7 +707,7 @@
   }
 
   function drawLights(ctx, t) {
-    var g = glowImg('torch', 24, [255, 140, 50], 0.4), i;
+    var g = glowImg('torch', 24, [255, 140, 50], 0.4);
     ctx.globalCompositeOperation = 'lighter';
     W.torches.forEach(function (q) {
       if (!W.seen[idx(q.x, q.y)]) return;
@@ -755,7 +756,8 @@
       DD.text(ctx, '¡LAS COMPUERTAS VAN A CAMBIAR!', 320, 25, { align: 'center', color: f ? C.warn : C.bloodHi, shadow: C.bg });
     }
     if (W.hint > 0) {
-      DD.text(ctx, 'Flechas o WASD para moverte · o mantén pulsado para ir hacia el puntero', 320, 311, { align: 'center', color: C.dim, alpha: Math.min(1, W.hint / 2) });
+      DD.text(ctx, DD.Input.mouse.touch ? 'Mantén pulsado para caminar' : 'Flechas o WASD para moverte · o mantén pulsado para ir hacia el puntero',
+        320, 311, { align: 'center', color: C.dim, alpha: Math.min(1, W.hint / 2) });
     }
     if (W.banner > 0) {
       var fl = DD.FLOORS && DD.FLOORS[W.floor], a = Math.min(1, W.banner / 0.8);
