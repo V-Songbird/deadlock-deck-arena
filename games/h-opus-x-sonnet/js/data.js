@@ -213,7 +213,7 @@
     'Un matraz por mano, ácido por sangre.', [
       card('c_vitriolo', 'Vitriolo', 'attack', 1, 20, 0, 'Inflige 4. Quemadura 4.',
         function (c) { c.damage(4); c.status('enemy', 'burn', 4); }),
-      card('c_frasco', 'Frasco Explosivo', 'attack', 2, 40, 1, 'Inflige 8. Quemadura 5. +15 calor al azar.',
+      card('c_frasco', 'Frasco Ígneo', 'attack', 2, 40, 1, 'Inflige 8. Quemadura 5. Calor al azar.',
         function (c) { c.damage(8); c.status('enemy', 'burn', 5); c.heatSelf('random', 15); }),
       card('c_reactivo', 'Reactivo', 'skill', 0, 10, 0, 'Quemadura 2.',
         function (c) { c.status('enemy', 'burn', 2); })
@@ -334,7 +334,7 @@
   function enemy(o) { DD.ENEMIES[o.id] = o; }
 
   enemy({
-    id: 'homunculo', name: 'Homúnculo', kind: 'monster', hp: 24, floorMin: 1, ether: 3,
+    id: 'homunculo', name: 'Homúnculo', kind: 'monster', hp: 28, floorMin: 1, ether: 3,
     limbs: ['head_homunculo', 'torso_homunculo', 'arm_homunculo', 'leg_homunculo'],
     intents: [{ type: 'attack', dmg: 5 }, { type: 'attack', dmg: 3, times: 2 }, { type: 'debuff', status: 'weak', n: 2 }],
     desc: 'Una cosa pálida y chillona, cuajada en un frasco.'
@@ -346,7 +346,7 @@
     desc: 'Se hincha con la sangre de los desdichados.'
   });
   enemy({
-    id: 'alquimista', name: 'Alquimista Loco', kind: 'scientist', hp: 28, floorMin: 1, ether: 4,
+    id: 'alquimista', name: 'Alquimista Loco', kind: 'scientist', hp: 30, floorMin: 1, ether: 4,
     limbs: ['head_alquimista', 'torso_alquimista', 'arm_alquimista'],
     intents: [{ type: 'scald', heat: 30 }, { type: 'attack', dmg: 6 }, { type: 'debuff', status: 'burn', n: 3 }, { type: 'block', n: 8 }],
     desc: 'Lanza frascos hirvientes y ríe entre los vapores.'
