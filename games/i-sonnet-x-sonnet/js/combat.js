@@ -671,7 +671,7 @@
   }
 
   function drawCard(ctx, inst, x, y, w, sel, st) {
-    var card = inst.card, slot = inst.slot, body = DD.run.body, hi = heatInfo(inst), h = CARD_H;
+    var card = inst.card, slot = inst.slot, hi = heatInfo(inst), h = CARD_H;
     var afford = S.pl.energy >= card.cost, playable = S.phase === 'player' && afford;
     var acc = ACCENT[kindOf(card)], blink = Math.floor(DD.time * 6) % 2 === 0, prevA = ctx.globalAlpha, i;
     var armed = S.armed === inst.uid, dn = S.deny && S.deny.uid === inst.uid ? Math.round(Math.sin(S.deny.t * 60) * 2) : 0;
@@ -1111,7 +1111,7 @@
     limbIcon(ctx, id, null, cx + 2, y + 25, 3);
     var tx = cx + 60, ps = DD.passiveText(l.passive);
     txt(ctx, DD.TYPE_NAME[l.type] + ' · Nivel ' + l.tier, tx, y + 26, C.bone);
-    txt(ctx, 'Integridad máx. ' + l.integ, tx, y + 36, C.integ);
+    txt(ctx, 'Integridad máx. ' + l.integ + ' (injerto: ' + DD.clamp(Math.ceil(l.integ * CFG.GRAFT_FRAC), 1, l.integ) + ')', tx, y + 36, C.integ);
     if (!ps.length) txt(ctx, 'Sin pasivas', tx, y + 48, C.dim);
     for (j = 0; j < ps.length && j < 3; j++) txt(ctx, ps[j], tx, y + 48 + j * 9, C.acid);
     if (!DD.save.blueprints[id]) txt(ctx, '¡Plano nuevo!', x + w - 10, y + 26, C.warn, { align: 'right' });

@@ -74,7 +74,7 @@
   }
 
   /* ---------- Motor: cadena maestra ---------- */
-  // sfxBus y musicBus -> compresor -> maestro -> limitador suave -> destino; reverb y eco como envíos.
+  // sfxBus y musicBus (+ reverb) -> paso alto -> compresor -> maestro -> limitador suave -> destino; el eco entra en musicBus.
   function createEngine(ctx, opt) {
     opt = opt || {};
     var E = { ctx: ctx, rng: opt.rng || Math.random, tension: 0, tensionFn: null, sink: null };
@@ -86,7 +86,8 @@
     comp.threshold.value = -16; comp.knee.value = 14; comp.ratio.value = 5;
     comp.attack.value = 0.004; comp.release.value = 0.22;
     E.master = gain(MASTER); E.sfxBus = gain(SFX_LVL); E.musicBus = gain(MUSIC_LVL);
-    E.sfxBus.connect(comp); E.musicBus.connect(comp); comp.connect(E.master);
+    E.pre = ctx.createBiquadFilter(); E.pre.type = 'highpass'; E.pre.frequency.value = 32;   // sin infragraves que gasten margen
+    E.sfxBus.connect(E.pre); E.musicBus.connect(E.pre); E.pre.connect(comp); comp.connect(E.master);
     if (opt.clip === false) E.master.connect(dest);
     else { sh = ctx.createWaveShaper(); sh.curve = clipCurve(); try { sh.oversample = '2x'; } catch (e) { /* sin oversample */ } E.master.connect(sh); sh.connect(dest); }
 
@@ -95,7 +96,7 @@
     vIn = gain(1); vHp = ctx.createBiquadFilter(); vHp.type = 'highpass'; vHp.frequency.value = 180;
     vLp = ctx.createBiquadFilter(); vLp.type = 'lowpass'; vLp.frequency.value = 5200; vOut = gain(0.9);
     E.sfxBus.connect(gain(0.14)).connect(vIn); E.musicBus.connect(gain(0.3)).connect(vIn);
-    vIn.connect(vHp); vHp.connect(vLp); vLp.connect(conv); conv.connect(vOut); vOut.connect(comp);
+    vIn.connect(vHp); vHp.connect(vLp); vLp.connect(conv); conv.connect(vOut); vOut.connect(E.pre);
 
     // eco oscuro con realimentación (arpegios y campanas)
     E.echoIn = gain(1); dl = ctx.createDelay(1); dl.delayTime.value = 0.34; fb = gain(0.4);
@@ -536,7 +537,10 @@
       nb(E, d, t, 'highpass', 0.09, 6000, 6000, 0.7, c.vel * 0.25, 0.001);
     },
     hat: function (E, d, t, c) { nb(E, d, t, 'highpass', c.L.open ? 0.12 : 0.03, 7000, 7000, 0.7, c.vel * 1.1, 0.001); },
-    tick: function (E, d, t, c) { clockTick(E, d, t, c.vel * 1.5, (c.n >> 2) & 1, ((c.n >> 2) & 1) ? 0.25 : -0.25); },
+    tick: function (E, d, t, c) {              // tic y tac alternos (L.ev = pasos entre golpes, por defecto una negra)
+      var tock = ((c.n / (c.L.ev || 4)) | 0) & 1;
+      clockTick(E, d, t, c.vel * 1.5, tock, tock ? 0.25 : -0.25);
+    },
     gear: function (E, d, t, c) {              // engranaje: trinquete de chasquidos que se frena + clunk final
       var n = 7 + (c.n % 3), i, sp = c.dur / n, tt = t;
       for (i = 0; i < n; i++) {
@@ -626,7 +630,7 @@
         { v: 'kick', p: 'X..x..x.X..x..x.', g: 0.9 },
         { v: 'timp', p: 'X.......x.......', g: 0.8 },
         { v: 'snare', p: '....X.......X..o', g: 0.6 },
-        { v: 'tick', p: 'X.x.X.x.X.x.X.x.', g: 0.4 },
+        { v: 'tick', p: 'X.x.X.x.X.x.X.x.', ev: 2, g: 0.4 },
         { v: 'bass', p: 'x.x.xx.xx.x.xx.x', g: 0.6, len: 1, dist: 1, cut: 900 },
         { v: 'metal', p: sprinkle(32, { 10: 'x', 26: 'x', 30: 'x' }), f: 520, g: 0.4 },
         { v: 'gear', p: sprinkle(128, { 60: 'x', 124: 'x' }), len: 4, g: 0.4 },
@@ -833,7 +837,7 @@
   function sfx(name, vol) {
     try {
       var def = SFX[name], now, i, n = 0, lo = null, inst;
-      if (!def || !ready()) return;
+      if (!def || !ready() || (vol != null && !(+vol > 0.001))) return;
       syncMute();
       if (isMuted() || ctx.state !== 'running') return;
       now = ctx.currentTime;
@@ -870,7 +874,7 @@
     document.addEventListener('visibilitychange', function () {   // pestaña oculta: el contexto se suspende (el planificador no se retrasa)
       try {
         if (!ctx) return;
-        var p = document.hidden ? ctx.suspend() : (isMuted() ? null : ctx.resume());
+        var p = document.hidden ? ctx.suspend() : ctx.resume();
         if (p && p.catch) p.catch(function () { /* sin gesto */ });
       } catch (e) { /* silencio */ }
     });
