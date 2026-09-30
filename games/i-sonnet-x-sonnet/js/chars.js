@@ -1025,7 +1025,7 @@
     limbE(g, T, -2 + dx, -26, -5 + dx + sw, -12, 5); limbE(g, T, -5 + dx + sw, -12, -6 + dx + sw * 2, -3, 4); box(g, MAT.rubber, -12 + dx + sw * 2, -5, 10, 5);
     // brazo trasero con bisturí
     limbE(g, T, 5 + dx, ty + 4, 9 + dx, ty + 14, 4); limbE(g, GLV, 9 + dx, ty + 14, 6 + dx, ty + 20 + (atk ? -5 : 0), 3);
-    tline(g, St_(0), 6 + dx, ty + 20 + (atk ? -5 : 0), 1 + dx, ty + 27 + (atk ? -6 : 0), 1);
+    tline(g, MAT.steel[0], 6 + dx, ty + 20 + (atk ? -5 : 0), 1 + dx, ty + 27 + (atk ? -6 : 0), 1);
     // torso con ropa de quirófano
     poly(g, T[2], [[-9 + dx, ty + 4], [9 + dx, ty + 4], [8 + dx, -24], [-8 + dx, -24]]);
     poly(g, T[0], [[-10 + dx, ty + 3], [7 + dx, ty + 3], [7 + dx, -24], [-9 + dx, -24]]);
@@ -1062,7 +1062,6 @@
     }
     box(g, MAT.brass, ax + dx - 1, ay - 3, 4, 7);
   }
-  function St_(i) { return MAT.steel[i]; }
 
   function paintAutomata(g, s) {
     var B = MAT.brass, St = MAT.steel, I = MAT.iron, atk = s.atk, b = s.bob, sw = s.sw, fr = s.fr, i;
@@ -1346,6 +1345,10 @@
     g.fillStyle = col;
     for (var i = 0; i < c.length; i++) g.fillRect(c[i][0], c[i][1], 1, 1);
   }
+  function wrapS(g, x, y, w, h) {       // vendaje pequeño
+    R(g, BAND[0], x, y, w, h);
+    for (var j = 0; j < h; j++) for (var i = 0; i < w; i++) if (((i + j) & 3) === 0) P(g, BAND[2], x + i, y + j);
+  }
   // --- abominación pequeña: se compone con lo que lleva el cuerpo (cabeza, torso, brazos, piernas) ---
   function smHead(g, id, k, b) {
     var y = 1 + b, sm = k.sm, e = k.ey[0], F = MAT.fur, hair = '#2a2230', Fz = MAT.scale;
@@ -1362,6 +1365,8 @@
     } else if (id === 'cab_plaga') {
       R(g, '#2e2630', 4, y + 1, 8, 2); R(g, '#2e2630', 5, y, 6, 1); R(g, '#2e2630', 3, y + 2, 10, 1); R(g, MAT.leather[0], 4, y + 3, 8, 3);
       R(g, e, 5, y + 3, 2, 1); R(g, e, 9, y + 3, 2, 1); R(g, MAT.bone[0], 7, y + 4, 2, 2); P(g, MAT.bone[2], 8, y + 5);
+    } else if (id === 'stump_head') {
+      wrapS(g, 4, y + 1, 8, 5); R(g, BAND[2], 4, y + 3, 8, 1); R(g, C.blood, 8, y + 1, 2, 2); P(g, BAND[0], 12, y + 4);
     } else {       // cab_cosido y desconocidas
       R(g, sm[0], 4, y + 1, 8, 5); R(g, sm[2], 4, y + 1, 1, 4); R(g, hair, 4, y, 8, 2); R(g, MAT.steel[0], 3, y + 4, 1, 2); R(g, MAT.steel[0], 12, y + 4, 1, 2);
       for (var i = 4; i < 12; i += 2) P(g, k.st, i, y + 1);
@@ -1371,18 +1376,20 @@
   function smTorso(g, id, k, b) {
     var y = 7 + b, sm = k.sm;
     if (id === 'tor_caldera') {
-      R(g, MAT.copper[0], 4, y, 8, 5); R(g, MAT.brass[0], 4, y + 1, 8, 1); R(g, MAT.brass[0], 4, y + 4, 8, 1); R(g, '#1a0f0a', 6, y + 2, 4, 2); R(g, C.fire2, 7, y + 2, 2, 2); P(g, C.fire3, 7, y + 3);
+      R(g, MAT.copper[0], 4, y, 8, 4); R(g, MAT.brass[0], 4, y, 8, 1); R(g, MAT.brass[0], 4, y + 3, 8, 1); R(g, '#1a0f0a', 6, y + 1, 4, 2); R(g, C.fire2, 7, y + 1, 2, 2); P(g, C.fire3, 7, y + 2);
       R(g, MAT.iron[0], 4, y - 1, 1, 2); R(g, MAT.iron[0], 11, y - 1, 1, 2);
     } else if (id === 'tor_costillar') {
-      R(g, '#1b1420', 4, y, 8, 5); R(g, MAT.steel[0], 4, y, 8, 1); for (var i = 1; i < 4; i++) R(g, i & 1 ? MAT.steel[1] : MAT.steel[0], 5, y + i, 6, 1);
-      R(g, MAT.steel[2], 7, y + 1, 2, 3); P(g, C.blood, 9, y + 2); R(g, MAT.steel[0], 4, y + 4, 8, 1);
+      R(g, '#1b1420', 4, y, 8, 4); R(g, MAT.steel[0], 4, y, 8, 1); R(g, MAT.steel[1], 5, y + 1, 6, 1); R(g, MAT.steel[0], 5, y + 2, 6, 1); R(g, MAT.steel[0], 4, y + 3, 8, 1);
+      R(g, MAT.steel[2], 7, y + 1, 2, 2); P(g, C.blood, 9, y + 1);
     } else if (id === 'tor_alambique') {
-      R(g, sm[1], 4, y, 8, 5); R(g, MAT.brass[0], 4, y, 8, 1); R(g, '#16302c', 5, y + 1, 6, 4); R(g, '#5fbf3a', 5, y + 2, 6, 3); R(g, '#b6ef7a', 5, y + 2, 6, 1);
-      P(g, '#ffffff', 6, y + 1); R(g, MAT.brass[0], 7, y - 1, 2, 1); R(g, MAT.leather[0], 4, y + 4, 8, 1);
+      R(g, sm[1], 4, y, 8, 4); R(g, MAT.brass[0], 4, y, 8, 1); R(g, '#16302c', 5, y + 1, 6, 3); R(g, '#5fbf3a', 5, y + 1, 6, 2); R(g, '#b6ef7a', 5, y + 1, 6, 1);
+      P(g, '#ffffff', 6, y + 2); R(g, MAT.brass[0], 7, y - 1, 2, 1); R(g, MAT.leather[0], 4, y + 3, 8, 1);
+    } else if (id === 'stump_torso') {
+      wrapS(g, 4, y, 8, 4); R(g, C.blood, 6, y + 1, 3, 2); P(g, C.bloodHi, 6, y + 1);
     } else {       // tor_remendado
-      R(g, sm[0], 4, y, 8, 5); R(g, sm[2], 4, y, 1, 4); R(g, sm[1], 11, y, 1, 4);
-      R(g, MAT.leather[0], 8, y + 1, 3, 3); R(g, MAT.cloth[0], 5, y + 2, 2, 2); P(g, k.st, 7, y + 1); P(g, k.st, 7, y + 2); P(g, k.st, 7, y + 3);
-      R(g, MAT.leather[1], 4, y + 4, 8, 1); P(g, MAT.brass[0], 8, y + 4);
+      R(g, sm[0], 4, y, 8, 4); R(g, sm[2], 4, y, 1, 3); R(g, sm[1], 11, y, 1, 3);
+      R(g, MAT.leather[0], 8, y + 1, 3, 2); R(g, MAT.cloth[0], 5, y + 1, 2, 2); P(g, k.st, 7, y); P(g, k.st, 7, y + 1); P(g, k.st, 7, y + 2);
+      R(g, MAT.leather[1], 4, y + 3, 8, 1); P(g, MAT.brass[0], 8, y + 3);
     }
   }
   function smArm(g, id, k, b, side, swing) {      // side: 0 izquierdo (x 1..3), 1 derecho (x 12..14)
@@ -1396,6 +1403,8 @@
       R(g, sm[0], x + 1 - o, y, 2, 2); R(g, MAT.steel[0], x + 1 - o, y + 2, 2, 2); R(g, MAT.steel[1], x + (side ? 1 : 0), y + 4, 1, 4); R(g, MAT.steel[1], x + (side ? 3 : 2), y + 4, 1, 4 - 1);
     } else if (id === 'bra_piston') {
       R(g, sm[0], x + 1 - o, y, 2, 1); R(g, MAT.brass[0], x + 1 - o, y + 1, 2, 4); P(g, MAT.brass[2], x + 1 - o, y + 3); R(g, MAT.steel[0], x + 1 + (side ? 0 : 0), y + 5, 1, 2); R(g, MAT.steel[1], x, y + 7, 3, 1);
+    } else if (id === 'stump_arm') {
+      R(g, sm[0], x + 1 - o, y, 2, 2); wrapS(g, x + 1 - o, y + 2, 2, 3); P(g, C.blood, x + 1 - o, y + 4);
     } else if (id === 'bra_tentaculo') {
       R(g, MAT.plum[0], x + 1 - o, y, 2, 4); R(g, MAT.plum[0], x + (side ? 0 : 2) , y + 3, 1, 3); R(g, MAT.plum[0], x + 1 , y + 6, 2, 1); P(g, '#f0c8e0', x + 1 - o, y + 2); P(g, '#7fe04a', x + (side ? 3 : 0), y + 7);
     } else {       // bra_muerto
@@ -1403,7 +1412,7 @@
     }
   }
   function smLeg(g, id, k, x, up) {       // x = columna izquierda de la pierna (2 px), up = 1 si está levantada un píxel
-    var sm = k.sm, top = 12, bot = 15 - up;
+    var sm = k.sm, top = 11, bot = 15 - up;
     if (id === 'pie_sabueso') {
       R(g, MAT.fur[0], x, top, 2, bot - top); R(g, MAT.furLt[0], x - 1, bot, 3, 1); P(g, MAT.bone[1], x - 1, bot);
     } else if (id === 'pie_resorte') {
@@ -1413,6 +1422,8 @@
       hline(g, MAT.steel[0], x, top, x - 1, top + 1); hline(g, MAT.steel[0], x - 1, top + 1, x, bot); P(g, MAT.brass[0], x - 1, top + 1);
     } else if (id === 'pie_pesada') {
       R(g, MAT.iron[0], x, top, 2, bot - top - 1); R(g, MAT.iron[1], x, top, 1, bot - top - 1); R(g, MAT.iron[0], x - 1, bot - 2, 4, 2); R(g, MAT.brass[0], x - 1, bot - 2, 4, 1); R(g, MAT.rubber[0], x - 1, bot, 4, 1);
+    } else if (id === 'stump_leg') {
+      R(g, sm[0], x, top, 2, 2); wrapS(g, x, top + 2, 2, 2); R(g, MAT.wood[0], x, top + 4, 2, bot - top - 4 + 1); P(g, MAT.iron[0], x, bot); P(g, C.blood, x, top + 3);
     } else {       // pie_muerta
       R(g, sm[0], x, top, 2, bot - top); R(g, sm[1], x + 1, top, 1, bot - top); R(g, sm[0], x - 1, bot, 3, 1); P(g, k.st, x, top + 1);
     }
@@ -1448,6 +1459,338 @@
       paintSmallPlayer(g, ids, { sk: cos.sk, sm: cos.sm, st: cos.st, ey: cos.ey }, fr);
     });
     blit16(ctx, o.c, x, y, opt.dir === -1, opt.flash, opt.alpha);
+  };
+
+
+  // --- enemigos pequeños (miran a la derecha; b = rebote del cuerpo, sw = paso) ---
+  function smSabueso(g, fr) {
+    var F = MAT.fur, L = MAT.furLt, D = '#3c3128', b = (fr & 1) ? 0 : 1, sw = SW[fr];
+    R(g, D, 4 + sw, 11, 2, 4); R(g, D, 10 - sw, 11, 2, 4); R(g, D, 3 + sw, 15, 3, 1); R(g, D, 9 - sw, 15, 3, 1);
+    R(g, F[0], 1, 4 + b, 1, 2); R(g, F[0], 2, 6 + b, 2, 2);                               // cola
+    R(g, F[0], 3, 6 + b, 9, 5); R(g, F[1], 4, 6 + b, 7, 1); R(g, F[2], 3, 10 + b, 9, 1);
+    R(g, '#4a2a2e', 6, 7 + b, 4, 3); R(g, MAT.bone[1], 6, 7 + b, 1, 3); R(g, MAT.bone[1], 8, 7 + b, 1, 3);
+    P(g, D, 5, 5 + b); P(g, D, 7, 5 + b); P(g, D, 9, 5 + b); P(g, TH.st, 4, 8 + b); P(g, TH.st, 4, 9 + b);
+    R(g, F[0], 10, 4 + b, 5, 5); R(g, L[0], 13, 6 + b, 3, 3); P(g, '#0f0b10', 15, 6 + b);
+    R(g, D, 10, 2 + b, 1, 2); R(g, D, 12, 2 + b, 1, 2); P(g, EMBER, 12, 5 + b); P(g, MAT.bone[1], 14, 9 + b); P(g, TH.st, 10, 7 + b);
+    R(g, F[0], 10 + sw, 11, 2, 4); R(g, L[0], 10 + sw, 15, 3, 1);
+    R(g, F[0], 4 - sw, 11, 2, 4); R(g, L[0], 3 - sw, 15, 3, 1);
+  }
+  function smAyudante(g, fr) {
+    var z = ['#d8d0b8', '#efe8d2', '#a79f86'], b = (fr & 1) ? 0 : 1, sw = SW[fr], sk = '#c9b79a', hair = '#b8b8c4', i;
+    R(g, '#3a3248', 5 + sw, 13, 2, 2); R(g, '#3a3248', 9 - sw, 13, 2, 2); R(g, MAT.leather[0], 4 + sw, 15, 3, 1); R(g, MAT.leather[0], 9 - sw, 15, 3, 1);
+    R(g, z[0], 4, 7 + b, 8, 6); R(g, z[2], 10, 7 + b, 2, 6); R(g, z[1], 4, 7 + b, 1, 5);
+    P(g, z[0], 4, 13); P(g, z[0], 6, 13); P(g, z[0], 9, 13); P(g, z[0], 11, 13);
+    P(g, '#6fbf3a', 6, 9 + b); P(g, C.blood, 8, 10 + b); P(g, C.blood, 5, 11 + b); R(g, MAT.leather[0], 4, 10 + b, 8, 1);
+    R(g, z[0], 12, 8 + b, 2, 3); P(g, sk, 13, 11 + b); R(g, MAT.steel[1], 14, 10 + b, 1, 3);
+    R(g, z[0], 2, 8 + b, 2, 2); P(g, sk, 2, 7 + b);                                        // brazo con matraz
+    R(g, '#5fbf3a', 0, 3 + b, 3, 3); R(g, '#b6ef7a', 0, 3 + b, 3, 1); R(g, MAT.leather[0], 1, 2 + b, 1, 1);
+    R(g, hair, 4, 2 + b, 8, 1); P(g, hair, 3, 3 + b); P(g, hair, 12, 3 + b); for (i = 4; i < 12; i += 2) P(g, i & 2 ? '#8a8a96' : hair, i, 1 + b); P(g, hair, 3, 1 + b); P(g, hair, 12, 1 + b);
+    R(g, sk, 5, 3 + b, 6, 4); R(g, MAT.brass[0], 5, 4 + b, 6, 2); R(g, '#8fe06a', 6, 4 + b, 2, 1); R(g, '#ff6a5a', 9, 4 + b, 1, 1); P(g, OL, 7, 5 + b);
+    R(g, '#2b1016', 6, 6 + b, 4, 1); P(g, '#f0e8d0', 6, 6 + b); P(g, '#f0e8d0', 9, 6 + b);
+  }
+  function smGolem(g, fr) {
+    var st = MAT.stone, b = (fr & 1) ? 0 : 1, sw = SW[fr];
+    R(g, st[0], 4 + sw, 11, 3, 5); R(g, st[0], 9 - sw, 11, 3, 5); R(g, st[2], 4 + sw, 15, 3, 1); R(g, st[2], 9 - sw, 15, 3, 1); R(g, MAT.iron[0], 4 + sw, 13, 3, 1); R(g, MAT.iron[0], 9 - sw, 13, 3, 1);
+    R(g, st[0], 3, 5 + b, 10, 6); R(g, st[1], 3, 5 + b, 10, 1); R(g, st[2], 3, 10 + b, 10, 1);
+    R(g, FLESH[0], 9, 6 + b, 3, 3); R(g, MAT.iron[0], 4, 8 + b, 3, 2); P(g, C.fire2, 7, 8 + b); P(g, C.fire3, 8, 9 + b);
+    P(g, TH.st, 8, 6 + b); P(g, TH.st, 8, 7 + b); P(g, TH.st, 4, 6 + b); P(g, TH.st, 5, 7 + b);
+    R(g, st[0], 6, 2 + b, 4, 4); R(g, st[2], 6, 5 + b, 4, 1); P(g, '#ffb02e', 6, 3 + b); P(g, '#ffb02e', 9, 3 + b); R(g, MAT.iron[0], 5, 2 + b, 6, 1);
+    R(g, st[0], 1, 6 + b, 2, 5); R(g, st[0], 13, 6 + b, 2, 5); R(g, st[0], 0, 11 + b, 3, 3); R(g, st[0], 13, 11 + b, 3, 3); R(g, st[2], 0, 13 + b, 3, 1); R(g, st[2], 13, 13 + b, 3, 1);
+  }
+  function smAlquimista(g, fr) {
+    var Rb = ['#4a2f66', '#6a4690', '#2a1a3c'], b = (fr & 1) ? 0 : 1, sw = SW[fr];
+    R(g, MAT.leather[0], 4 + sw, 15, 3, 1); R(g, MAT.leather[0], 9 - sw, 15, 3, 1);
+    R(g, Rb[0], 4, 6 + b, 8, 3); R(g, Rb[0], 3, 9 + b, 10, 5); R(g, Rb[1], 3, 9 + b, 1, 5); R(g, Rb[2], 12, 9 + b, 1, 5); R(g, MAT.brass[0], 3, 13, 10, 1);
+    R(g, Rb[0], 5, 1 + b, 6, 2); R(g, Rb[0], 4, 3 + b, 8, 3); R(g, Rb[1], 5, 1 + b, 1, 3);
+    R(g, MAT.iron[0], 5, 3 + b, 6, 3); R(g, '#7dff5a', 6, 4 + b, 1, 1); R(g, '#7dff5a', 9, 4 + b, 1, 1); R(g, MAT.iron[2], 7, 5 + b, 2, 2);
+    R(g, '#2a5a58', 12, 5 + b, 2, 5); R(g, '#5fbf3a', 12, 7 + b, 2, 3); P(g, '#b6ef7a', 12, 7 + b);
+    P(g, '#6fbf3a', 5, 10 + b); P(g, C.blood, 7, 10 + b); P(g, '#7fd6e6', 9, 10 + b); R(g, MAT.leather[0], 4, 9 + b, 8, 1);
+    R(g, Rb[0], 2, 7 + b, 2, 3); R(g, '#5fe040', 0, 3 + b, 3, 3); R(g, '#b6ef7a', 0, 3 + b, 3, 1); R(g, '#2a5a58', 1, 2 + b, 1, 1);
+  }
+  function smArana(g, fr) {
+    var B = MAT.brass, Cu = MAT.copper, L = '#8d9db0', sw = SW[fr], b = (fr & 1) ? 0 : 1, i;
+    var legs = [[[5, 6], [3, 2], [1, 4 + sw]], [[5, 7], [2, 6], [0, 8 - sw]], [[5, 9], [2, 10], [1, 13 + sw]], [[6, 10], [4, 13], [3, 15 - sw]]];
+    for (i = 0; i < 4; i++) {
+      var l = legs[i];
+      hline(g, L, l[0][0], l[0][1] + b * (i ? 0 : 0), l[1][0], l[1][1]); hline(g, L, l[1][0], l[1][1], l[2][0], l[2][1]);
+      hline(g, L, 15 - l[0][0], l[0][1], 15 - l[1][0], l[1][1]); hline(g, L, 15 - l[1][0], l[1][1], 15 - l[2][0], l[2][1]);
+      P(g, B[0], l[1][0], l[1][1]); P(g, B[0], 15 - l[1][0], l[1][1]);
+    }
+    ov(g, B[0], 8, 9 + b, 4, 3.5); ov(g, Cu[0], 8, 6 + b, 3, 2.5); ov(g, B[2], 8, 10 + b, 2, 2); P(g, B[1], 7, 8 + b);
+    P(g, EMBER, 6, 5 + b); P(g, EMBER, 9, 5 + b); P(g, '#ffd0a0', 6, 5 + b); P(g, MAT.steel[1], 6, 8 + b - 1 + 1); P(g, MAT.steel[1], 9, 8 + b);
+    P(g, B[1], 8, 7 + b);
+  }
+  function smCirujano(g, fr) {
+    var T = ['#3f8f8a', '#62b5ae', '#2a5f66'], b = (fr & 1) ? 0 : 1, sw = SW[fr];
+    R(g, T[2], 5 + sw, 13, 2, 2); R(g, T[2], 9 - sw, 13, 2, 2); R(g, MAT.rubber[0], 4 + sw, 15, 3, 1); R(g, MAT.rubber[0], 9 - sw, 15, 3, 1);
+    R(g, T[0], 4, 7 + b, 8, 6); R(g, MAT.leather[0], 5, 8 + b, 6, 5); R(g, C.blood, 6, 9 + b, 3, 2); P(g, C.blood, 9, 11 + b); P(g, '#6a1a20', 6, 12 + b);
+    R(g, T[0], 12, 8 + b, 2, 4); P(g, '#d8c060', 13, 12 + b); P(g, MAT.steel[1], 13, 13 + b);
+    R(g, T[0], 2, 8 + b, 2, 2); P(g, '#d8c060', 2, 10 + b); R(g, MAT.steel[0], 0, 10 + b, 3, 2); P(g, MAT.steel[1], 0, 12 + b); P(g, MAT.steel[1], 2, 12 + b); P(g, C.blood, 0, 11 + b);
+    R(g, T[0], 5, 1 + b, 6, 3); R(g, T[2], 5, 3 + b, 6, 1); ov(g, '#e8f4ff', 6.5, 1 + b, 1.2, 1.2); P(g, '#2a3038', 6, 1 + b);
+    R(g, '#d8c8b0', 5, 4 + b, 6, 1); P(g, '#a32a1a', 6, 4 + b); P(g, '#a32a1a', 9, 4 + b); R(g, '#d8dde0', 5, 5 + b, 6, 2); P(g, C.blood, 6, 6 + b);
+  }
+  function smAutomata(g, fr) {
+    var B = MAT.brass, b = (fr & 1) ? 0 : 1, sw = SW[fr];
+    R(g, B[0], 4 + sw, 12, 3, 3); R(g, B[0], 9 - sw, 12, 3, 3); R(g, B[2], 3 + sw, 15, 4, 1); R(g, B[2], 9 - sw, 15, 4, 1);
+    R(g, B[0], 3, 6 + b, 10, 6); R(g, B[1], 3, 6 + b, 10, 1); R(g, B[2], 3, 11 + b, 10, 1);
+    R(g, '#140e12', 5, 7 + b, 6, 3); P(g, B[1], 6, 8 + b); P(g, B[1], 7, 9 + b); P(g, C.copper, 9, 8 + b); R(g, C.fire2, 5, 10 + b, 6, 1);
+    R(g, B[0], 1, 7 + b, 2, 5); R(g, MAT.steel[0], 1, 12 + b, 2, 2); R(g, B[0], 13, 7 + b, 2, 5); R(g, MAT.steel[0], 13, 12 + b, 2, 2);
+    R(g, B[0], 5, 2 + b, 6, 4); R(g, B[1], 5, 2 + b, 6, 1); R(g, '#140e12', 6, 3 + b, 4, 2); R(g, '#ffb02e', 6 + ((fr * 2) % 3), 3 + b, 2, 1);
+    P(g, C.blood, 8, 1 + b); P(g, MAT.steel[2], 8, 2 + b); P(g, 'rgba(215,220,230,0.8)', 3 + (fr & 1), 4 + b); P(g, 'rgba(215,220,230,0.8)', 12, 4 + b - (fr >> 1));
+  }
+  function smQuimera(g, fr) {
+    var Fz = MAT.scale, D = '#7c2412', Mz = '#e8a060', b = (fr & 1) ? 0 : 1, sw = SW[fr];
+    R(g, D, 4 + sw, 11, 2, 4); R(g, D, 10 - sw, 11, 2, 4);
+    R(g, '#3f9a44', 1, 7 + b, 2, 1); R(g, '#3f9a44', 1, 4 + b, 1, 4); P(g, '#ffd15a', 1, 3 + b); P(g, '#ff3a30', 0, 3 + b);                  // cola-serpiente
+    R(g, Fz[0], 3, 6 + b, 9, 5); R(g, Fz[1], 4, 6 + b, 7, 1); R(g, D, 3, 10 + b, 9, 1);
+    R(g, D, 5, 7 + b, 1, 3); R(g, D, 7, 7 + b, 1, 3); R(g, D, 9, 7 + b, 1, 3);
+    P(g, C.fire2, 4, 5 + b - (fr & 1)); P(g, C.fire3, 6, 4 + b); P(g, C.fire2, 8, 5 + b - (fr >> 1)); P(g, C.fire1, 10, 4 + b); P(g, C.fire3, 5, 5 + b); P(g, C.fire1, 7, 5 + b);
+    R(g, C.fire1, 9, 2 + b, 2, 2); R(g, C.fire2, 10, 1 + b, 1, 2); R(g, C.fire3, 11, 2 + b, 1, 1);                                          // melena
+    R(g, Fz[0], 10, 4 + b, 5, 5); R(g, Mz, 13, 6 + b, 3, 3); P(g, '#3a1410', 15, 6 + b);
+    R(g, MAT.bone[0], 10, 3 + b, 1, 1); R(g, MAT.bone[0], 13, 3 + b, 1, 1); P(g, '#ffd15a', 12, 5 + b); P(g, MAT.bone[1], 14, 9 + b);
+    R(g, Fz[0], 10 + sw, 11, 2, 4); R(g, Mz, 10 + sw, 15, 3, 1); R(g, Fz[0], 4 - sw, 11, 2, 4); R(g, Mz, 3 - sw, 15, 3, 1);
+  }
+  function smRelojero(g, fr) {
+    var D = ['#2f2538', '#473a54', '#1c1524'], B = MAT.brass, b = (fr & 1) ? 0 : 1, sw = SW[fr], sk = '#d8c8b0';
+    R(g, D[2], 5 + sw, 13, 2, 2); R(g, D[2], 9 - sw, 13, 2, 2); R(g, MAT.rubber[0], 4 + sw, 15, 3, 1); R(g, MAT.rubber[0], 9 - sw, 15, 3, 1);
+    R(g, D[0], 4, 8 + b, 8, 5); R(g, D[1], 4, 8 + b, 1, 4); P(g, D[0], 3, 13); P(g, D[0], 12, 13); R(g, D[0], 12, 12, 1, 2);
+    R(g, '#efe6cc', 7, 9 + b, 3, 3); R(g, B[0], 7, 9 + b, 3, 1); R(g, B[0], 7, 11 + b, 3, 1); P(g, '#1c1524', 8, 10 + b); P(g, C.blood, 9, 10 + b);
+    R(g, D[0], 12, 9 + b, 2, 3); P(g, sk, 13, 12 + b);
+    R(g, B[0], 2, 3 + b, 1, 9); P(g, B[1], 2, 2 + b); R(g, B[0], 1, 2 + b, 3, 1); R(g, B[0], 3, 9 + b, 1, 2); P(g, B[1], 3, 12 + b); R(g, D[0], 3, 8 + b, 1, 2);
+    R(g, D[2], 5, 1 + b, 6, 3); R(g, D[2], 4, 4 + b, 8, 1); P(g, '#efe6cc', 6, 2 + b); R(g, B[0], 5, 3 + b, 6, 1);
+    R(g, sk, 5, 5 + b, 6, 3); P(g, B[0], 6, 6 + b); P(g, '#9fe6f2', 6, 6 + b); P(g, '#a32a1a', 9, 6 + b); R(g, '#c8c8d0', 4, 6 + b, 1, 2); R(g, '#c8c8d0', 11, 6 + b, 1, 2); R(g, OL, 7, 7 + b, 3, 1);
+  }
+  function smVivisector(g, fr) {
+    var LE = ['#46322a', '#6a4c3a', '#241911'], AP = ['#5e4330', '#85604a', '#33231a'], b = (fr & 1) ? 0 : 1, sw = SW[fr], St = MAT.steel;
+    R(g, LE[2], 4 + sw, 13, 3, 2); R(g, LE[2], 9 - sw, 13, 3, 2); R(g, MAT.rubber[0], 3 + sw, 15, 4, 1); R(g, MAT.rubber[0], 9 - sw, 15, 4, 1);
+    hline(g, St[0], 12, 7 + b, 14, 3 + (fr & 1)); hline(g, St[1], 13, 4, 15, 2); P(g, MAT.brass[0], 14, 3 + (fr & 1)); hline(g, St[0], 12, 9 + b, 15, 6 + b); P(g, St[1], 15, 5 + b);
+    R(g, LE[0], 3, 6 + b, 10, 7); R(g, LE[1], 3, 6 + b, 1, 6); R(g, AP[0], 5, 8 + b, 6, 5); R(g, C.blood, 6, 9 + b, 3, 2); P(g, C.blood, 9, 11 + b); P(g, C.blood, 7, 12 + b);
+    R(g, MAT.iron[0], 3, 6 + b, 2, 2); R(g, MAT.iron[0], 11, 6 + b, 2, 2);
+    R(g, St[0], 0, 4 + b, 3, 7); R(g, St[1], 0, 4 + b, 1, 6); P(g, C.blood, 1, 9 + b); R(g, MAT.leather[0], 1, 11 + b, 1, 2);
+    R(g, LE[0], 4, 1 + b, 8, 5); R(g, LE[1], 4, 1 + b, 1, 4); R(g, MAT.iron[0], 5, 3 + b, 6, 3); R(g, EMBER, 6, 3 + b, 2, 2); P(g, '#ffd0a0', 6, 3 + b); R(g, MAT.iron[2], 8, 4 + b, 3, 1); R(g, MAT.iron[2], 6, 5 + b, 5, 1);
+  }
+  function smGenerico(g, fr) {
+    var d = ['#3a3048', '#4f4266', '#241c30'], b = (fr & 1) ? 0 : 1, sw = SW[fr];
+    R(g, d[2], 4 + sw, 13, 3, 3); R(g, d[2], 9 - sw, 13, 3, 3);
+    ov(g, d[0], 8, 8 + b, 5.5, 5.5); ov(g, d[1], 6, 6 + b, 2.5, 2.5);
+    R(g, '#e8c23a', 5, 6 + b, 2, 2); R(g, '#e8c23a', 9, 6 + b, 2, 2); P(g, '#8a7f9a', 8, 9 + b); P(g, '#8a7f9a', 9, 10 + b); P(g, '#8a7f9a', 8, 12 + b - 1);
+  }
+  var SMALL_ART = { sabueso: smSabueso, ayudante: smAyudante, golem: smGolem, alquimista: smAlquimista, arana: smArana, cirujano: smCirujano, automata: smAutomata, quimera: smQuimera, relojero: smRelojero, vivisector: smVivisector };
+  S.drawEnemy = function (ctx, id, x, y, opt) {
+    opt = opt || {};
+    var fr = (opt.frame | 0) & 3, fn = SMALL_ART[id] || smGenerico;
+    var o = smallSprite('E|' + (SMALL_ART[id] ? id : '?') + '|' + fr, function (g) { fn(g, fr); });
+    blit16(ctx, o.c, x, y, opt.flip, opt.flash, opt.alpha);
+  };
+
+
+  /* ====================================================================== */
+  /*  ICONOS 16×16 de extremidades y muñones                                  */
+  /* ====================================================================== */
+  var IK = { sm: ['#b9a98c', '#d9cdb0', '#8a7a66'], st: '#a3202a', ey: ['#6fbf3a', '#d6ff9a'] };   // piel de serie (icono = color del tema)
+  function iHeadCosido(g) {
+    var sm = IK.sm, i;
+    R(g, sm[0], 6, 13, 4, 2); box(g, MAT.steel, 1, 7, 2, 3); box(g, MAT.steel, 13, 7, 2, 3);
+    box(g, sm, 3, 3, 10, 10); g.clearRect(3, 3, 1, 1); g.clearRect(12, 3, 1, 1); g.clearRect(3, 12, 1, 1); g.clearRect(12, 12, 1, 1);
+    R(g, '#2a2230', 3, 2, 10, 3); g.clearRect(3, 2, 1, 1); g.clearRect(12, 2, 1, 1);
+    R(g, '#1c1117', 3, 5, 10, 1); for (i = 4; i < 12; i += 2) { P(g, IK.st, i, 4); P(g, IK.st, i, 6); }
+    R(g, sm[2], 4, 7, 8, 1); R(g, IK.ey[0], 5, 8, 2, 2); R(g, IK.ey[0], 9, 8, 2, 2); P(g, IK.ey[1], 5, 8); P(g, IK.ey[1], 9, 8);
+    P(g, sm[2], 8, 10); R(g, '#1c1117', 5, 11, 6, 1); for (i = 5; i < 11; i += 2) { P(g, IK.st, i, 10); P(g, IK.st, i, 12); }
+  }
+  function iHeadSabueso(g) {
+    var F = MAT.fur, L = MAT.furLt;
+    poly(g, F[0], [[1, 1], [7, 5], [3, 9]]); poly(g, F[0], [[15, 1], [9, 5], [13, 9]]); poly(g, '#7a3a4a', [[2, 3], [5, 5], [3, 7]]); poly(g, '#7a3a4a', [[14, 3], [11, 5], [13, 7]]);
+    box(g, F, 3, 4, 10, 7); g.clearRect(3, 4, 1, 1); g.clearRect(12, 4, 1, 1);
+    R(g, F[2], 3, 6, 3, 2); R(g, F[2], 10, 6, 3, 2);
+    box(g, L, 5, 8, 6, 6); R(g, '#0f0b10', 6, 8, 4, 2); P(g, '#6a6070', 6, 8);
+    R(g, EMBER, 4, 6, 2, 1); R(g, EMBER, 10, 6, 2, 1); P(g, '#ffd0a0', 4, 6); P(g, '#ffd0a0', 11, 6);
+    R(g, '#1c1117', 6, 12, 4, 1); P(g, MAT.bone[1], 6, 12); P(g, MAT.bone[1], 9, 12); P(g, IK.st, 8, 5); P(g, IK.st, 8, 7);
+  }
+  function iHeadRelojero(g) {
+    var B = MAT.brass, sm = IK.sm;
+    R(g, B[0], 6, 2, 4, 4); R(g, B[1], 7, 1, 2, 1); R(g, B[1], 5, 3, 1, 2); R(g, B[1], 10, 3, 1, 2); P(g, B[2], 7, 3); P(g, B[2], 8, 4);
+    box(g, B, 3, 5, 10, 3); R(g, B[2], 3, 7, 10, 1); P(g, B[1], 5, 6); P(g, B[1], 10, 6);
+    box(g, sm, 4, 8, 8, 5); R(g, IK.ey[0], 5, 9, 2, 1);
+    ov(g, B[2], 10, 10, 3, 3); ov(g, B[0], 10, 10, 2.5, 2.5); ov(g, '#9fe6f2', 10, 10, 1.8, 1.8); P(g, IK.ey[0], 10, 10); P(g, '#ffffff', 9, 9);
+    R(g, '#2f2836', 5, 12, 6, 1); box(g, B, 5, 13, 6, 2);
+  }
+  function iHeadQuimera(g) {
+    var F = MAT.scale, Mz = ['#e8a060', '#ffd09a', '#b06a3a'];
+    flameTongue(g, 3, 9, 2, 7); flameTongue(g, 8, 6, 3, 6); flameTongue(g, 13, 9, 2, 7); flameTongue(g, 5, 6, 2, 5); flameTongue(g, 11, 6, 2, 5);
+    tline(g, MAT.bone[0], 4, 6, 2, 3, 1); P(g, MAT.bone[1], 2, 2); tline(g, MAT.bone[0], 11, 6, 13, 3, 1); P(g, MAT.bone[1], 13, 2);
+    box(g, F, 4, 6, 8, 8); g.clearRect(4, 6, 1, 1); g.clearRect(11, 6, 1, 1);
+    box(g, Mz, 6, 9, 4, 5); R(g, '#3a1410', 7, 9, 2, 1);
+    R(g, '#ffd15a', 5, 8, 2, 1); R(g, '#ffd15a', 9, 8, 2, 1); P(g, OL, 6, 8); P(g, OL, 10, 8);
+    P(g, MAT.bone[1], 6, 12); P(g, MAT.bone[1], 9, 12); R(g, '#2b1016', 7, 12, 2, 1);
+  }
+  function iHeadPlaga(g) {
+    var hat = ['#2e2630', '#4a4050', '#17121a'], B = MAT.bone, LE = MAT.leather, i;
+    box(g, hat, 4, 1, 8, 4); R(g, '#6a1f28', 4, 4, 8, 1); box(g, hat, 1, 5, 14, 2); g.clearRect(1, 5, 1, 1); g.clearRect(14, 5, 1, 1);
+    box(g, LE, 4, 7, 8, 6);
+    for (i = 0; i < 2; i++) { ov(g, MAT.brass[2], 5.5 + i * 5, 9, 2.3, 2.3); ov(g, MAT.brass[0], 5.5 + i * 5, 9, 1.8, 1.8); R(g, IK.ey[0], 5 + i * 5, 8, 1, 2); R(g, IK.ey[0], 6 + i * 5, 9, 1, 1); P(g, IK.ey[1], 5 + i * 5, 8); }
+    R(g, B[0], 7, 9, 2, 3); R(g, B[1], 7, 9, 1, 3); R(g, B[0], 7, 12, 2, 2); P(g, B[2], 8, 12); P(g, B[0], 8, 14);
+    box(g, hat, 4, 12, 3, 3); box(g, hat, 9, 12, 3, 3);
+  }
+  function iTorRemendado(g) {
+    var sm = IK.sm, i;
+    box(g, sm, 2, 2, 12, 12); g.clearRect(2, 2, 2, 1); g.clearRect(12, 2, 2, 1);
+    seam(g, IK, [[4, 3], [8, 7], [8, 12]]); seam(g, IK, [[12, 3], [9, 6]]);
+    box(g, MAT.leather, 9, 7, 4, 3); box(g, MAT.cloth, 3, 9, 4, 3);
+    for (i = 9; i < 13; i += 2) { P(g, IK.st, i, 7); P(g, IK.st, i, 9); }
+    box(g, MAT.leather, 2, 12, 12, 3); box(g, MAT.brass, 7, 12, 2, 3); P(g, OL, 7, 13);
+  }
+  function iTorCaldera(g) {
+    var Cu = MAT.copper, B = MAT.brass;
+    box(g, MAT.iron, 3, 0, 2, 4); box(g, MAT.iron, 11, 0, 2, 4); P(g, 'rgba(215,220,230,0.85)', 4, 0);
+    box(g, Cu, 1, 3, 14, 12); g.clearRect(1, 3, 1, 1); g.clearRect(14, 3, 1, 1); g.clearRect(1, 14, 1, 1); g.clearRect(14, 14, 1, 1);
+    R(g, B[2], 1, 5, 14, 1); R(g, B[0], 1, 4, 14, 1); R(g, B[2], 1, 12, 14, 1); R(g, B[0], 1, 11, 14, 1);
+    ov(g, B[2], 8, 8, 3.8, 3.8); ov(g, B[0], 8, 8, 3.2, 3.2); ov(g, '#1a0f0a', 8, 8, 2.4, 2.4); ov(g, C.fire2, 8, 8.5, 1.9, 1.9); P(g, C.fire3, 8, 8); P(g, '#ffffff', 7, 7);
+    P(g, B[1], 3, 7); P(g, B[1], 3, 9); P(g, B[1], 12, 7); P(g, B[1], 12, 9);
+  }
+  function iTorCostillar(g) {
+    var St = MAT.steel, i;
+    R(g, '#1b1420', 3, 3, 10, 11); box(g, St, 2, 2, 12, 2); box(g, St, 7, 4, 2, 9);
+    for (i = 0; i < 4; i++) { var y = 5 + i * 2; R(g, St[1], 3 + i, y, 4 - i, 1); R(g, St[0], 3 + i, y + 1, 4 - i, 1); R(g, St[1], 9, y, 4 - i, 1); R(g, St[0], 9, y + 1, 4 - i, 1); }
+    R(g, C.blood, 9, 6, 2, 2); P(g, C.bloodHi, 9, 6);
+    box(g, St, 3, 13, 10, 2); R(g, IK.sm[0], 2, 4, 1, 6); R(g, IK.sm[0], 13, 4, 1, 6);
+  }
+  function iTorAlambique(g) {
+    var B = MAT.brass;
+    box(g, MAT.leather, 2, 2, 2, 12); box(g, MAT.leather, 12, 2, 2, 12); box(g, B, 2, 2, 12, 2);
+    ov(g, B[2], 8, 9, 5.6, 5.6); ov(g, '#16302c', 8, 9, 4.8, 4.8);
+    g.save(); g.beginPath(); g.rect(0, 8, 16, 8); g.clip(); ov(g, '#5fbf3a', 8, 9, 4.8, 4.8); g.restore();
+    R(g, '#b6ef7a', 5, 8, 6, 1); P(g, '#ffffff', 5, 7); P(g, '#c8f4f0', 4, 9); P(g, '#e8ffd0', 9, 11); P(g, '#e8ffd0', 7, 12);
+    box(g, B, 6, 3, 4, 2); R(g, '#b8f0f0', 7, 5, 2, 2); R(g, MAT.leather[0], 7, 2, 2, 1);
+    box(g, MAT.leather, 3, 13, 10, 2); box(g, B, 7, 13, 2, 2);
+  }
+  function iArmMuerto(g) {
+    var sm = IK.sm;
+    box(g, sm, 6, 1, 4, 7); R(g, MAT.rag[0], 6, 1, 4, 2); P(g, MAT.rag[2], 7, 3);
+    seamH(g, IK, 6, 9, 7); box(g, sm, 6, 8, 4, 4);
+    box(g, sm, 5, 12, 6, 2); R(g, sm[0], 5, 14, 1, 1); R(g, sm[0], 7, 14, 1, 1); R(g, sm[0], 9, 14, 1, 1); R(g, sm[0], 11, 12, 1, 2); P(g, sm[2], 7, 13);
+  }
+  function iArmSierra(g) {
+    var St = MAT.steel, B = MAT.brass, i;
+    box(g, IK.sm, 6, 0, 4, 3); seamH(g, IK, 6, 9, 3);
+    box(g, B, 4, 4, 8, 4); R(g, B[2], 4, 6, 8, 1); box(g, St, 2, 5, 2, 2); P(g, B[1], 5, 5); P(g, B[1], 10, 5);
+    box(g, St, 5, 8, 6, 7); R(g, St[2], 7, 9, 1, 5); R(g, '#1c2028', 8, 9, 1, 5);
+    for (i = 0; i < 3; i++) { P(g, St[1], 4, 9 + i * 2); P(g, St[0], 3, 10 + i * 2); P(g, St[1], 11, 10 + i * 2); P(g, St[0], 12, 11 + i * 2); }
+    P(g, C.blood, 10, 12); P(g, C.blood, 6, 10);
+  }
+  function iArmGolem(g) {
+    var st = MAT.stone, ir = MAT.iron;
+    box(g, IK.sm, 6, 0, 4, 2); box(g, st, 5, 2, 6, 5); box(g, MAT.leather, 5, 3, 3, 2); box(g, ir, 4, 6, 8, 2);
+    box(g, st, 3, 8, 10, 7); R(g, st[2], 6, 10, 1, 4); R(g, st[2], 9, 10, 1, 4); R(g, st[1], 4, 9, 8, 1);
+    P(g, ir[1], 5, 7); P(g, ir[1], 10, 7); P(g, IK.st, 4, 13);
+  }
+  function iArmTijera(g) {
+    var St = MAT.steel, B = MAT.brass;
+    ov(g, St[2], 5, 3, 2.8, 2.8); ov(g, St[0], 5, 3, 2.2, 2.2); ov(g, '#1c2028', 5, 3, 1.1, 1.1);
+    ov(g, St[2], 11, 3, 2.8, 2.8); ov(g, St[0], 11, 3, 2.2, 2.2); ov(g, '#1c2028', 11, 3, 1.1, 1.1);
+    tline(g, St[2], 6, 5, 9, 8, 3); tline(g, St[2], 10, 5, 7, 8, 3); tline(g, St[0], 6, 5, 9, 8, 2); tline(g, St[0], 10, 5, 7, 8, 2);
+    box(g, B, 7, 6, 2, 2);
+    box(g, St, 5, 8, 3, 6); box(g, St, 9, 8, 3, 6); R(g, '#1c2028', 8, 9, 1, 5); R(g, St[1], 5, 9, 1, 4); P(g, St[2], 7, 14); P(g, St[2], 9, 14);
+    P(g, C.blood, 7, 14); P(g, C.blood, 8, 14);
+  }
+  function iArmPiston(g) {
+    var B = MAT.brass, St = MAT.steel;
+    box(g, IK.sm, 6, 0, 4, 2);
+    tline(g, MAT.rubber[1], 4, 2, 3, 6, 2); tline(g, MAT.rubber[0], 3, 6, 5, 8, 2);
+    box(g, B, 5, 2, 6, 8); R(g, B[2], 5, 4, 6, 1); R(g, B[2], 5, 8, 6, 1); ov(g, '#e8dcc0', 8, 6, 1.4, 1.4); P(g, C.blood, 8, 6);
+    box(g, St, 7, 10, 2, 3); box(g, St, 4, 12, 8, 3); R(g, MAT.iron[2], 4, 14, 8, 1); P(g, St[1], 5, 13); P(g, St[1], 10, 13);
+  }
+  function iArmTentaculo(g) {
+    var P4 = MAT.plum, N = 50, i, pts = [];
+    for (i = 0; i <= N; i++) {
+      var t = i / N, x = 7 + Math.sin(t * 5) * (1.2 + t * 2.6), y = 1.5 + t * 12;
+      if (t > 0.8) x += (t - 0.8) * 16;
+      pts.push([x, y, 3.1 - 2.1 * t]);
+    }
+    for (i = 0; i < pts.length; i++) ov(g, P4[0], pts[i][0], pts[i][1], pts[i][2], pts[i][2]);
+    for (i = 0; i < pts.length; i += 2) if (pts[i][2] > 1) ov(g, P4[1], pts[i][0] - 0.8, pts[i][1] - 0.3, pts[i][2] * 0.4, pts[i][2] * 0.4);
+    for (i = 8; i < pts.length - 4; i += 6) P(g, '#f0c8e0', Math.round(pts[i][0] + pts[i][2] * 0.5), Math.round(pts[i][1]));
+    P(g, '#7fe04a', Math.round(pts[N][0]) + 1, 14); P(g, '#b6ef7a', Math.round(pts[N][0]) + 1, 15);
+  }
+  function iLegMuerta(g) {          // vista lateral: la pierna mira a la derecha
+    var sm = IK.sm;
+    box(g, sm, 4, 0, 5, 7); R(g, MAT.rag[0], 4, 0, 5, 3); R(g, MAT.rag[2], 4, 3, 5, 1); P(g, MAT.rag[0], 5, 4); P(g, MAT.rag[0], 7, 4);
+    seamH(g, IK, 4, 8, 7); box(g, sm, 5, 8, 4, 4);
+    box(g, sm, 4, 12, 9, 3); P(g, sm[2], 10, 14); P(g, sm[2], 12, 14); P(g, sm[2], 11, 13);
+  }
+  function iLegSabueso(g) {         // pata trasera de perro: muslo hacia delante, corvejón atrás, zarpa
+    var F = MAT.fur, L = MAT.furLt;
+    tline(g, F[2], 6, 2, 11, 6, 5); tline(g, F[0], 5, 1, 10, 5, 5); tline(g, F[1], 4, 0, 9, 4, 1);
+    tline(g, F[2], 11, 6, 6, 10, 3); tline(g, F[0], 10, 5, 5, 9, 3);
+    tline(g, F[0], 5, 9, 7, 13, 2);
+    box(g, L, 5, 13, 9, 2); P(g, MAT.bone[1], 14, 14); P(g, MAT.bone[1], 12, 15); P(g, F[2], 9, 14); P(g, F[2], 11, 14);
+  }
+  function iLegResorte(g) {
+    var St = MAT.steel, B = MAT.brass, y;
+    box(g, IK.sm, 6, 0, 4, 2); box(g, B, 4, 2, 8, 2);
+    R(g, '#14181e', 6, 4, 4, 8);
+    for (y = 4; y < 12; y++) { var ph = y & 3; if (ph === 0) R(g, St[1], 5, y, 6, 1); else if (ph === 1) R(g, St[0], 5, y, 6, 1); else if (ph === 2) R(g, St[2], 5, y, 6, 1); }
+    box(g, B, 3, 12, 10, 2); box(g, MAT.rubber, 3, 14, 10, 2);
+  }
+  function iLegArana(g) {
+    var St = MAT.steel, B = MAT.brass;
+    tline(g, St[2], 9, 2, 3, 5, 3); tline(g, St[2], 3, 5, 6, 11, 3); tline(g, St[2], 6, 11, 7, 14, 2);
+    tline(g, St[0], 9, 2, 3, 5, 2); tline(g, St[0], 3, 5, 6, 11, 2); tline(g, St[1], 8, 1, 3, 4, 1);
+    ov(g, B[2], 10, 2, 2.6, 2.6); ov(g, B[0], 10, 2, 2, 2); ov(g, B[2], 3, 5, 2, 2); ov(g, B[0], 3, 5, 1.4, 1.4); ov(g, B[0], 6, 11, 1.6, 1.6);
+    P(g, MAT.bone[1], 7, 15);
+  }
+  function iLegPesada(g) {          // bota de hierro en vista lateral
+    var I = MAT.iron, B = MAT.brass;
+    box(g, IK.sm, 4, 0, 5, 2); box(g, I, 3, 2, 7, 3); R(g, I[1], 5, 0, 2, 3); P(g, I[1], 5, 0);
+    box(g, I, 4, 5, 5, 5); R(g, I[2], 4, 7, 5, 1); R(g, I[1], 5, 6, 1, 3); P(g, B[1], 8, 6); P(g, B[1], 8, 9);
+    box(g, B, 3, 9, 7, 1); box(g, I, 3, 10, 11, 4); R(g, I[1], 4, 11, 2, 1); R(g, OL, 3, 14, 11, 1); P(g, B[1], 12, 11);
+  }
+  function iStumpHead(g) {
+    wrapS(g, 6, 11, 4, 4); wrapOv(g, 8, 7, 5.5, 5.5); R(g, BAND[2], 5, 10, 6, 1);
+    R(g, C.blood, 8, 4, 3, 2); P(g, C.bloodHi, 8, 4); P(g, C.blood, 9, 6); R(g, BAND[0], 12, 8, 3, 1); P(g, BAND[2], 14, 9);
+  }
+  function iStumpTorso(g) {
+    for (var y = 2; y < 15; y++) { var w = y < 4 ? 6 : (y < 11 ? 5 : 4); for (var x = 8 - w; x < 8 + w; x++) P(g, (((x + y) & 3) === 0) ? BAND[2] : (x === 8 - w ? BAND[1] : BAND[0]), x, y); }
+    R(g, BAND[2], 4, 14, 8, 1); R(g, MAT.leather[0], 4, 11, 8, 1);
+    R(g, C.blood, 5, 5, 3, 2); P(g, C.bloodHi, 5, 5); R(g, C.blood, 9, 8, 2, 2); R(g, BAND[0], 12, 10, 3, 1);
+  }
+  function iStumpArm(g) {
+    box(g, IK.sm, 6, 1, 4, 3); seamH(g, IK, 6, 9, 4); wrapS(g, 6, 5, 4, 6); wrapOv(g, 8, 11, 2, 2); R(g, BAND[2], 6, 5, 4, 1);
+    R(g, C.blood, 7, 10, 2, 2); P(g, C.bloodHi, 7, 10); R(g, BAND[0], 10, 7, 3, 1); P(g, BAND[2], 12, 8);
+  }
+  function iStumpLeg(g) {
+    box(g, IK.sm, 5, 1, 6, 4); seamH(g, IK, 5, 10, 5); wrapS(g, 5, 6, 6, 5); wrapOv(g, 8, 11, 3, 2); R(g, BAND[2], 5, 6, 6, 1);
+    R(g, C.blood, 6, 9, 3, 2); box(g, MAT.wood, 7, 12, 2, 3); R(g, MAT.iron[0], 6, 14, 4, 1); R(g, MAT.leather[0], 5, 8, 6, 1);
+  }
+  var ICON_ART = {
+    cab_cosido: iHeadCosido, cab_sabueso: iHeadSabueso, cab_relojero: iHeadRelojero, cab_quimera: iHeadQuimera, cab_plaga: iHeadPlaga,
+    tor_remendado: iTorRemendado, tor_caldera: iTorCaldera, tor_costillar: iTorCostillar, tor_alambique: iTorAlambique,
+    bra_muerto: iArmMuerto, bra_sierra: iArmSierra, bra_golem: iArmGolem, bra_tijera: iArmTijera, bra_piston: iArmPiston, bra_tentaculo: iArmTentaculo,
+    pie_muerta: iLegMuerta, pie_sabueso: iLegSabueso, pie_resorte: iLegResorte, pie_arana: iLegArana, pie_pesada: iLegPesada,
+    stump_head: iStumpHead, stump_torso: iStumpTorso, stump_arm: iStumpArm, stump_leg: iStumpLeg
+  };
+  var QMARK = ['.xxx.', 'x...x', '....x', '...x.', '..x..', '.....', '..x..'];
+  var iconCache = {};
+  function iconOf(id, silhouette) {
+    var fn = ICON_ART[id], key = (fn ? id : '?') + (silhouette || !fn ? '|s' : ''), o = iconCache[key];
+    if (o) return o;
+    o = mk(16, 16);
+    if (fn && !silhouette) { fn(o.g); outline(o, OL); }
+    else {
+      if (fn) { var t = mk(16, 16); fn(t.g); o.g.drawImage(silh(t.c, '#2a2136'), 0, 0); outline(o, '#4a3b5c'); }
+      else { ov(o.g, '#2a2136', 8, 8, 6, 6); outline(o, '#4a3b5c'); }
+      paint(o.g, QMARK, { x: '#8a7f6a' }, 6, 4, false);
+    }
+    return (iconCache[key] = o);
+  }
+  S.drawLimbIcon = function (ctx, limbId, x, y, opt) {
+    opt = opt || {};
+    var o = iconOf(limbId, opt.silhouette);
+    if (opt.alpha != null && opt.alpha !== 1) { ctx.save(); ctx.globalAlpha *= opt.alpha; ctx.drawImage(o.c, Math.round(x), Math.round(y)); ctx.restore(); }
+    else ctx.drawImage(o.c, Math.round(x), Math.round(y));
+  };
+  S.drawStumpIcon = function (ctx, type, x, y) {
+    var o = iconOf('stump_' + type);
+    ctx.drawImage(o.c, Math.round(x), Math.round(y));
   };
 
   //@@END

@@ -8,7 +8,7 @@
   var DD = window.DD = window.DD || {};
 
   /* ---------- Mezcla y límites ---------- */
-  var MASTER = 0.9, MUSIC_LVL = 0.42, SFX_LVL = 1.0, ECHO_SEND = 0.5;
+  var MASTER = 0.9, MUSIC_LVL = 0.28, SFX_LVL = 1.0, ECHO_SEND = 0.5;
   var LOOK = 0.4, PUMP_MS = 60;            // planificación adelantada (s) e intervalo del planificador (ms)
   var MAX_SFX = 14, MAX_TRACKS = 3;        // efectos simultáneos; pista actual + las que se desvanecen
   var FADE_TC = 0.3, FADE_END = 2.2;       // fundido cruzado: constante de tiempo y cuándo se retira la saliente
@@ -470,9 +470,9 @@
   var VOICES = {
     drone: function (E, d, t, c) {             // pedal grave: sierras desafinadas filtradas + seno
       var f = c.fs[0], cut = c.L.cut || 170, a = c.dur * 0.3, r = c.dur * 0.4;
-      tone(E, d, { t: t, f: f, type: 'sawtooth', dets: [-9, 9], a: a, dur: c.dur, r: r, vol: c.vel * 0.5, flt: { t: 'lowpass', f: cut, f2: cut * 1.8, q: 1.5 } });
-      tone(E, d, { t: t, f: f, a: a, dur: c.dur, r: r, vol: c.vel * 0.5 });
-      tone(E, d, { t: t, f: f * 2, a: a, dur: c.dur, r: r, vol: c.vel * 0.18 });
+      tone(E, d, { t: t, f: f, type: 'sawtooth', dets: [-9, 9], a: a, dur: c.dur, r: r, vol: c.vel * 0.4, flt: { t: 'lowpass', f: cut, f2: cut * 1.8, q: 1.5 } });
+      tone(E, d, { t: t, f: f, a: a, dur: c.dur, r: r, vol: c.vel * 0.06 });
+      tone(E, d, { t: t, f: f * 2, a: a, dur: c.dur, r: r, vol: c.vel * 0.28 });
     },
     strings: function (E, d, t, c) {           // cuerdas de sierra filtradas, el filtro se abre durante la nota
       var cut = c.L.cut || 800, a = Math.min(c.dur * 0.35, 1.4), r = Math.min(c.dur * 0.45, 1.8);
@@ -490,7 +490,7 @@
     },
     brass: function (E, d, t, c) {             // «metales»: onda con armónicos y filtro que se abre en el ataque
       c.fs.forEach(function (f) {
-        tone(E, d, { t: t, f: f, wave: 'brass', dets: [-7, 7], a: c.L.att || 0.05, dur: c.dur, r: Math.min(0.35, c.dur * 0.4), vol: c.vel * 0.3,
+        tone(E, d, { t: t, f: f, wave: 'brass', dets: [-7, 7], a: c.L.att || 0.05, dur: c.dur, r: Math.min(0.35, c.dur * 0.4), vol: c.vel * 0.48,
           flt: { t: 'lowpass', f: 450, f2: 2600, q: 1.6, s: Math.min(c.dur * 0.6, 0.45) } });
       });
     },
@@ -503,38 +503,38 @@
     },
     bass: function (E, d, t, c) {
       var dec = c.dur * 1.4 + 0.05;
-      tone(E, d, { t: t, f: c.fs[0], type: 'sawtooth', d: dec, a: 0.004, vol: c.vel * 0.55, dist: !!c.L.dist,
+      tone(E, d, { t: t, f: c.fs[0], type: 'sawtooth', d: dec, a: 0.004, vol: c.vel * 0.5, dist: !!c.L.dist,
         flt: { t: 'lowpass', f: c.L.cut || 1100, f2: 130, q: 3, s: dec } });
-      tone(E, d, { t: t, f: c.fs[0], d: dec, a: 0.004, vol: c.vel * 0.6 });
+      tone(E, d, { t: t, f: c.fs[0], d: dec, a: 0.004, vol: c.vel * 0.55 });
     },
     arp: function (E, d, t, c) {               // arpegio de sinte: pizzicato con filtro que cierra
       var dec = c.dur * 2 + 0.12;
-      tone(E, d, { t: t, f: c.fs[0], type: c.L.type || 'sawtooth', dets: [-6, 6], d: dec, a: 0.003, vol: c.vel * 0.35, pan: c.pan,
+      tone(E, d, { t: t, f: c.fs[0], type: c.L.type || 'sawtooth', dets: [-6, 6], d: dec, a: 0.003, vol: c.vel * 0.8, pan: c.pan,
         flt: { t: 'lowpass', f: 3800, f2: 420, q: 4, s: dec } });
     },
     timp: function (E, d, t, c) {              // timbal
-      var f = c.fs[0], v = c.vel;
+      var f = c.fs[0], v = c.vel * 0.65;
       tone(E, d, { t: t, f: f * 1.12, f2: f, glide: 0.18, d: 1.1, a: 0.002, vol: v });
       tone(E, d, { t: t, f: f * 1.5, d: 0.45, a: 0.002, vol: v * 0.3 });
       tone(E, d, { t: t, f: f * 2, d: 0.3, a: 0.002, vol: v * 0.18 });
       nb(E, d, t, 'lowpass', 0.07, 600, 120, 0.8, v * 0.9, 0.001);
     },
     kick: function (E, d, t, c) {
-      thump(E, d, t, 160, 42, 0.34, c.vel);
-      nb(E, d, t, 'highpass', 0.03, 1800, 1800, 0.7, c.vel * 0.3, 0.001);
+      thump(E, d, t, 160, 42, 0.34, c.vel * 0.7);
+      nb(E, d, t, 'highpass', 0.03, 1800, 1800, 0.7, c.vel * 0.25, 0.001);
     },
     snare: function (E, d, t, c) {
       nb(E, d, t, 'bandpass', 0.18, 1900, 1900, 0.9, c.vel * 0.7, 0.001);
       thump(E, d, t, 190, 140, 0.1, c.vel * 0.5);
       nb(E, d, t, 'highpass', 0.09, 6000, 6000, 0.7, c.vel * 0.25, 0.001);
     },
-    hat: function (E, d, t, c) { nb(E, d, t, 'highpass', c.L.open ? 0.12 : 0.03, 7000, 7000, 0.7, c.vel * 0.3, 0.001); },
-    tick: function (E, d, t, c) { clockTick(E, d, t, c.vel, (c.n >> 2) & 1, ((c.n >> 2) & 1) ? 0.25 : -0.25); },
+    hat: function (E, d, t, c) { nb(E, d, t, 'highpass', c.L.open ? 0.12 : 0.03, 7000, 7000, 0.7, c.vel * 1.1, 0.001); },
+    tick: function (E, d, t, c) { clockTick(E, d, t, c.vel * 1.5, (c.n >> 2) & 1, ((c.n >> 2) & 1) ? 0.25 : -0.25); },
     gear: function (E, d, t, c) {              // engranaje: trinquete de chasquidos que se frena + clunk final
       var n = 7 + (c.n % 3), i, sp = c.dur / n, tt = t;
       for (i = 0; i < n; i++) {
-        nb(E, d, tt, 'bandpass', 0.012, i % 2 ? 2200 : 3800, i % 2 ? 2200 : 3800, 6, c.vel * 0.6, 0.001);
-        tone(E, d, { t: tt, f: 2400, d: 0.015, a: 0.001, vol: c.vel * 0.1, pan: i % 2 ? 0.3 : -0.3 });
+        nb(E, d, tt, 'bandpass', 0.012, i % 2 ? 2200 : 3800, i % 2 ? 2200 : 3800, 6, c.vel, 0.001);
+        tone(E, d, { t: tt, f: 2400, d: 0.015, a: 0.001, vol: c.vel * 0.16, pan: i % 2 ? 0.3 : -0.3 });
         tt += sp * (0.7 + i * 0.12);
       }
       clang(E, d, t + c.dur, 260, 0.18, c.vel * 0.4);
@@ -544,21 +544,21 @@
     bell: function (E, d, t, c) { clang(E, d, t, c.fs[0], c.L.dec || 3.2, c.vel * 0.45, BELL, BELL_A); },
     drip: function (E, d, t, c) {              // gota de agua
       var f = c.fs[0];
-      tone(E, d, { t: t, f: f, f2: f * 1.7, glide: 0.035, d: 0.22, a: 0.002, vol: c.vel * 0.5 });
+      tone(E, d, { t: t, f: f, f2: f * 1.7, glide: 0.035, d: 0.22, a: 0.002, vol: c.vel * 0.7 });
       tone(E, d, { t: t + 0.05, f: f * 0.5, f2: f * 0.8, glide: 0.04, d: 0.15, a: 0.002, vol: c.vel * 0.2 });
     },
     heart: function (E, d, t, c) {             // latido: «lub» (X) y «dub» (x)
       var lub = c.acc > 0.9;
-      thump(E, d, t, lub ? 72 : 62, lub ? 42 : 38, 0.22, c.vel * 0.95);
+      thump(E, d, t, lub ? 72 : 62, lub ? 42 : 38, 0.22, c.vel * 0.85);
       nb(E, d, t, 'lowpass', 0.12, 240, 90, 0.7, c.vel * 0.5);
     },
-    glug: function (E, d, t, c) { bubbles(E, d, t, 3, c.L.f || 180, c.sd * 0.6, c.vel * 0.5, E.rng() < 0.5 ? 1 : -1); },
+    glug: function (E, d, t, c) { bubbles(E, d, t, 3, c.L.f || 180, c.sd * 0.6, c.vel, E.rng() < 0.5 ? 1 : -1); },
     squelch: function (E, d, t, c) {
-      nb(E, d, t, 'bandpass', 0.22, 260, 720, 6, c.vel * 0.7, 0.02);
-      thump(E, d, t, 90, 55, 0.2, c.vel * 0.6);
+      nb(E, d, t, 'bandpass', 0.22, 260, 720, 6, c.vel, 0.02);
+      thump(E, d, t, 90, 55, 0.2, c.vel * 0.7);
     },
     rise: function (E, d, t, c) {
-      noiseBurst(E, d, { t: t, a: c.dur * 0.92, dur: c.dur, r: 0.08, vol: c.vel * 0.5, flt: { t: 'bandpass', f: 300, f2: 4500, q: 2.5 } });
+      noiseBurst(E, d, { t: t, a: c.dur * 0.92, dur: c.dur, r: 0.08, vol: c.vel * 0.7, flt: { t: 'bandpass', f: 300, f2: 4500, q: 2.5 } });
     }
   };
 
@@ -573,7 +573,7 @@
     title: { key: 38, bpm: 52, bars: 8, tempo: 0, sc: SC.phr, fade: 0.6,      // re frigio, solemne
       prog: [[0, 'm'], [0, 'm'], [1, 'M'], [0, 'm'], [5, 'm'], [10, 'M'], [1, 'M'], [7, 'p']],
       layers: [
-        { v: 'drone', p: ONE, len: 32, pedal: 1, oct: -12, g: 0.9 },
+        { v: 'drone', p: ONE, len: 32, pedal: 1, oct: -12, g: 0.4 },
         { v: 'organ', p: BAR, len: 16, tones: [0, 2], oct: 12, g: 0.5 },
         { v: 'strings', p: BAR, len: 16, tones: [0, 1, 2], oct: 24, g: 0.55, bars: [2, 3, 4, 5, 6, 7] },
         { v: 'choir', p: BAR, len: 16, tones: [1, 2], oct: 24, g: 0.5, bars: [4, 5, 6, 7] },
@@ -586,7 +586,7 @@
     table: { key: 36, bpm: 46, bars: 8, tempo: 0, sc: SC.phr, fade: 0.8,      // do frigio, goteo
       prog: [[0, 'm'], [0, 'm'], [1, 'M'], [0, 'm'], [8, 'M'], [1, 'M'], [0, 'm'], [6, 'd']],
       layers: [
-        { v: 'drone', p: ONE, len: 32, pedal: 1, oct: -12, g: 0.8, cut: 150 },
+        { v: 'drone', p: ONE, len: 32, pedal: 1, oct: -12, g: 0.35, cut: 150 },
         { v: 'strings', p: BAR, len: 16, tones: [1, 2], oct: 24, g: 0.3, cut: 500 },
         { v: 'drip', p: sprinkle(128, { 5: '3', 14: '5', 22: '1', 35: '4', 41: '2', 58: '6', 63: '3', 77: '5', 84: '1', 97: '4', 103: '0', 118: '2' }),
           m: 's', oct: 36, g: 0.8, echo: 1 },
@@ -599,7 +599,7 @@
     explore: { key: 40, bpm: 76, bars: 8, tempo: 0.34, tense: 1, sc: SC.phr, fade: 0.5,   // mi frigio, pulso que crece
       prog: [[0, 'm'], [0, 'm'], [1, 'M'], [0, 'm'], [10, 'M'], [8, 'M'], [1, 'M'], [7, 'p']],
       layers: [
-        { v: 'drone', p: ONE, len: 32, pedal: 1, oct: -12, g: 0.8 },
+        { v: 'drone', p: ONE, len: 32, pedal: 1, oct: -12, g: 0.35 },
         { v: 'bass', p: 'X.x.x.x.x.x.x.x.X.x.x.x.x.x.xx..', g: 0.7, len: 1, cut: 700 },
         { v: 'tick', p: 'x...x...x...x...', g: 0.4 },
         { v: 'strings', p: BAR, len: 16, tones: [0, 1, 2], oct: 24, g: 0.4, cut: 900 },
@@ -615,7 +615,7 @@
     combat: { key: 41, bpm: 118, bars: 8, tempo: 0.28, tense: 1, sc: SC.phr, fade: 0.12,  // fa frigio, percusivo
       prog: [[0, 'm'], [0, 'm'], [1, 'M'], [0, 'm'], [0, 'm'], [10, 'M'], [1, 'M'], [7, 'p']],
       layers: [
-        { v: 'drone', p: ONE, len: 32, pedal: 1, oct: -12, g: 0.7 },
+        { v: 'drone', p: ONE, len: 32, pedal: 1, oct: -12, g: 0.3 },
         { v: 'kick', p: 'X..x..x.X..x..x.', g: 0.9 },
         { v: 'timp', p: 'X.......x.......', g: 0.8 },
         { v: 'snare', p: '....X.......X..o', g: 0.6 },
@@ -633,7 +633,7 @@
     harvest: { key: 33, bpm: 58, bars: 8, tempo: 0.18, tense: 1, sc: SC.phr, fade: 0.4,   // la frigio, grave y carnal
       prog: [[0, 'm'], [1, 'M'], [0, 'm'], [10, 'M'], [0, 'm'], [8, 'M'], [1, 'M'], [0, 's']],
       layers: [
-        { v: 'drone', p: ONE, len: 32, pedal: 1, oct: 0, g: 0.9, cut: 140 },
+        { v: 'drone', p: ONE, len: 32, pedal: 1, oct: 0, g: 0.4, cut: 140 },
         { v: 'heart', p: 'X..x............', g: 0.9 },
         { v: 'glug', p: sprinkle(64, { 6: 'x', 21: 'x', 40: 'x', 52: 'x' }), f: 170, g: 0.5 },
         { v: 'strings', p: BAR, len: 16, tones: [0, 1, 2], oct: 12, g: 0.45, cut: 500 },
@@ -646,7 +646,7 @@
     death: { key: 38, bpm: 46, bars: 4, tempo: 0, sc: SC.phr, fade: 0.25,      // re, descendente
       prog: [[0, 'm'], [-2, 'M'], [-4, 'M'], [-5, 's']],
       layers: [
-        { v: 'drone', p: 'x' + dots(63), len: 64, pedal: 1, oct: -12, g: 1 },
+        { v: 'drone', p: 'x' + dots(63), len: 64, pedal: 1, oct: -12, g: 0.45 },
         { v: 'strings', p: BAR, len: 16, tones: [0, 1, 2], oct: 24, g: 0.55, cut: 600 },
         { v: 'choir', p: BAR, len: 16, tones: [1, 2], oct: 24, g: 0.5 },
         { v: 'strings', p: '7.......6.......5.......4.......3.......2.......1.......0.......', m: 's', oct: 24, len: 0, g: 0.5, cut: 1000 },
@@ -657,7 +657,7 @@
     win: { key: 38, bpm: 70, bars: 8, tempo: 0, sc: SC.phr, fade: 0.5,         // alivio sombrío (menor) -> luz (mayor)
       prog: [[0, 'm'], [8, 'M'], [5, 'm'], [7, 'M'], [0, 'M'], [5, 'M'], [2, 'm'], [7, 's']],
       layers: [
-        { v: 'drone', p: ONE, len: 32, pedal: 1, oct: -12, g: 0.8 },
+        { v: 'drone', p: ONE, len: 32, pedal: 1, oct: -12, g: 0.35 },
         { v: 'strings', p: BAR, len: 16, tones: [0, 1, 2], oct: 24, g: 0.5, cut: 900 },
         { v: 'organ', p: BAR, len: 16, tones: [0, 2], oct: 12, g: 0.45, bars: [0, 1, 2, 3] },
         { v: 'timp', p: 'X' + dots(63), oct: 12, g: 0.8 },

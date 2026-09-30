@@ -35,31 +35,34 @@
 
   limb('cab_sabueso', 'Cabeza de Sabueso', 'head', 1, 35, { vision: 2 },
     'Huele el miedo a tres pisos de distancia.');
-  card('cab_sabueso_1', 'Olfatear Sangre', 1, 8, 0, [{ t: 'vuln', v: 1 }, { t: 'dmg', v: 2 }]);
-  card('cab_sabueso_2', 'Mordisco Doble', 1, 12, 0, [{ t: 'dmg', v: 3, n: 2 }]);
-  card('cab_sabueso_3', 'Jauría', 2, 22, 0, [{ t: 'vuln', v: 2 }, { t: 'dmg', v: 2, n: 4 }],
+  card('cab_sabueso_1', 'Olfatear Sangre', 1, 10, 0, [{ t: 'vuln', v: 1 }, { t: 'dmg', v: 2 }]);
+  card('cab_sabueso_2', 'Mordisco Doble', 1, 14, 0, [{ t: 'dmg', v: 3, n: 2 }]);
+  card('cab_sabueso_3', 'Jauría', 2, 24, 0,
+    [{ t: 'vuln', v: 2 }, { t: 'dmg', v: 2, n: 4 }],
     'Aúlla, y el eco responde con colmillos.');
 
   limb('cab_relojero', 'Cabeza de Relojero', 'head', 2, 40, { draw: 1, vision: 1 },
     'Sus ojos son lentes; su mente, un escape de ancla.');
   card('cab_relojero_1', 'Tic-Tac', 0, 10, 0, [{ t: 'draw', v: 1 }]);
-  card('cab_relojero_2', 'Dar Cuerda', 1, 12, 0, [{ t: 'draw', v: 2 }]);
-  card('cab_relojero_3', 'Hora Exacta', 1, 30, 3, [{ t: 'energy', v: 2 }, { t: 'draw', v: 1 }],
+  card('cab_relojero_2', 'Dar Cuerda', 1, 14, 0, [{ t: 'draw', v: 2 }]);
+  card('cab_relojero_3', 'Hora Exacta', 1, 40, 3,
+    [{ t: 'energy', v: 2 }, { t: 'draw', v: 1 }],
     'Por un instante, el tiempo te obedece.');
 
   limb('cab_quimera', 'Cabeza de Quimera', 'head', 3, 50, { fireRes: 0.25 },
     'Tres bocas, una sola hambre: arder.');
-  card('cab_quimera_1', 'Chispa', 1, 16, 0, [{ t: 'dmg', v: 2 }, { t: 'burn', v: 3 }]);
-  card('cab_quimera_2', 'Fuego Fatuo', 2, 32, 0, [{ t: 'dmg', v: 3 }, { t: 'burn', v: 4 }]);
-  card('cab_quimera_3', 'Gran Llamarada', 3, 40, 5,
+  card('cab_quimera_1', 'Chispa', 1, 20, 0, [{ t: 'dmg', v: 2 }, { t: 'burn', v: 3 }]);
+  card('cab_quimera_2', 'Fuego Fatuo', 2, 36, 2, [{ t: 'dmg', v: 3 }, { t: 'burn', v: 4 }]);
+  card('cab_quimera_3', 'Gran Llamarada', 3, 55, 6,
     [{ t: 'dmg', v: 8 }, { t: 'burn', v: 5 }, { t: 'selfdmg', v: 3 }],
     'El fuego pide su precio en carne.');
 
   limb('cab_plaga', 'Máscara de la Plaga', 'head', 2, 42, { block: 1, fireRes: 0.15 },
     'El pico está lleno de hierbas... y de lo que ocultan.');
-  card('cab_plaga_1', 'Velo Enfermizo', 1, 6, 0, [{ t: 'block', v: 5 }, { t: 'weak', v: 1 }]);
-  card('cab_plaga_2', 'Miasma Denso', 2, 16, 0, [{ t: 'block', v: 6 }, { t: 'weak', v: 3 }]);
-  card('cab_plaga_3', 'Peste Negra', 2, 30, 2, [{ t: 'dmg', v: 5 }, { t: 'weak', v: 2 }, { t: 'vuln', v: 2 }],
+  card('cab_plaga_1', 'Velo Enfermizo', 1, 8, 0, [{ t: 'block', v: 5 }, { t: 'weak', v: 1 }]);
+  card('cab_plaga_2', 'Miasma Denso', 2, 20, 0, [{ t: 'block', v: 6 }, { t: 'weak', v: 3 }, { t: 'cool', v: 10, all: true }]);
+  card('cab_plaga_3', 'Peste Negra', 2, 42, 3,
+    [{ t: 'dmg', v: 5 }, { t: 'weak', v: 2 }, { t: 'vuln', v: 2 }],
     'La torre entera tose.');
 
   /* ---------- Torsos ---------- */
@@ -72,16 +75,18 @@
 
   limb('tor_caldera', 'Torso de Caldera', 'torso', 3, 60, { energy: 1 },
     'En su pecho hierve algo que no debería hervir.');
-  card('tor_caldera_1', 'Vapor a Presión', 1, 18, 0, [{ t: 'block', v: 6 }]);
-  card('tor_caldera_2', 'Escape de Vapor', 2, 34, 0, [{ t: 'block', v: 10 }, { t: 'cool', v: 15, all: true }]);
-  card('tor_caldera_3', 'Sobrepresión', 3, 40, 5, [{ t: 'dmg', v: 10 }, { t: 'block', v: 10 }],
+  card('tor_caldera_1', 'Vapor a Presión', 1, 22, 0, [{ t: 'block', v: 6 }]);
+  card('tor_caldera_2', 'Escape de Vapor', 2, 40, 0, [{ t: 'block', v: 10 }, { t: 'cool', v: 15, all: true }, { t: 'repair', v: 6 }]);
+  card('tor_caldera_3', 'Sobrepresión', 3, 52, 6,
+    [{ t: 'dmg', v: 10 }, { t: 'block', v: 10 }],
     'La presión busca salida. Tú eres la salida.');
 
   limb('tor_costillar', 'Costillar de Hierro', 'torso', 2, 50, { hp: 2, block: 1 },
     'Las costillas son barrotes; el corazón, un preso.');
-  card('tor_costillar_1', 'Jaula de Hueso', 1, 6, 0, [{ t: 'block', v: 7 }]);
-  card('tor_costillar_2', 'Muro de Hueso', 2, 12, 0, [{ t: 'block', v: 13 }]);
-  card('tor_costillar_3', 'Bastión Férreo', 3, 30, 3, [{ t: 'block', v: 20 }, { t: 'weak', v: 2 }],
+  card('tor_costillar_1', 'Jaula de Hueso', 1, 8, 0, [{ t: 'block', v: 7 }]);
+  card('tor_costillar_2', 'Muro de Hueso', 2, 16, 0, [{ t: 'block', v: 13 }, { t: 'cool', v: 8, all: true }]);
+  card('tor_costillar_3', 'Bastión Férreo', 3, 44, 3,
+    [{ t: 'block', v: 20 }, { t: 'weak', v: 2 }],
     'Nada entra. Nada sale. Nadie se queja.');
 
   limb('tor_alambique', 'Alambique Vivo', 'torso', 2, 45, { cool: 3 },
@@ -101,37 +106,41 @@
 
   limb('bra_sierra', 'Brazo de Sierra', 'arm', 2, 45, { dmg: 1 },
     'Zumba como una colmena furiosa.');
-  card('bra_sierra_1', 'Corte Dentado', 1, 16, 0, [{ t: 'dmg', v: 5 }]);
-  card('bra_sierra_2', 'Aserrar', 2, 26, 3, [{ t: 'dmg', v: 9 }]);
-  card('bra_sierra_3', 'Desmembrar', 3, 38, 6, [{ t: 'dmg', v: 20 }],
+  card('bra_sierra_1', 'Corte Dentado', 1, 20, 0, [{ t: 'dmg', v: 5 }]);
+  card('bra_sierra_2', 'Aserrar', 2, 32, 4, [{ t: 'dmg', v: 9 }]);
+  card('bra_sierra_3', 'Desmembrar', 3, 50, 7,
+    [{ t: 'dmg', v: 20 }],
     'Las virutas de hueso caen como nieve.');
 
   limb('bra_golem', 'Puño de Gólem', 'arm', 2, 50, { hp: 3 },
     'Retazos de una docena de gigantes, un solo puño.');
-  card('bra_golem_1', 'Puño de Piedra', 1, 16, 0, [{ t: 'dmg', v: 6 }]);
-  card('bra_golem_2', 'Muro de Piedra', 2, 20, 0, [{ t: 'block', v: 9 }, { t: 'dmg', v: 4 }]);
-  card('bra_golem_3', 'Golpe Sísmico', 3, 36, 4, [{ t: 'dmg', v: 16 }, { t: 'block', v: 6 }],
+  card('bra_golem_1', 'Puño de Piedra', 1, 20, 0, [{ t: 'dmg', v: 6 }]);
+  card('bra_golem_2', 'Muro de Piedra', 2, 26, 0, [{ t: 'block', v: 9 }, { t: 'dmg', v: 4 }, { t: 'repair', v: 4 }]);
+  card('bra_golem_3', 'Golpe Sísmico', 3, 48, 5,
+    [{ t: 'dmg', v: 16 }, { t: 'block', v: 6 }],
     'El suelo recuerda cada golpe.');
 
   limb('bra_tijera', 'Tenazas de Cirujano', 'arm', 2, 40, { vision: 1 },
     'Precisas, frías y siempre demasiado abiertas.');
-  card('bra_tijera_1', 'Tijeretazo', 1, 12, 0, [{ t: 'vuln', v: 1 }, { t: 'dmg', v: 2 }]);
-  card('bra_tijera_2', 'Incisión', 2, 18, 0, [{ t: 'vuln', v: 1 }, { t: 'dmg', v: 5 }]);
-  card('bra_tijera_3', 'Amputación', 3, 32, 3, [{ t: 'vuln', v: 2 }, { t: 'dmg', v: 11 }],
+  card('bra_tijera_1', 'Tijeretazo', 1, 14, 0, [{ t: 'vuln', v: 1 }, { t: 'dmg', v: 2 }]);
+  card('bra_tijera_2', 'Incisión', 2, 24, 1, [{ t: 'vuln', v: 1 }, { t: 'dmg', v: 5 }]);
+  card('bra_tijera_3', 'Amputación', 3, 46, 4,
+    [{ t: 'vuln', v: 2 }, { t: 'dmg', v: 11 }],
     'Un corte tan limpio que tarda en doler.');
 
   limb('bra_piston', 'Brazo de Pistón', 'arm', 3, 52, { dmg: 1 },
     'Cada golpe es una explosión pequeña y obediente.');
-  card('bra_piston_1', 'Pistonazo', 1, 16, 0, [{ t: 'dmg', v: 2, n: 2 }]);
-  card('bra_piston_2', 'Martilleo', 2, 28, 0, [{ t: 'dmg', v: 2, n: 3 }]);
-  card('bra_piston_3', 'Ráfaga de Vapor', 3, 40, 4, [{ t: 'dmg', v: 2, n: 5 }],
+  card('bra_piston_1', 'Pistonazo', 1, 20, 0, [{ t: 'dmg', v: 2, n: 2 }]);
+  card('bra_piston_2', 'Martilleo', 2, 36, 1, [{ t: 'dmg', v: 2, n: 3 }]);
+  card('bra_piston_3', 'Ráfaga de Vapor', 3, 55, 5,
+    [{ t: 'dmg', v: 2, n: 5 }],
     'Cinco golpes antes de que suene el primero.');
 
   limb('bra_tentaculo', 'Tentáculo Alquímico', 'arm', 3, 55, { fireRes: 0.2 },
     'Nació en un frasco. No ha perdonado al frasco.');
-  card('bra_tentaculo_1', 'Látigo Ácido', 1, 16, 0, [{ t: 'dmg', v: 3 }, { t: 'burn', v: 3 }]);
-  card('bra_tentaculo_2', 'Zarcillo Tóxico', 2, 26, 0, [{ t: 'weak', v: 2 }, { t: 'burn', v: 5 }]);
-  card('bra_tentaculo_3', 'Abrazo Ácido', 3, 38, 4,
+  card('bra_tentaculo_1', 'Látigo Ácido', 1, 20, 0, [{ t: 'dmg', v: 3 }, { t: 'burn', v: 3 }]);
+  card('bra_tentaculo_2', 'Zarcillo Tóxico', 2, 32, 1, [{ t: 'weak', v: 2 }, { t: 'burn', v: 5 }]);
+  card('bra_tentaculo_3', 'Abrazo Ácido', 3, 52, 5,
     [{ t: 'weak', v: 3 }, { t: 'dmg', v: 6 }, { t: 'burn', v: 5 }],
     'Lo disuelve despacio, con cariño.');
 
@@ -144,30 +153,34 @@
 
   limb('pie_sabueso', 'Patas de Sabueso', 'leg', 1, 35, { speed: 0.15 },
     'Corren sin que nadie las llame.');
-  card('pie_sabueso_1', 'Arañazo', 0, 8, 0, [{ t: 'dmg', v: 2 }]);
-  card('pie_sabueso_2', 'Acoso', 1, 10, 0, [{ t: 'dmg', v: 2, n: 2 }]);
-  card('pie_sabueso_3', 'Salto Cazador', 2, 18, 0, [{ t: 'vuln', v: 1 }, { t: 'dmg', v: 7 }],
+  card('pie_sabueso_1', 'Arañazo', 0, 10, 0, [{ t: 'dmg', v: 2 }]);
+  card('pie_sabueso_2', 'Acoso', 1, 12, 0, [{ t: 'dmg', v: 2, n: 2 }]);
+  card('pie_sabueso_3', 'Salto Cazador', 2, 22, 0,
+    [{ t: 'vuln', v: 1 }, { t: 'dmg', v: 7 }],
     'La presa nunca oye el último paso.');
 
   limb('pie_resorte', 'Piernas de Resorte', 'leg', 2, 40, { speed: 0.15 },
     'Cada paso es un rebote con mala intención.');
-  card('pie_resorte_1', 'Rebote', 1, 10, 0, [{ t: 'dmg', v: 4 }, { t: 'block', v: 3 }]);
-  card('pie_resorte_2', 'Muelle Tenso', 0, 20, 0, [{ t: 'energy', v: 1 }]);
-  card('pie_resorte_3', 'Salto Mortal', 2, 30, 3, [{ t: 'dmg', v: 8 }, { t: 'energy', v: 1 }],
+  card('pie_resorte_1', 'Rebote', 1, 14, 0, [{ t: 'dmg', v: 4 }, { t: 'block', v: 3 }]);
+  card('pie_resorte_2', 'Muelle Tenso', 0, 24, 0, [{ t: 'energy', v: 1 }]);
+  card('pie_resorte_3', 'Salto Mortal', 2, 40, 4,
+    [{ t: 'dmg', v: 8 }, { t: 'energy', v: 1 }],
     'Sube, cae y aplasta.');
 
   limb('pie_arana', 'Patas de Araña', 'leg', 2, 40, { speed: 0.1, vision: 1 },
     'Ocho agujas de latón que no dejan de tejer.');
-  card('pie_arana_1', 'Pinchazos', 1, 8, 0, [{ t: 'dmg', v: 2, n: 3 }]);
-  card('pie_arana_2', 'Tejer Red', 1, 8, 0, [{ t: 'block', v: 4 }, { t: 'weak', v: 2 }]);
-  card('pie_arana_3', 'Lluvia de Púas', 2, 22, 2, [{ t: 'weak', v: 1 }, { t: 'dmg', v: 2, n: 5 }],
+  card('pie_arana_1', 'Pinchazos', 1, 10, 0, [{ t: 'dmg', v: 2, n: 3 }]);
+  card('pie_arana_2', 'Tejer Red', 1, 10, 0, [{ t: 'block', v: 4 }, { t: 'weak', v: 2 }]);
+  card('pie_arana_3', 'Lluvia de Púas', 2, 36, 3,
+    [{ t: 'weak', v: 1 }, { t: 'dmg', v: 2, n: 5 }],
     'Mil puntadas en un segundo.');
 
   limb('pie_pesada', 'Botas de Hierro', 'leg', 2, 50, { block: 1 },
     'Pesan tanto que hasta el suelo se disculpa.');
-  card('pie_pesada_1', 'Planta Firme', 1, 6, 0, [{ t: 'block', v: 6 }]);
-  card('pie_pesada_2', 'Patada Pesada', 2, 22, 0, [{ t: 'dmg', v: 10 }]);
-  card('pie_pesada_3', 'Pisotón Sísmico', 2, 28, 4, [{ t: 'dmg', v: 7 }, { t: 'stun' }],
+  card('pie_pesada_1', 'Planta Firme', 1, 8, 0, [{ t: 'block', v: 6 }, { t: 'cool', v: 10 }]);
+  card('pie_pesada_2', 'Patada Pesada', 2, 28, 0, [{ t: 'dmg', v: 10 }]);
+  card('pie_pesada_3', 'Pisotón Sísmico', 2, 42, 4,
+    [{ t: 'dmg', v: 7 }, { t: 'stun' }],
     'Bajo la bota, hasta el tiempo se detiene.');
 
   /* ---------- Muñones: una carta débil y sin calor por cada hueco vacío ---------- */
@@ -243,9 +256,9 @@
       drops: ['cab_sabueso', 'pie_sabueso'],
       moves: [
         { name: 'Zarpazos', t: 'attack', v: 5, n: 2 },
+        { name: 'Desgarro', t: 'limb', v: 9 },
         { name: 'Mordisco', t: 'attack', v: 8 },
-        { name: 'Aullido', t: 'debuff', status: 'weak', v: 2 },
-        { name: 'Desgarro', t: 'limb', v: 9 }
+        { name: 'Aullido', t: 'debuff', status: 'weak', v: 2 }
       ],
       flavor: 'Hecho con tres perros y ningún remordimiento.'
     },
@@ -255,9 +268,9 @@
       drops: ['cab_cosido', 'tor_remendado', 'bra_muerto', 'pie_muerta', 'bra_tijera'],
       moves: [
         { name: 'Bisturí Tembloroso', t: 'attack', v: 6 },
+        { name: 'Frasco Hirviente', t: 'heat', v: 35 },
         { name: 'Puñalada Nerviosa', t: 'attack', v: 8 },
-        { name: 'Frasco Hirviente', t: 'heat', v: 30 },
-        { name: 'Tónico Dudoso', t: 'heal', v: 6 }
+        { name: 'Corte de Tendones', t: 'limb', v: 7 }
       ],
       flavor: 'Lleva semanas sin dormir. Tú eres su último experimento.'
     },
@@ -291,7 +304,8 @@
       moves: [
         { name: 'Picotazos', t: 'attack', v: 5, n: 3 },
         { name: 'Hilo Cortante', t: 'limb', v: 11 },
-        { name: 'Veneno Pegajoso', t: 'debuff', status: 'vuln', v: 2 }
+        { name: 'Veneno Pegajoso', t: 'debuff', status: 'vuln', v: 2 },
+        { name: 'Patas Afiladas', t: 'limb', v: 9 }
       ],
       flavor: 'Teje con hilo de latón y espera con paciencia de reloj.'
     },
@@ -301,8 +315,8 @@
       drops: ['bra_tijera', 'bra_sierra'],
       moves: [
         { name: 'Afilar Bisturí', t: 'buff', v: 2 },
-        { name: 'Corte Limpio', t: 'attack', v: 11 },
         { name: 'Amputación', t: 'limb', v: 16 },
+        { name: 'Corte Limpio', t: 'attack', v: 11 },
         { name: 'Tajo Doble', t: 'attack', v: 7, n: 2 }
       ],
       flavor: 'Sonríe tras la máscara mientras cuenta tus piezas.'
@@ -313,8 +327,8 @@
       drops: ['pie_pesada', 'tor_costillar', 'bra_piston', 'tor_caldera'],
       moves: [
         { name: 'Blindaje de Latón', t: 'block', v: 12 },
+        { name: 'Vapor Hirviente', t: 'heat', v: 24, all: true },
         { name: 'Golpe de Pistón', t: 'attack', v: 12 },
-        { name: 'Vapor Hirviente', t: 'heat', v: 20, all: true },
         { name: 'Martillazo', t: 'attack', v: 15 }
       ],
       flavor: 'Nadie recuerda quién le dio cuerda por última vez.'
@@ -325,8 +339,8 @@
       drops: ['cab_quimera', 'tor_caldera'],
       moves: [
         { name: 'Aliento Ígneo', t: 'debuff', status: 'burn', v: 6 },
+        { name: 'Llamarada', t: 'heat', v: 30, all: true },
         { name: 'Zarpazo Ardiente', t: 'attack', v: 15 },
-        { name: 'Llamarada', t: 'heat', v: 25, all: true },
         { name: 'Mordisco Triple', t: 'attack', v: 6, n: 3 }
       ],
       flavor: 'Escapó del crisol y ahora quiere que todo arda.'
@@ -337,9 +351,9 @@
       drops: ['bra_piston', 'pie_resorte', 'cab_relojero'],
       moves: [
         { name: 'Dar Cuerda', t: 'buff', v: 3 },
+        { name: 'Engranaje Roto', t: 'limb', v: 13 },
         { name: 'Martillo de Reloj', t: 'attack', v: 14 },
-        { name: 'Manecillas', t: 'attack', v: 8, n: 2 },
-        { name: 'Engranaje Roto', t: 'limb', v: 13 }
+        { name: 'Manecillas', t: 'attack', v: 8, n: 2 }
       ],
       flavor: 'Jura que a medianoche el tiempo se detendrá. Te quiere dentro.'
     },
@@ -349,9 +363,9 @@
       drops: ['bra_sierra', 'bra_tentaculo', 'cab_quimera', 'pie_arana'],
       moves: [
         { name: 'Anestesia', t: 'debuff', status: 'weak', v: 2 },
+        { name: 'Extirpar', t: 'limb', v: 16 },
         { name: 'Vivisección', t: 'attack', v: 18 },
         { name: 'Bisturíes Múltiples', t: 'attack', v: 7, n: 3 },
-        { name: 'Extirpar', t: 'limb', v: 16 },
         { name: 'Transfusión', t: 'heal', v: 7 }
       ],
       flavor: 'Ha cosido más cuerpos que nadie. Ninguno seguía vivo.'

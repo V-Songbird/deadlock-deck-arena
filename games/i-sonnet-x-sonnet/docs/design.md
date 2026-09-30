@@ -162,7 +162,7 @@ Todo se expone en `DD`. Números enteros.
   fx:[{t:'dmg', v:7}], flavor:'…' }       // flavor opcional
 ```
 
-- `cost` 0–3. `heat` (0–40): calor que la carta añade **a la extremidad dueña (el hueco que la juega)**. `wear` (0–8): integridad que
+- `cost` 0–3. `heat` (0–**55** tras el reequilibrio térmico; las firmas de coste 3 rondan 44–55, así que una sola puede llevar una extremidad al 50 % del máximo): calor que la carta añade **a la extremidad dueña (el hueco que la juega)**. `wear` (0–8): integridad que
   pierde esa extremidad al jugar la carta (desgaste directo). Guía: coste 1 → daño 5–8 o bloqueo 5–7, calor 8–16, wear 0;
   coste 2 → daño 10–15 (o combos), calor 18–28, wear 0–3; coste 3 → daño 18–26 (o combos grandes), calor 30–42, wear 2–6.
   Cada extremidad: una carta barata, una media y una "firma" (la más potente, más calor/desgaste). Las iniciales: sin desgaste, poco calor.
