@@ -192,7 +192,13 @@
     };
 
     // start room + farthest room for the goal
-    const startRoom = rooms[rng.int(0, rooms.length - 1)];
+    // start at one end of the tower (farthest room from an arbitrary room), goal at the far end
+    let startRoom = rooms[rng.int(0, rooms.length - 1)];
+    {
+      const dA = bfs(map, startRoom.cx, startRoom.cy).dist;
+      let far = -1;
+      for (const r of rooms) { const d = dA[r.cy * W + r.cx]; if (d > far) { far = d; startRoom = r; } }
+    }
     map.start = { x: startRoom.cx, y: startRoom.cy };
     const d0 = bfs(map, map.start.x, map.start.y).dist;
     let goalRoom = null, best = -1;
@@ -325,7 +331,7 @@
       if (e && !e.boss && (e.floorMin || 1) <= floor) pool.push(e.id || k);
     }
     if (!pool.length) pool.push('homunculo');
-    const nEnemies = 4 + 2 * floor;
+    const nEnemies = 5 + 2 * floor;
     for (let i = 0; i < nEnemies; i++) {
       let c = pick(roomCells, c => d0[idx(c.x, c.y)] >= 9 && !near(c, map.goal, 3));
       if (!c) c = pick(allCells, c => d0[idx(c.x, c.y)] >= 6);

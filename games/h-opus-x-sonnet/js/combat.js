@@ -94,7 +94,7 @@
   // ======================================================================
   const DOLL_X = 130, DOLL_Y = 186, DOLL_SCALE = 3;
   const ENEMY_X = 500, ENEMY_Y = 186, ENEMY_SCALE = 3;
-  const ROW_X = 188, ROW_Y = 46, ROW_DY = 20;
+  const ROW_X = 188, ROW_Y = 46, ROW_DY = 19;
   const CARD_W = 74, CARD_H = 100, HAND_Y = 256;
   const END_BTN = { x: 528, y: 232, w: 104, h: 20 };
   const MAX_HAND = 8;
@@ -651,34 +651,40 @@
     }
   }
 
+  const SLOT_SHORT = { head: 'Cabeza', torso: 'Torso', armL: 'Br.Izq', armR: 'Br.Der', legL: 'Pi.Izq', legR: 'Pi.Der' };
+
   function drawSlotRows(activeSlot, addHeat) {
+    // panel behind the limb column so it stays readable over the backdrop
+    const px = ROW_X - 6, pw = 114, ph = 6 * ROW_DY + 16;
+    DD.draw.panel(px, ROW_Y - 20, pw, ph + 4, { fill: 'rgba(14,10,18,0.92)', edge: PAL.panelEdge, rivets: false });
+    txt('MIEMBROS', px + pw / 2, ROW_Y - 15, { size: 8, align: 'center', color: PAL.brass });
     for (let i = 0; i < DD.SLOTS.length; i++) {
       const k = DD.SLOTS[i];
       const y = ROW_Y + i * ROW_DY;
       const l = S.body.slots[k];
       const type = DD.SLOT_TYPE[k];
       const hot = activeSlot === k;
-      if (hot) DD.draw.rect(ROW_X - 3, y - 2, 88, ROW_DY, 'rgba(200,155,60,0.25)');
-      ico(l ? type : 'stump', ROW_X, y, 2);
-      if (k.length === 4 && (k.endsWith('L') || k.endsWith('R'))) {
-        txt(k.endsWith('L') ? 'I' : 'D', ROW_X + 17, y + 4, { size: 8, color: PAL.dim });
-      }
+      if (i > 0) DD.draw.rect(px + 4, y - 3, pw - 8, 1, '#2a2028');
+      if (hot) DD.draw.rect(px + 3, y - 2, pw - 6, ROW_DY - 1, 'rgba(200,155,60,0.28)');
+      ico(l ? type : 'stump', ROW_X, y + 1, 2);
+      txt(SLOT_SHORT[k], ROW_X + 19, y, { size: 8, color: l ? PAL.bone : PAL.bloodLight });
       if (l) {
-        const bx = ROW_X + 28, bw = 48;
-        DD.draw.bar(bx, y + 1, bw, 7, l.heat / 100, heatColor(l.heat));
+        const bx = ROW_X + 19, bw = 76;
+        DD.draw.bar(bx, y + 9, bw, 5, l.heat / 100, heatColor(l.heat), '#241a20');
         if (hot && addHeat > 0) {
           const w = Math.floor((bw - 2) * DD.clamp(addHeat / 100, 0, 1 - l.heat / 100));
-          DD.draw.rect(bx + 1 + Math.floor((bw - 2) * l.heat / 100), y + 2, w, 5,
-            l.heat + addHeat >= 100 ? 'rgba(255,255,255,0.85)' : 'rgba(255,220,120,0.6)');
+          DD.draw.rect(bx + 1 + Math.floor((bw - 2) * l.heat / 100), y + 10, w, 3,
+            l.heat + addHeat >= 100 ? 'rgba(255,255,255,0.9)' : 'rgba(255,220,120,0.7)');
         }
         for (let p = 0; p < l.maxIntegrity; p++) {
-          DD.draw.rect(bx + p * 7, y + 11, 5, 5, p < l.integrity ? PAL.bone : '#2a2228');
+          DD.draw.rect(bx + 36 + p * 6 - 0, y + 1, 4, 4, p < l.integrity ? PAL.bone : '#2a2228');
         }
-        if (l.heat >= 80 && Math.floor(S.t * 4) % 2 === 0) txt('!', bx + bw + 3, y + 1, { size: 8, color: PAL.heat });
+        if (l.heat >= 80 && Math.floor(S.t * 4) % 2 === 0) txt('!', bx + bw + 3, y + 7, { size: 8, color: PAL.heat });
       } else {
-        txt('MUÑÓN', ROW_X + 28, y + 4, { size: 8, color: PAL.bloodLight });
+        txt('MUÑÓN', ROW_X + 55, y, { size: 8, color: PAL.bloodLight });
+        DD.draw.rect(ROW_X + 19, y + 11, 76, 1, '#5a1a20');
       }
-      if (inRect(ROW_X - 3, y - 2, 88, ROW_DY)) {
+      if (inRect(px + 3, y - 2, pw - 6, ROW_DY - 1)) {
         const lines = [];
         if (l) {
           const def = DD.LIMBS[l.id];
@@ -780,9 +786,20 @@
 
     // middle: turn counter + log
     txt('Turno ' + Math.max(1, S.turn), 335, 30, { size: 10, align: 'center', color: PAL.dim });
-    for (let i = 0; i < S.log.length; i++) {
-      const isLast = i === S.log.length - 1;
-      txt(S.log[i], 284, 128 + i * 11, { size: 8, color: isLast ? PAL.ink : PAL.dim, alpha: 0.5 + 0.5 * (i + 1) / S.log.length });
+    {
+      const lines = [];
+      for (let i = 0; i < S.log.length; i++) {
+        const w = wrapStr(S.log[i], 22);
+        for (const l of w) lines.push({ t: l, last: i === S.log.length - 1 });
+      }
+      const shown = lines.slice(-5);
+      if (shown.length) {
+        const lh = 11, lx = 304, lw = 112, lh2 = shown.length * lh + 8, ly = 172 - lh2;
+        DD.draw.panel(lx, ly, lw, lh2, { fill: 'rgba(14,10,18,0.85)', edge: PAL.panelEdge, rivets: false });
+        for (let i = 0; i < shown.length; i++) {
+          txt(shown[i].t, lx + 5, ly + 5 + i * lh, { size: 8, color: shown[i].last ? PAL.ink : PAL.dim });
+        }
+      }
     }
 
     // energy orb
@@ -796,14 +813,12 @@
     }
     txt('Mazo ' + S.pile.length, 52, 231, { size: 8, color: PAL.bone });
     txt('Descarte ' + S.discard.length, 52, 243, { size: 8, color: PAL.dim });
-    if (n) txt('1-9 / clic: jugar   E: fin de turno', 330, 246, { size: 8, color: PAL.dim, align: 'center' });
+    if (n && !activeInst) txt('1-9 / clic: jugar   E: fin de turno', 330, 246, { size: 8, color: PAL.dim, align: 'center' });
 
     // end turn button
     const canEnd = S.state === 'player';
-    if (DD.draw.button('Fin de turno', END_BTN.x, END_BTN.y, END_BTN.w, END_BTN.h,
-      { disabled: !canEnd, size: 10, selected: canEnd && n === 0 })) {
-      endTurn();
-    }
+    const endClicked = DD.draw.button('Fin de turno', END_BTN.x, END_BTN.y, END_BTN.w, END_BTN.h,
+      { disabled: !canEnd, size: 10, selected: canEnd && n === 0 });
 
     // hand
     for (let i = 0; i < n; i++) {
@@ -818,13 +833,16 @@
     }
 
     drawTip(S.tip);
+    if (endClicked) endTurn(); // after the hand was drawn: endTurn empties it
 
     // banners
     if (S.state === 'intro') {
       const a = DD.clamp(S.timer / 0.9, 0, 1);
-      txt(S.def.name.toUpperCase(), DD.W / 2, 120, { size: 24, align: 'center', color: S.def.boss ? PAL.fire : PAL.bloodLight, alpha: Math.min(1, a * 2) });
-      if (S.def.boss) txt('¡Combate contra el jefe!', DD.W / 2, 150, { size: 12, align: 'center', color: PAL.brass, alpha: Math.min(1, a * 2) });
+      DD.draw.rect(0, 100, DD.W, S.def.boss ? 66 : 42, 'rgba(8,4,10,' + (0.8 * Math.min(1, a * 2)).toFixed(2) + ')');
+      txt(S.def.name.toUpperCase(), DD.W / 2, 110, { size: 24, align: 'center', color: S.def.boss ? PAL.fire : PAL.bloodLight, alpha: Math.min(1, a * 2) });
+      if (S.def.boss) txt('¡Combate contra el jefe!', DD.W / 2, 143, { size: 12, align: 'center', color: PAL.brass, alpha: Math.min(1, a * 2) });
     } else if (S.state === 'win') {
+      DD.draw.rect(0, 104, DD.W, 36, 'rgba(8,4,10,0.75)');
       txt('¡VENCIDO!', DD.W / 2, 110, { size: 24, align: 'center', color: PAL.fire });
     } else if (S.state === 'lose') {
       cx.fillStyle = 'rgba(20,0,0,' + (0.6 * (1 - S.timer / 1.6)).toFixed(2) + ')';
@@ -1042,6 +1060,7 @@
     if (!H) return;
     if (DD.sprites && DD.sprites.background) DD.sprites.background(ctx, 'table', H.t);
     else DD.draw.rect(0, 0, DD.W, DD.H, PAL.bg);
+    DD.draw.rect(0, 0, DD.W, DD.H, 'rgba(6,4,10,0.55)');
 
     txt('COSECHA', DD.W / 2, 28, { size: 16, align: 'center', color: PAL.fire });
 

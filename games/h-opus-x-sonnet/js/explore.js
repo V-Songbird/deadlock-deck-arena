@@ -724,7 +724,7 @@
       }
       S.miniDirty = false;
     }
-    const mx = 640 - w * 2 - 6, my = HUD_H + 4;
+    const mx = 640 - w * 2 - 6, my = HUD_H + 22;
     ctx.fillStyle = 'rgba(8,5,14,0.6)';
     ctx.fillRect(mx - 2, my - 2, w * 2 + 4, h * 2 + 4);
     ctx.strokeStyle = DD.PAL.panelEdge; ctx.lineWidth = 1;

@@ -358,7 +358,8 @@
 
         D.text('DEADLOCK DECK', 320, 24, { size: 24, align: 'center', color: PAL.brass });
         D.text('EL RELOJ ANATÓMICO', 320, 54, { size: 16, align: 'center', color: mix(PAL.blood, PAL.bloodLight, 0.5 + 0.5 * Math.sin(t * 2.4)) });
-        D.text('Seis minutos. Una torre en llamas. Tu cuerpo es tu mazo.', 320, 82, { size: 8, align: 'center', color: PAL.dim });
+        D.rect(0, 78, DD.W, 16, 'rgba(8,4,10,0.6)');
+        D.text('Seis minutos. Una torre en llamas. Tu cuerpo es tu mazo.', 320, 82, { size: 8, align: 'center', color: PAL.bone });
 
         const muted = sv().muted;
         const items = [
@@ -370,12 +371,14 @@
         const a = DD.ui.menu(ms, items);
 
         const d = sv();
+        D.rect(0, 264, DD.W, 16, 'rgba(8,4,10,0.6)');
+        D.rect(0, 292, DD.W, 28, 'rgba(8,4,10,0.6)');
         D.text('Bucles: ' + d.loops + '  ·  Fugas: ' + d.escapes + '  ·  Mejor tiempo: ' +
           (d.bestTime != null ? fmtTime(d.bestTime) : '--:--') + '  ·  Éter: ' + d.ether,
           320, 268, { size: 8, align: 'center', color: PAL.bone });
         D.text('WASD/Flechas: mover · Enter/Espacio: aceptar · 1-9: cartas · E: fin de turno · P/Esc: pausa',
-          320, 296, { size: 8, align: 'center', color: PAL.dim });
-        D.text('Ratón, pantalla táctil y mando compatibles', 320, 308, { size: 8, align: 'center', color: PAL.dim });
+          320, 296, { size: 8, align: 'center', color: PAL.bone });
+        D.text('Ratón, pantalla táctil y mando compatibles', 320, 308, { size: 8, align: 'center', color: PAL.bone });
 
         if (a === 0) DD.setScene('table', { fresh: true });
         else if (a === 1) DD.setScene('codex', { back: 'title' });
@@ -441,7 +444,9 @@
         limbIcon(c.id, c.x + 8, c.y + 11, 2);
         D.text(def.name, c.x + 48, c.y + 7, { size: 10, color: st.grafts[slot] === c.id ? PAL.fire : PAL.ink });
         D.text('Integ. ' + def.integrity + ' · ' + passiveText(def.passive), c.x + 48, c.y + 21, { size: 8, color: PAL.bone });
-        D.text(def.cards.map(cardName).join(', ').slice(0, 40), c.x + 48, c.y + 33, { size: 8, color: PAL.dim });
+        let cl = def.cards.map(cardName).join(', ');
+        if (cl.length > 40) { cl = cl.slice(0, 39); cl = cl.slice(0, Math.max(cl.lastIndexOf(','), 10)) + '…'; }
+        D.text(cl, c.x + 48, c.y + 33, { size: 8, color: PAL.dim });
         if (st.grafts[slot] === c.id) D.text('EN USO', c.x + c.w - 6, c.y + 7, { size: 8, align: 'right', color: PAL.ember });
       }
       if (!list.length) D.text('Aún no conoces ningún plano de este tipo.', 320, 150, { size: 10, align: 'center', color: PAL.dim });
@@ -506,6 +511,7 @@
           dim(0.5); drawDoll(); drawModal(ctx); return;
         }
 
+        D.rect(120, 2, 400, 34, 'rgba(8,4,10,0.7)');
         D.text('MESA DE DISECCIÓN', 320, 6, { size: 16, align: 'center', color: PAL.brass });
         D.text('Bucle ' + (d.loops + 1) + ' · un nuevo cuerpo base te espera', 320, 25, { size: 8, align: 'center', color: PAL.dim });
 
@@ -645,6 +651,7 @@
         const s = DD.game.last || { elapsed: 0, kills: 0, ether: 0, banked: 0, newBlueprints: [] };
         const pulse = 0.5 + 0.5 * Math.sin(t * 3);
         D.text('¡HAS ESCAPADO!', 320, 28, { size: 24, align: 'center', color: mix(PAL.brass, PAL.fire, pulse) });
+        D.rect(0, 58, DD.W, 16, 'rgba(8,4,10,0.6)');
         D.text('Cruzas las puertas mientras la torre se derrumba a tu espalda.', 320, 62, { size: 8, align: 'center', color: PAL.bone });
         D.panel(150, 86, 340, 180);
         const best = sv().bestTime;
@@ -714,6 +721,7 @@
         background('lab', t);
         dim(0.7);
         const bp = sv().blueprints;
+        D.rect(170, 2, 300, 34, 'rgba(8,4,10,0.6)');
         D.text('PLANOS ANATÓMICOS', 320, 6, { size: 16, align: 'center', color: PAL.brass });
         D.text('Descubiertos: ' + blueprintCount() + '/' + ids.length, 320, 25, { size: 8, align: 'center', color: PAL.dim });
 
@@ -721,9 +729,9 @@
         // grid layout
         const groups = TYPES.map(function (ty) { return ids.filter(function (id) { return DD.LIMBS[id].slot === ty; }); });
         let dense = false;
-        let rowsN = groups.reduce(function (s, g) { return s + Math.ceil(g.length / 8); }, 0);
+        let rowsN = groups.reduce(function (s, g) { return s + Math.ceil(g.length / 7); }, 0);
         if (rowsN * 36 + 4 * 14 > 254) dense = true;
-        const cell = dense ? 22 : 36, per = dense ? 12 : 8, sc = dense ? 1 : 2;
+        const cell = dense ? 22 : 36, per = dense ? 11 : 7, sc = dense ? 1 : 2;
         const items = [];
         let y = 46;
         for (let g = 0; g < groups.length; g++) {
@@ -825,6 +833,7 @@
         background('lab', t);
         dim(0.7);
         const d = sv();
+        D.rect(150, 2, 340, 26, 'rgba(8,4,10,0.6)');
         D.text('TIENDA DE LA TORRE', 320, 6, { size: 16, align: 'center', color: PAL.brass });
         icon('ether', 520, 10, 1);
         D.text('Éter: ' + d.ether, 632, 9, { size: 12, align: 'right', color: PAL.verdigris });
