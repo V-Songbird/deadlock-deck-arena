@@ -1,0 +1,5 @@
+.private/
+docs/tasks/
+docs/decisions/
+docs/knowledge/private/
+docs/apis/private/

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>Deadlock Deck: El Reloj Anatómico</title>
+<link rel="icon" href="data:,">
+<style>
+  :root { --b: clamp(44px, 13vmin, 64px); }
+  html, body {
+    margin: 0; height: 100%; background: #000; overflow: hidden; overscroll-behavior: none;
+    touch-action: none; user-select: none; -webkit-user-select: none;
+    -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;
+  }
+  #screen {
+    position: fixed; display: flex; align-items: center; justify-content: center;
+    top: env(safe-area-inset-top, 0px); right: env(safe-area-inset-right, 0px);
+    bottom: env(safe-area-inset-bottom, 0px); left: env(safe-area-inset-left, 0px);
+  }
+  #game { display: block; image-rendering: crisp-edges; image-rendering: pixelated; touch-action: none; outline: none; }
+
+  .touch { position: fixed; z-index: 1; opacity: 0.55; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+  .touch[hidden] { display: none !important; }
+  .tbtn {
+    position: relative; box-sizing: border-box; margin: 0; padding: 0;
+    -webkit-appearance: none; appearance: none;
+    border: 2px solid #b8892e; border-radius: 10px; background: rgba(26, 20, 36, 0.7);
+  }
+  .tbtn.on { background: rgba(184, 137, 46, 0.8); }
+
+  #dpad {
+    left: calc(env(safe-area-inset-left, 0px) + 12px); bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+    display: grid; grid-template-columns: repeat(3, var(--b)); grid-template-rows: repeat(3, var(--b));
+  }
+  #dpad [data-act="up"] { grid-area: 1 / 2; }
+  #dpad [data-act="left"] { grid-area: 2 / 1; --r: 270deg; }
+  #dpad [data-act="right"] { grid-area: 2 / 3; --r: 90deg; }
+  #dpad [data-act="down"] { grid-area: 3 / 2; --r: 180deg; }
+  #dpad .tbtn::before {
+    content: ""; position: absolute; left: 50%; top: 50%;
+    border-style: solid; border-width: 0 10px 14px; border-color: transparent transparent #e8dcc0;
+    transform: translate(-50%, -50%) rotate(var(--r, 0deg));
+  }
+
+  #pause-btn {
+    position: fixed;
+    right: calc(env(safe-area-inset-right, 0px) + 12px); top: calc(env(safe-area-inset-top, 0px) + 12px);
+    width: var(--b); height: var(--b);
+  }
+  #pause-btn::before, #pause-btn::after { content: ""; position: absolute; top: 28%; bottom: 28%; width: 16%; background: #e8dcc0; }
+  #pause-btn::before { left: 28%; }
+  #pause-btn::after { right: 28%; }
+
+  .nojs {
+    position: fixed; inset: 0; z-index: 2; margin: 0; padding: 2em; display: flex; align-items: center; justify-content: center;
+    background: #000; color: #e8dcc0; font: 18px/1.5 Georgia, serif; text-align: center;
+  }
+</style>
+</head>
+<body>
+<div id="screen">
+  <canvas id="game" width="384" height="216"></canvas>
+</div>
+
+<div id="dpad" class="touch" hidden aria-hidden="true">
+  <div class="tbtn" data-act="up"></div>
+  <div class="tbtn" data-act="left"></div>
+  <div class="tbtn" data-act="right"></div>
+  <div class="tbtn" data-act="down"></div>
+</div>
+<button id="pause-btn" class="touch tbtn" type="button" hidden aria-label="Pausa"></button>
+
+<noscript><p class="nojs">Deadlock Deck necesita JavaScript para funcionar. Actívalo en tu navegador y vuelve a cargar la página.</p></noscript>
+
+<script src="js/data.js"></script>
+<script src="js/art.js"></script>
+<script src="js/art_body.js"></script>
+<script src="js/art_enemies.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/core.js"></script>
+<script src="js/tower.js"></script>
+<script src="js/explore.js"></script>
+<script src="js/combat.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
