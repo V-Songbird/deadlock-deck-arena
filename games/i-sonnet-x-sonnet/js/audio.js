@@ -1,7 +1,7 @@
 /* Deadlock Deck: El Reloj Anatómico — audio (W8)
  * Todo se sintetiza con Web Audio: sin archivos de sonido.
  * Las funciones de síntesis reciben el motor E (contexto + buses) y un destino, así que funcionan igual
- * sobre un AudioContext real que sobre un OfflineAudioContext (DD.Audio.create, usado para verificar).
+ * sobre un AudioContext real que sobre un OfflineAudioContext (createEngine).
  */
 (function () {
   'use strict';
@@ -872,12 +872,6 @@
   }
   function toggleMute() { setMuted(!isMuted()); return isMuted(); }
 
-  function stats() {                                       // para verificación: estado interno acotado
-    var srcs = cur ? cur.srcs.length : 0;
-    old.forEach(function (p) { srcs += p.srcs.length; });
-    return { state: ctx ? ctx.state : null, dead: dead, track: cur ? cur.name : null, fading: old.length, sfx: live.length, musicSources: srcs };
-  }
-
   if (typeof document !== 'undefined' && document.addEventListener) {
     document.addEventListener('visibilitychange', function () {   // pestaña oculta: el contexto se suspende (el planificador no se retrasa)
       try {
@@ -888,9 +882,6 @@
     });
   }
 
-  DD.Audio = {
-    init: init, music: music, setTension: setTension, sfx: sfx, setMuted: setMuted, toggleMute: toggleMute,
-    create: createEngine, stats: stats, tracks: Object.keys(TRACKS), sfxNames: Object.keys(SFX)
-  };
+  DD.Audio = { init: init, music: music, setTension: setTension, sfx: sfx, setMuted: setMuted, toggleMute: toggleMute };
   Object.defineProperty(DD.Audio, 'muted', { get: isMuted, set: setMuted, enumerable: true });
 })();
