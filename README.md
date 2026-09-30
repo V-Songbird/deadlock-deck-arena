@@ -1,6 +1,6 @@
 # Deadlock Deck Arena
 
-Seven playable browser games built from one identical prompt by seven different AI
+Eight playable browser games built from one identical prompt by eight different AI
 orchestrator/worker pairings, with a hub that launches any of them or runs several side by side
 in the same window.
 
@@ -11,7 +11,7 @@ your card deck is your body, limbs overheat and break, and you have six real min
 burning tower. Nobody intervened while the agents built it. What each pairing handed back is in
 this repository, unedited apart from the language layer described below.
 
-## The seven builds
+## The eight builds
 
 | | Orchestrator | Worker | Files | Lines | Rendering |
 |---|---|---|---|---|---|
@@ -22,9 +22,10 @@ this repository, unedited apart from the language layer described below.
 | **E** | Astra 6 Pro (Web) | Astra 6 Pro (Web) | 10 | 2 978 | no canvas on the page |
 | **F** | Fable 5.1 | Fable 5.1 | 17 | 3 524 | one 640×360 canvas |
 | **G** | Fable 5.1 | Opus 5 | 13 | 4 466 | one 480×270 canvas |
+| **H** | Opus 5.5 | Sonnet 5.5 | 15 | 7 415 | one 640×360 canvas |
 
-Line counts cover the JS, CSS and HTML files in each folder, measured on 16 September 2026. They
-describe size, not quality.
+Line counts cover the JS, CSS and HTML files in each folder, measured on 16 September 2026
+(build H on 30 September). They describe size, not quality.
 
 ## Play
 
@@ -32,8 +33,9 @@ Open <https://v-songbird.github.io/deadlock-deck-arena/> and pick a build, or ti
 press **Compare**. The URL carries the whole state, so `play.html?g=b,d` is a shareable link to
 that exact pairing.
 
-The hub and all seven games run in Spanish and English. The switch is in the top bar, and every
-game carries its own ES/EN control. `?lang=en` works on any page, and the hub passes your choice
+The hub and builds A to G run in Spanish and English. The switch is in the top bar, and each of
+those games carries its own ES/EN control. Build H has no language layer yet and plays in Spanish
+whatever the switch says. `?lang=en` works on any page, and the hub passes your choice
 into the game it launches.
 
 To run it locally you need any static file server, because the games load their scripts over HTTP.
@@ -48,11 +50,12 @@ call at runtime.
 
 ## How the experiment was run
 
-All seven runs had the same conditions:
+All eight runs had the same conditions:
 
 - **The same prompt**, word for word. It is reproduced in full on the hub, in the original
   Spanish, and in [docs/experiment.md](docs/experiment.md).
 - **Maximum reasoning effort** on every orchestrator: `xhigh`, or DeepSeek-V4.1-Flash's own ceiling.
+  Build H's orchestrator effort was not recorded.
 - **No owner in the loop.** Each orchestrator planned the work, dispatched its workers and
   integrated the result on its own.
 - **No dependencies allowed.** Every build came out as plain HTML, CSS and JavaScript.
@@ -64,7 +67,7 @@ orchestrator and differ only in the worker, which is the cleanest pair to compar
 
 One run per pairing is an anecdote, not a benchmark. The differences you can see — build size,
 architecture, how far each one got with the six-minute loop — come from a single sample each, with
-no repeats and no controlled scoring. Read it as seven concrete artefacts to compare by hand, not
+no repeats and no controlled scoring. Read it as eight concrete artefacts to compare by hand, not
 as a ranking.
 
 ## Repository layout
@@ -80,6 +83,7 @@ games/d-opus-x-opus/            build D
 games/e-astra/                  build E
 games/f-fable-x-fable/          build F
 games/g-fable-x-opus/           build G
+games/h-opus-x-sonnet/          build H
 docs/experiment.md      method, measurements and the full prompt
 docs/provenance/        build history recovered from build B's own git repository
 ```
@@ -91,7 +95,8 @@ with each other in places; that is part of the record.
 
 Tag [`as-built-2026-09`](https://github.com/V-Songbird/deadlock-deck-arena/releases/tag/as-built-2026-09)
 points at the first commit, which holds the first five games exactly as the agents delivered them.
-Builds F and G arrived later and are tagged separately. Every
+Builds F and G arrived later and are tagged separately, and so is build H
+([`as-built-h-2026-09`](https://github.com/V-Songbird/deadlock-deck-arena/releases/tag/as-built-h-2026-09)). Every
 later change to a game — currently only the Spanish/English layer — sits in commits after it, so
 the raw output stays recoverable.
 

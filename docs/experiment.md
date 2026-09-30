@@ -1,15 +1,15 @@
 # Deadlock Deck Arena — method, measurements and hub design
 
-What was investigated: how seven orchestrator/worker agent pairings differ when they are given one
-identical game brief, and how to present the seven results so a visitor can compare them.
+What was investigated: how eight orchestrator/worker agent pairings differ when they are given one
+identical game brief, and how to present the eight results so a visitor can compare them.
 
 Everything below is recorded from the repository itself. Commands are reproducible from the
 repository root.
 
 ## 1. The experiment
 
-Seven runs of the same prompt, each producing a complete browser game. The only variable was the
-model pairing. Builds A to E were run first; F and G were added afterwards.
+Eight runs of the same prompt, each producing a complete browser game. The only variable was the
+model pairing. Builds A to E were run first; F and G were added afterwards, and H after those.
 
 | Build | Orchestrator | Worker | Folder |
 |---|---|---|---|
@@ -20,18 +20,19 @@ model pairing. Builds A to E were run first; F and G were added afterwards.
 | E | Astra 6 Pro (Web) | Astra 6 Pro (Web) | `games/e-astra/` |
 | F | Fable 5.1 | Fable 5.1 | `games/f-fable-x-fable/` |
 | G | Fable 5.1 | Opus 5 | `games/g-fable-x-opus/` |
+| H | Opus 5.5 | Sonnet 5.5 | `games/h-opus-x-sonnet/` |
 
-Constant across all seven runs:
+Constant across all eight runs:
 
 - the same prompt, word for word (reproduced in §5);
-- the orchestrator at maximum reasoning effort — `xhigh`, or DeepSeek-V4.1-Flash's own ceiling;
+- the orchestrator at maximum reasoning effort — `xhigh`, or DeepSeek-V4.1-Flash's own ceiling (build H's orchestrator effort was not recorded; its prompt asked for Sonnet 5.5 workers at `high`);
 - fully autonomous operation, with no owner input during the build;
 - no dependencies, no build step, no tests.
 
 ### What this does not establish
 
 One run per pairing. No repeats, no controlled scoring, no held-out rubric. The measurements below
-describe seven artefacts; they do not rank seven models.
+describe eight artefacts; they do not rank eight models.
 
 One pair does isolate a single variable. F and G share the Fable 5.1 orchestrator and differ only
 in the worker, so the gap between those two is the closest this set comes to a controlled
@@ -61,13 +62,15 @@ Result, 16 September 2026:
 | E | 10 | 7 | 2 978 |
 | F | 17 | 14 | 3 524 |
 | G | 13 | 9 | 4 466 |
+| H | 15 | 12 | 7 415 |
 
 Build E's single-file bundle `Deadlock-Deck.html` is excluded from the line count because it
 duplicates the rest of that folder.
 
 The spread is the most visible result: build A is about 3.7× the size of build E for the same
 brief. F and G share an orchestrator and still diverge: F spreads the job over 14 code files and
-3 524 lines, G over 9 files and 4 466 lines.
+3 524 lines, G over 9 files and 4 466 lines. H, measured on 30 September 2026, is the second
+largest: 12 code files and 7 415 lines.
 
 ## 3. Structural differences
 
@@ -82,6 +85,7 @@ Verified by reading the entry points.
 | E | [src/art.js:11](../games/e-astra/src/art.js) | No `<canvas>` in the page at all; sprites are built offscreen and the interface is a dark serif layout, not pixel art. |
 | F | [index.html:14](../games/f-fable-x-fable/index.html), [src/core.js:3](../games/f-fable-x-fable/src/core.js) | One 640×360 canvas, 13 classic scripts on a single `window.DD` namespace, styles inline in the page. |
 | G | [index.html](../games/g-fable-x-opus/index.html), [js/core.js:2](../games/g-fable-x-opus/js/core.js) | One 480×270 canvas, 7 scripts each exposing its own global: `Core`, `Sprites`, `Data`, `Sound`, `Tower`, `Combat`, `Game`. |
+| H | [index.html](../games/h-opus-x-sonnet/index.html), [docs/design.md](../games/h-opus-x-sonnet/docs/design.md) | One 640×360 canvas, 10 classic scripts on a single `window.DD` namespace, built by four workers in parallel against a design contract the orchestrator wrote first, then a fifth QA worker. |
 
 Build E is the only one that did not follow the prompt's "Pixel Art" instruction at the page level.
 
@@ -114,15 +118,17 @@ git clone docs/provenance/game-b-build-history.bundle build-b-history
 ```
 
 That history shows build B's orchestrator working in phases: a written contract first, then data
-and systems, then the UI layer, then a review pass. None of the other four builds left a comparable
-record.
+and systems, then the UI layer, then a review pass. None of the other four builds from that first batch left a comparable
+record. Build H later kept its own: the contract in
+[docs/design.md](../games/h-opus-x-sonnet/docs/design.md) and a
+[build log](../games/h-opus-x-sonnet/docs/build-log.md).
 
 ## 5. The prompt
 
 Reproduced verbatim on the hub, inside the **Read the full prompt** panel on
 [index.html](../index.html), in whichever language the page is set to.
 
-The Spanish text is the evidence: it is what the seven agents actually received, and it is what the
+The Spanish text is the evidence: it is what the eight agents actually received, and it is what the
 Spanish side of the panel shows, unedited. The English side is a reading translation, labelled as
 one, with a link back to the original. The two are never presented as interchangeable, because the
 prompt is the experiment's input and a translated input would be a different experiment.
@@ -136,7 +142,7 @@ Nothing is stored in a custom history stack, so browser back, forward and a copi
 correctly, and a specific comparison is shareable. An overlay on the hub was rejected because it
 would need manual history handling and could not be linked.
 
-**Static HTML first.** The seven cards, their play links and the all-builds compare link are plain
+**Static HTML first.** The eight cards, their play links and the all-builds compare link are plain
 markup. Scripting adds the compare tray, the language switch and the pixel headline; with
 scripting off the page still reads and every game is still one click away.
 
@@ -152,7 +158,7 @@ page would manufacture urgency with no task behind it. The real clock starts ins
 **The footer's six limb slots carry real links** — repository, prompt, conditions, method, as-built
 tag, licence — so the chrome that echoes the game's anatomy bar is also the site's navigation.
 
-**Unique accessible names.** Seven cards each with a control named "Play" is a screen-reader
+**Unique accessible names.** Eight cards each with a control named "Play" is a screen-reader
 problem, so every card control carries a visually hidden build letter: "Play build A", "Compare
 build A", "Source of build A".
 
@@ -172,7 +178,7 @@ Checked against a local `python -m http.server` in a Chromium browser:
 | The language switch rewrites internal links so a copied URL keeps the language | verified — links read `play.html?g=a&lang=en` after switching |
 | Ticking two cards shows the tray with the right target | verified — `play.html?g=a,b&lang=es`, label "ABRIR 2 LADO A LADO" |
 | Each card's compare control has a unique accessible name | verified — label text reads "Comparar la construcción A" |
-| All seven games load and run at once in `play.html?g=a,b,c,d,e,f,g` | verified, 4+3 grid |
+| All eight games load and run at once in `play.html?g=a,b,c,d,e,f,g,h` | verified, 4+4 grid |
 | No console errors on the hub or the player | verified |
 | Mobile layout at 375×812 | verified — cards stack, health bar hides, targets stay ≥44 px |
 
@@ -182,7 +188,7 @@ is.
 
 ## 7. Bilingual games
 
-The seven games shipped Spanish-only. A language layer was added afterwards, one agent per build, so
+The games shipped Spanish-only. For builds A to G a language layer was added afterwards, one agent per build, so
 each game resolves its language from `?lang=`, then `localStorage['dd-lang']`, then falls back to
 Spanish, and exposes its own ES/EN control. The hub passes the visitor's choice into the game it
 launches. This is the only change made to the delivered code, and it sits in commits after the
@@ -199,6 +205,7 @@ Each build got the shape that fitted it, not one shared module:
 | E | [src/i18n.js](../games/e-astra/src/i18n.js) | 519 entries | two header buttons, mirrored in the intro modal |
 | F | [src/i18n.js](../games/f-fable-x-fable/src/i18n.js) | 319 entries | a canvas button beside the sound toggle |
 | G | [js/i18n.js](../games/g-fable-x-opus/js/i18n.js) | 281 entries | a canvas button on the title, victory and death screens |
+| H | — | — | none yet: Spanish only |
 
 Three decisions are worth recording because they are not obvious:
 

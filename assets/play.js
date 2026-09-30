@@ -12,7 +12,8 @@
     d: { slug: 'd-opus-x-opus', orch: 'Opus 5', work: 'Opus 5' },
     e: { slug: 'e-astra', orch: 'Astra 6 Pro (Web)', work: 'Astra 6 Pro (Web)' },
     f: { slug: 'f-fable-x-fable', orch: 'Fable 5.1', work: 'Fable 5.1' },
-    g: { slug: 'g-fable-x-opus', orch: 'Fable 5.1', work: 'Opus 5' }
+    g: { slug: 'g-fable-x-opus', orch: 'Fable 5.1', work: 'Opus 5' },
+    h: { slug: 'h-opus-x-sonnet', orch: 'Opus 5.5', work: 'Sonnet 5.5' }
   };
 
   var panes = document.getElementById('panes');
@@ -47,7 +48,7 @@
   function render() {
     var ids = wanted(), l = lang();
     panes.innerHTML = '';
-    panes.dataset.n = String(Math.min(ids.length, 7));
+    panes.dataset.n = String(Math.min(ids.length, 8));
     reloadAll.hidden = ids.length < 2;
 
     if (!ids.length) {
@@ -57,8 +58,8 @@
       empty.innerHTML =
         '<p>' + both('No has elegido ninguna construcción.', 'You have not picked a build.') + '</p>' +
         '<p class="build-actions">' +
-          '<a class="btn btn-primary" href="play.html?g=a,b,c,d,e,f,g">' +
-            both('Abrir las siete', 'Open all seven') + '</a>' +
+          '<a class="btn btn-primary" href="play.html?g=a,b,c,d,e,f,g,h">' +
+            both('Abrir las ocho', 'Open all eight') + '</a>' +
           '<a class="btn" href="index.html">' + both('Volver a la arena', 'Back to the arena') + '</a>' +
         '</p>';
       panes.appendChild(empty);
