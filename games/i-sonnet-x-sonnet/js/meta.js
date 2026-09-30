@@ -6,6 +6,7 @@
   'use strict';
   var DD = window.DD;
   var C = DD.C, CFG = DD.CFG;
+  var DIM = '#a89e88';       // como C.dim pero más claro: el texto secundario pequeño necesita más contraste
 
   /* =====================================================================
    * Helpers de dibujo y audio
@@ -164,7 +165,7 @@
     var hov = !uiLocked && DD.ui.hit(x, y, w, h);
     box(ctx, x, y, w, h, active ? C.panelHi : (hov || foc ? C.panel : C.bg2), foc ? C.heatHi : (active ? C.brass : C.line));
     if (active) rect(ctx, C.heat, x + 2, y + h - 3, w - 4, 2);
-    T(ctx, label, x + (w >> 1), y + ((h - 7) >> 1) + (active ? 0 : 1), active ? C.bone : (hov || foc ? C.ink : C.dim), 1, 'center');
+    T(ctx, label, x + (w >> 1), y + ((h - 7) >> 1) + (active ? 0 : 1), active ? C.bone : (hov || foc ? C.ink : DIM), 1, 'center');
     return (hov && DD.Input.mouse.clicked) || (foc && (DD.Input.pressed('ok') || (n.keyMoved && !active)));
   }
 
@@ -261,16 +262,16 @@
     T(ctx, DD.TYPE_NAME[L.type], tx, ty, C.brass);
     if (!isKnown) {
       var lines = wrapM('Plano sin descubrir. Cosecha esta extremidad en la torre e injértala para registrarla en el Códice.', w - 62, 1);
-      for (i = 0; i < lines.length; i++) T(ctx, lines[i], tx, ty + 14 + i * 9, C.dim);
+      for (i = 0; i < lines.length; i++) T(ctx, lines[i], tx, ty + 14 + i * 9, DIM);
       T(ctx, 'Pista: la llevan enemigos a partir del piso ' + firstFloor(id) + '.', x, top + 62, C.steel);
       return;
     }
-    T(ctx, 'Nivel ' + L.tier, tx + (DD.TYPE_NAME[L.type].length + 1) * 6, ty, C.dim);
+    T(ctx, 'Nivel ' + L.tier, tx + (DD.TYPE_NAME[L.type].length + 1) * 6, ty, DIM);
     tierPips(ctx, tx + (DD.TYPE_NAME[L.type].length + 9) * 6 + 2, ty + 2, L.tier);
     spr(ctx, 'i_limb', tx, ty + 12);
     T(ctx, 'Integridad máx. ' + L.integ, tx + 12, ty + 12, C.ink);
     var ps = DD.passiveText(L.passive);
-    if (!ps.length) T(ctx, 'Sin pasivas', tx, ty + 24, C.dim);
+    if (!ps.length) T(ctx, 'Sin pasivas', tx, ty + 24, DIM);
     for (i = 0; i < ps.length; i++) T(ctx, ps[i], tx, ty + 24 + i * 9, C.acid);
 
     var cy = top + 58;
@@ -289,16 +290,16 @@
     }
     var fl = wrapM(L.flavor || '', w, 1);
     cy += 2;
-    for (i = 0; i < fl.length; i++) T(ctx, fl[i], x, cy + i * 9, C.dim);
+    for (i = 0; i < fl.length; i++) T(ctx, fl[i], x, cy + i * 9, DIM);
     cy += fl.length * 9 + 3;
     var dl = wrapM('Cae de: ' + droppedBy(id), w, 1);
     for (i = 0; i < dl.length; i++) T(ctx, dl[i], x, cy + i * 9, C.steel);
   }
 
   function ficheLegend(ctx, x, y) {
-    spr(ctx, 'i_energy', x, y); T(ctx, 'Coste', x + 11, y, C.dim);
-    spr(ctx, 'i_heat', x + 58, y); T(ctx, 'Calor', x + 69, y, C.dim);
-    spr(ctx, 'i_limb', x + 116, y); T(ctx, 'Desgaste', x + 127, y, C.dim);
+    spr(ctx, 'i_energy', x, y); T(ctx, 'Coste', x + 11, y, DIM);
+    spr(ctx, 'i_heat', x + 58, y); T(ctx, 'Calor', x + 69, y, DIM);
+    spr(ctx, 'i_limb', x + 116, y); T(ctx, 'Desgaste', x + 127, y, DIM);
   }
 
   /* =====================================================================
@@ -358,7 +359,7 @@
         rect(ctx, C.line, 70 + CONTROLS[i][0].length * 6 + 6, y + 4, 500 - CONTROLS[i][0].length * 6 - 6, 1);
         y += 13;
         for (var j = 0; j < CONTROLS[i][1].length; j++) {
-          T(ctx, CONTROLS[i][1][j][0], 82, y, C.dim);
+          T(ctx, CONTROLS[i][1][j][0], 82, y, DIM);
           T(ctx, CONTROLS[i][1][j][1], 240, y, C.ink);
           y += 11;
         }
@@ -397,7 +398,7 @@
       DD.ui.panel(ctx, X, Y, W, H, { title: 'RÉCORDS', alpha: 0.94 });
       if (!s.runs) {
         T(ctx, 'Aún no has despertado.', X + W / 2, Y + 24, C.ink, 1, 'center');
-        T(ctx, 'Tus récords y planos se anotarán aquí.', X + W / 2, Y + 36, C.dim, 1, 'center');
+        T(ctx, 'Tus récords y planos se anotarán aquí.', X + W / 2, Y + 36, DIM, 1, 'center');
         return;
       }
       var cells = [
@@ -406,7 +407,7 @@
       ];
       for (var i = 0; i < 6; i++) {
         var cx = X + 14 + (i % 3) * 96, cy = Y + 22 + Math.floor(i / 3) * 14;
-        T(ctx, cells[i][0], cx, cy, C.dim);
+        T(ctx, cells[i][0], cx, cy, DIM);
         T(ctx, String(cells[i][1]), cx + cells[i][0].length * 6 + 5, cy, cells[i][2]);
       }
     }
@@ -426,8 +427,8 @@
         var In = DD.Input;
         if (st.help) {
           if (In.pressed('back')) { sfx('uiBack'); st.help = false; nav.focus = 'wake'; return; }
-          if (In.pressed('left') && st.page > 0) { st.page--; sfx('ui', 0.5); }
-          else if (In.pressed('right') && st.page < 2) { st.page++; sfx('ui', 0.5); }
+          if (In.pressed('left') && st.page > 0) { st.page--; nav.focus = 'ht' + st.page; sfx('ui', 0.5); }
+          else if (In.pressed('right') && st.page < 2) { st.page++; nav.focus = 'ht' + st.page; sfx('ui', 0.5); }
           else if (In.pressed('up') || In.pressed('down')) navUpdate(nav);
           return;
         }
@@ -467,7 +468,7 @@
             DD.save.mute = !!m; DD.saveNow(); sfx('ui');
           }
           records(ctx);
-          T(ctx, 'Flechas + Enter, ratón, toque o mando', 250, 332, C.dim, 1, 'center');
+          T(ctx, 'Flechas + Enter, ratón, toque o mando', 250, 332, DIM, 1, 'center');
         });
         if (st.help) drawHelp(ctx, st, nav);
         flush();
@@ -552,7 +553,7 @@
       ctx.globalAlpha = 1;
       rect(ctx, C.brassDk, x + 1, y + 1, 3, 3);
       if (foc) focusRing(ctx, x, y, W, H);
-      T(ctx, DD.SLOT_NAME[slot].toUpperCase(), x + 28, y + 5, C.dim);
+      T(ctx, DD.SLOT_NAME[slot].toUpperCase(), x + 28, y + 5, DIM);
       var i, cards;
       if (!limb) {
         stumpIcon(ctx, DD.SLOT_TYPE[slot], x + 6, y + 6);
@@ -563,7 +564,7 @@
         T(ctx, limb.name, x + 28, y + 16, C.bone);
         var im = limb.integ, f = s.integ / im;
         DD.ui.bar(ctx, x + 28, y + 27, 100, 6, f, f < 0.6 ? C.warn : C.integ);
-        T(ctx, s.integ + '/' + im, x + 134, y + 26, f < 0.99 ? C.warn : C.dim);
+        T(ctx, s.integ + '/' + im, x + 134, y + 26, f < 0.99 ? C.warn : DIM);
         cards = limb.cards.map(function (cid) { return DD.CARDS[cid]; });
       }
       for (i = 0; i < cards.length; i++) {
@@ -590,14 +591,14 @@
       dim(ctx, 0.72);
       if (empty) {
         DD.ui.panel(ctx, 130, 96, 380, 156, { title: 'INJERTAR: ' + DD.SLOT_NAME[slot].toUpperCase() });
-        T(ctx, 'Sustituye: ' + (cur ? cur.name : 'muñón'), 146, 122, C.dim);
+        T(ctx, 'Sustituye: ' + (cur ? cur.name : 'muñón'), 146, 122, DIM);
         var ml = wrapM('No conoces otros planos de este tipo. Cosecha e injerta extremidades en la torre para descubrirlos.', 348, 1);
         for (i = 0; i < ml.length; i++) T(ctx, ml[i], 146, 140 + i * 9, C.ink);
         if (nbtn(nav, ctx, 'mcancel', 250, 212, 140, 26, 'Volver')) { sfx('uiBack'); st.modal = null; nav.focus = 's_' + slot; }
         return;
       }
       DD.ui.panel(ctx, 60, 14, 520, 332, { title: 'INJERTAR: ' + DD.SLOT_NAME[slot].toUpperCase() });
-      T(ctx, 'Sustituye: ' + (cur ? cur.name + ' (se pierde)' : 'muñón (no pierdes nada)'), 76, 40, C.dim);
+      T(ctx, 'Sustituye: ' + (cur ? cur.name + ' (se pierde)' : 'muñón (no pierdes nada)'), 76, 40, DIM);
       var ry = 56, rh = 28, rows = 8, lx = 76, lw = 174;
       var foc = navAdd(nav, 'mlist', lx, ry, lw, rows * rh, { list: L });
       if (L.sel < L.top) L.top = L.sel;
@@ -608,7 +609,7 @@
         box(ctx, lx, ly, lw, rh - 2, sel ? C.panelHi : C.bg2, sel ? (foc ? C.heatHi : C.brass) : C.line);
         limbIcon(ctx, id, lx + 4, ly + 4, 1);
         T(ctx, DD.LIMBS[id].name, lx + 25, ly + 4, sel ? C.bone : C.ink);
-        T(ctx, 'Nivel ' + DD.LIMBS[id].tier + ' · Integ. ' + DD.LIMBS[id].integ, lx + 25, ly + 14, C.dim);
+        T(ctx, 'Nivel ' + DD.LIMBS[id].tier + ' · Integ. ' + DD.LIMBS[id].integ, lx + 25, ly + 14, DIM);
       }
       if (L.top > 0) T(ctx, '↑', lx + lw - 8, ry - 10, C.brass);
       if (L.top + rows < m.ids.length) T(ctx, '↓', lx + lw - 8, ry + rows * rh + 1, C.brass);
@@ -631,7 +632,7 @@
       var i, stats = DD.Body.stats(run.body), base = DD.BASES[run.base] || DD.BASES.jornalero;
       // cabecera
       T(ctx, 'MESA DE DISECCIÓN', 12, 7, C.bone, 2);
-      T(ctx, 'Reanimación #' + run.n, 548, 8, C.dim, 1, 'right');
+      T(ctx, 'Reanimación #' + run.n, 548, 8, DIM, 1, 'right');
       if (nbtn(nav, ctx, 'title', 556, 3, 76, 20, 'Título')) backTo('title');
       var msg = st.msgT > 0 ? st.msg : reincarnation(run), mc = st.msgT > 0 ? st.msgCol : C.ether;
       T(ctx, msg, 12, 28, mc);
@@ -656,15 +657,15 @@
       for (i = 0; i < STAT_ROWS.length; i++) {
         var col = i < 5 ? 0 : 1, row = i < 5 ? i : i - 5, sx = 18 + col * 90, sy = 284 + row * 11;
         spr(ctx, STAT_ROWS[i][0], sx, sy);
-        T(ctx, STAT_ROWS[i][1], sx + 11, sy, C.dim);
+        T(ctx, STAT_ROWS[i][1], sx + 11, sy, DIM);
         T(ctx, String(STAT_ROWS[i][2](stats)), sx + 11 + STAT_ROWS[i][1].length * 6 + 4, sy, C.ink);
       }
       // injertos
       DD.ui.panel(ctx, 440, 258, 192, 94, { title: 'INJERTOS DE PLANO', alpha: 0.94 });
       T(ctx, left() + '/' + CFG.TABLE_GRAFTS, 536, 282, left() ? C.acid : C.blood, 2, 'center');
       var gl = wrapM('Pulsa un hueco para injertar un plano del Códice (' + Math.round(CFG.GRAFT_FRAC * 100) + '% de integridad).', 170, 1);
-      for (i = 0; i < gl.length && i < 3; i++) T(ctx, gl[i], 536, 300 + i * 9, C.dim, 1, 'center');
-      if (nbtn(nav, ctx, 'undo', 466, 329, 140, 18, 'Deshacer injerto', { disabled: !grafted() })) undoGraft();
+      for (i = 0; i < gl.length && i < 3; i++) T(ctx, gl[i], 536, 300 + i * 9, DIM, 1, 'center');
+      if (nbtn(nav, ctx, 'undo', 466, 328, 140, 20, 'Deshacer injerto', { disabled: !grafted() })) undoGraft();
       // recordatorio y despertar
       var rem = 'Tienes ' + DD.fmtTime(CFG.RUN_TIME) + ' para escapar de la torre en llamas.';
       var rl = wrapM(rem, 232, 1);
@@ -762,7 +763,7 @@
           ctx.globalAlpha = 1;
           limbIcon(ctx, id, x + 7, y + 6, 2, !kn);
           if (kn) tierPips(ctx, x + 6, y + 39, DD.LIMBS[id].tier);
-          else T(ctx, '???', x + CS / 2, y + 37, C.dim, 1, 'center');
+          else T(ctx, '???', x + CS / 2, y + 37, DIM, 1, 'center');
           if (foc) focusRing(ctx, x, y, CS, CS);
         }
         // ficha
@@ -772,8 +773,8 @@
         if (nbtn(nav, ctx, 'back', 14, 300, 110, 26, st.from === 'results' ? 'Resultados' : 'Título')) backTo(st.from);
         if (nbtn(nav, ctx, 'shop', 132, 300, 110, 26, 'Tienda')) go('shop', { from: st.from });
         ctx.globalAlpha = 0.88; rect(ctx, C.bg, 14, 266, 238, 26); ctx.globalAlpha = 1;
-        T(ctx, 'Un plano se descubre al injertar su', 20, 269, C.dim);
-        T(ctx, 'extremidad. Se conservan entre runs.', 20, 279, C.dim);
+        T(ctx, 'Un plano se descubre al injertar su', 20, 269, DIM);
+        T(ctx, 'extremidad. Se conservan entre runs.', 20, 279, DIM);
         flush();
       }
     };
@@ -852,7 +853,7 @@
         T(ctx, 'TIENDA DEL ALQUIMISTA', 14, 7, C.bone, 2);
         var bal = String(s.ether), bx0 = 626 - bal.length * 6;
         T(ctx, bal, 626, 10, C.ether, 1, 'right');
-        T(ctx, 'Éter', bx0 - 30, 10, C.dim);
+        T(ctx, 'Éter', bx0 - 30, 10, DIM);
         spr(ctx, 'i_ether', bx0 - 41, 10);
         for (i = 0; i < SHOP_TABS.length; i++) {
           if (tab(nav, ctx, 't' + i, 14 + i * 102, 30, 96, 22, SHOP_TABS[i][1], st.tab === i)) {
@@ -909,7 +910,7 @@
             var stt = DD.Body.stats(pb);
             T(ctx, 'Vida máx. ' + stt.hpMax + ' · Energía ' + stt.energy, ix, yy, C.brass); yy += 12;
             for (i = 0; i < DD.SLOTS.length; i++) {
-              T(ctx, DD.SLOT_NAME[DD.SLOTS[i]], ix, yy, C.dim);
+              T(ctx, DD.SLOT_NAME[DD.SLOTS[i]], ix, yy, DIM);
               var ln = DD.LIMBS[cur.base.limbs[DD.SLOTS[i]]].name;
               T(ctx, ln, ix + 72, yy, C.ink);
               yy += 10;
@@ -949,7 +950,7 @@
         T(ctx, 'DEMO', 28 + 23 * 6 + 18, DY + 10, C.bg, 1, 'center');
         spr(ctx, 'i_ether', 28, DY + 24);
         T(ctx, DEMO_ETHER + ' Éter de prueba · precio simulado: 2,99 EUR', 41, DY + 24, C.ether);
-        T(ctx, 'Demostración: no se cobra nada ni hay pagos reales.', 28, DY + 36, C.dim);
+        T(ctx, 'Demostración: no se cobra nada ni hay pagos reales.', 28, DY + 36, DIM);
         if (nbtn(nav, ctx, 'demo', 452, DY + 10, 160, 32, 'Probar paquete\n(DEMO, gratis)', { color: C.warn })) {
           s.ether += DEMO_ETHER; DD.saveNow(); sfx('ether'); DD.fx.flash(C.warn, 0.2, 0.15);
           say('+' + DEMO_ETHER + ' Éter de prueba (simulado).', C.warn);
@@ -974,7 +975,7 @@
 
     function row(ctx, y, ic, label, value, col) {
       if (ic) spr(ctx, ic, 76, y);
-      T(ctx, label, 88, y, C.dim);
+      T(ctx, label, 88, y, DIM);
       T(ctx, String(value), 272, y, col || C.ink, 1, 'right');
     }
 
@@ -1019,7 +1020,7 @@
         var y = PY + 28;
         row(ctx, y, 'i_burn', 'Piso alcanzado', st.floor + '/' + CFG.FLOORS, C.ink); y += 14;
         row(ctx, y, 'i_clock', 'Tiempo restante', DD.fmtTime(st.timeLeft), st.r === 'victory' ? C.acid : C.ink); y += 14;
-        row(ctx, y, 'i_clock', 'Tiempo usado', DD.fmtTime(used), C.dim); y += 14;
+        row(ctx, y, 'i_clock', 'Tiempo usado', DD.fmtTime(used), DIM); y += 14;
         row(ctx, y, 'i_attack', 'Enemigos derrotados', st.kills, C.ink); y += 14;
         row(ctx, y, 'i_limb', 'Injertos', st.grafts, C.ink); y += 14;
         row(ctx, y, 'i_ether', 'Éter ganado', '+' + st.gained, C.ether); y += 14;
@@ -1030,10 +1031,10 @@
         // planos nuevos
         rect(ctx, C.line, 286, PY + 28, 1, PH - 58);
         T(ctx, 'PLANOS NUEVOS', 298, PY + 28, C.brass);
-        T(ctx, 'Códice ' + knownCount() + '/' + DD.LIMB_ORDER.length, PX + PW - 14, PY + 28, C.dim, 1, 'right');
+        T(ctx, 'Códice ' + knownCount() + '/' + DD.LIMB_ORDER.length, PX + PW - 14, PY + 28, DIM, 1, 'right');
         if (!st.bp.length) {
           var nl = wrapM('Ningún plano nuevo esta vez. Cosecha e injerta extremidades que no conozcas para anotarlas en el Códice.', 270, 1);
-          for (i = 0; i < nl.length; i++) T(ctx, nl[i], 298, PY + 46 + i * 9, C.dim);
+          for (i = 0; i < nl.length; i++) T(ctx, nl[i], 298, PY + 46 + i * 9, DIM);
         } else {
           for (i = 0; i < st.bp.length && i < 12; i++) {
             var bx = 298 + (i % 2) * 144, by = PY + 44 + Math.floor(i / 2) * 20;

@@ -209,25 +209,47 @@
     }
   }
 
+  // Cada línea (texto+color+tamaño+sombra) se compone una vez en un lienzo pequeño y luego se estampa
+  // de un solo golpe: dibujar carácter a carácter era lo más caro de cada fotograma en móviles lentos.
+  // Caché de dos generaciones: al llenarse, la actual pasa a «vieja» y lo que siga en uso se rescata de ella.
+  var lineCache = {}, lineOld = {}, lineCount = 0, LINE_MAX = 400;
+  function lineBitmap(line, color, shadow, size) {
+    var key = size + '\u0001' + color + '\u0001' + (shadow || '') + '\u0001' + line;
+    var b = lineCache[key];
+    if (b) return b;
+    b = lineOld[key];
+    if (!b) {
+      b = document.createElement('canvas');
+      b.width = line.length * CW * size + (shadow ? size : 0);
+      b.height = CHA * size + (shadow ? size : 0);
+      var g = b.getContext('2d');
+      g.imageSmoothingEnabled = false;
+      if (shadow) drawRun(g, tinted(shadow), line, size, (ABOVE + 1) * size, size);
+      drawRun(g, tinted(color), line, 0, ABOVE * size, size);
+    }
+    if (lineCount >= LINE_MAX) { lineOld = lineCache; lineCache = {}; lineCount = 0; }
+    lineCache[key] = b; lineCount++;
+    return b;
+  }
+
   // opt: {color, size:1|2|3, align:'left'|'center'|'right', shadow:color|null, alpha}
   DD.text = function (ctx, str, x, y, opt) {
     opt = opt || {};
     str = str == null ? '' : String(str).replace(/\r/g, '');
     var size = Math.max(1, Math.round(opt.size || 1));
     var align = opt.align || 'left';
-    var src = tinted(opt.color || DD.C.ink);
-    var sh = opt.shadow ? tinted(opt.shadow) : null;
+    var color = opt.color || DD.C.ink;
     var prevA = ctx.globalAlpha;
     if (opt.alpha != null && opt.alpha !== 1) ctx.globalAlpha = prevA * opt.alpha;
     ctx.imageSmoothingEnabled = false;
     x = Math.round(x); y = Math.round(y);
     var lines = str.split('\n');
     for (var l = 0; l < lines.length; l++) {
+      if (!lines[l].length) continue;
       var w = lines[l].length * CW * size;
       var px = align === 'center' ? x - Math.floor(w / 2) : (align === 'right' ? x - w : x);
       var py = y + l * LH * size;
-      if (sh) drawRun(ctx, sh, lines[l], px + size, py + size, size);
-      drawRun(ctx, src, lines[l], px, py, size);
+      ctx.drawImage(lineBitmap(lines[l], color, opt.shadow || null, size), px, py - ABOVE * size);
     }
     ctx.globalAlpha = prevA;
   };
@@ -589,7 +611,8 @@
     var C = DD.C;
     x = Math.round(x); y = Math.round(y); w = Math.round(w); h = Math.round(h);
     var dis = !!opt.disabled, sel = !!opt.selected, size = opt.size || 1;
-    var hov = !dis && ui.hit(x, y, w, h);
+    var slop = mouse.touch && (w < 28 || h < 24) ? 2 : 0;       // con el dedo, los botones pequeños aceptan 2 px de margen
+    var hov = !dis && ui.hit(x - slop, y - slop, w + 2 * slop, h + 2 * slop);
     var prs = hov && mouse.down;
     var fired = !dis && ((hov && mouse.clicked) || (opt.hotkey != null && hotkeyPressed(String(opt.hotkey))));
     var lit = hov || sel;
@@ -661,7 +684,18 @@
 
   var fx = DD.fx = { ox: 0, oy: 0 };
 
+  // prefers-reduced-motion: sin sacudidas y con destellos muy atenuados
+  var reduceMotion = false;
+  try {
+    var mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    reduceMotion = !!mq.matches;
+    var onMq = function (e) { reduceMotion = !!e.matches; };
+    if (mq.addEventListener) mq.addEventListener('change', onMq);
+    else if (mq.addListener) mq.addListener(onMq);
+  } catch (_) { reduceMotion = false; }
+
   fx.shake = function (mag, dur) {
+    if (reduceMotion) return;
     mag = mag == null ? 4 : mag; dur = dur || 0.25;
     if (shakeT > 0 && shakeMag * shakeT / shakeDur > mag) return;      // no pisar una sacudida más fuerte
     shakeMag = mag; shakeDur = dur; shakeT = dur;
@@ -669,7 +703,7 @@
 
   fx.flash = function (color, dur, alpha) {
     flashColor = color || '#fff'; flashDur = dur || 0.2; flashT = flashDur;
-    flashMax = alpha == null ? 0.5 : alpha;
+    flashMax = (alpha == null ? 0.5 : alpha) * (reduceMotion ? 0.25 : 1);
   };
 
   fx.update = function (dt) {
@@ -746,7 +780,7 @@
     };
   }
 
-  function nat(v) { return typeof v === 'number' && isFinite(v) && v > 0 ? Math.floor(v) : 0; }
+  function nat(v) { return typeof v === 'number' && isFinite(v) && v > 0 ? Math.min(999999999, Math.floor(v)) : 0; }
 
   function trueMap(m) {
     var out = {};
@@ -779,7 +813,7 @@
     }
     var limbs = DD.LIMBS;
     if (limbs && typeof limbs === 'object' && Object.keys(limbs).length) {   // fuera planos que ya no existen
-      Object.keys(s.blueprints).forEach(function (id) { if (!limbs[id]) delete s.blueprints[id]; });
+      Object.keys(s.blueprints).forEach(function (id) { if (!Object.prototype.hasOwnProperty.call(limbs, id)) delete s.blueprints[id]; });
     }
     SAVE_CATS.forEach(function (cat) {
       var list = cosmetics(cat);

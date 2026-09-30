@@ -11,7 +11,7 @@
   var MASTER = 0.9, MUSIC_LVL = 0.28, SFX_LVL = 1.0, ECHO_SEND = 0.5;
   var LOOK = 0.4, PUMP_MS = 60;            // planificación adelantada (s) e intervalo del planificador (ms)
   var MAX_SFX = 14, MAX_TRACKS = 3;        // efectos simultáneos; pista actual + las que se desvanecen
-  var FADE_TC = 0.3, FADE_END = 2.2;       // fundido cruzado: constante de tiempo y cuándo se retira la saliente
+  var FADE_TC = 0.3;                       // constante de tiempo del fundido por defecto (cada pista puede fijar la suya: def.fade)
   var AC = window.AudioContext || window.webkitAudioContext;
 
   /* ---------- Utilidades ---------- */
@@ -267,7 +267,7 @@
       nb(E, d, t, 'lowpass', 0.5, 300, 100, 0.8, 0.8, 0.02);
       crackle(E, d, t + 0.2, 0.8, 8, 0.5, 2400);
     } },
-    break: { v: 0.6, len: 0.8, pri: 2, max: 2, fn: function (E, d, t, r) {
+    'break': { v: 0.6, len: 0.8, pri: 2, max: 2, fn: function (E, d, t, r) {
       nb(E, d, t, 'bandpass', 0.04, 2600 * r, 1800, 1.5, 0.9, 0.001);
       crackle(E, d, t + 0.02, 0.3, 6, 0.7, 1800);
       thump(E, d, t + 0.03, 130 * r, 45 * r, 0.35, 1);
@@ -424,7 +424,7 @@
       tone(E, d, { t: t + 0.11, f: 212 * r, type: 'square', d: 0.12, vol: 0.4, flt: { t: 'lowpass', f: 900 }, dist: true });
     } },
     tick: { v: 0.6, len: 0.15, gap: 0.05, max: 3, fn: function (E, d, t, r) {
-      clockTick(E, d, t, 1, E.rng() < 0.5, 0);
+      clockTick(E, d, t, 1, (E.tickN = (E.tickN || 0) + 1) & 1, 0);   // tic y tac alternos
     } },
     timeWarn: { v: 0.5, len: 1.6, pri: 2, max: 1, fn: function (E, d, t, r) {
       clang(E, d, t, 147 * r, 1.4, 0.5, BELL, BELL_A);
@@ -432,7 +432,7 @@
         tone(E, d, { t: t + i * 0.2, f: f * r, wave: 'brass', a: 0.03, dur: 0.3, r: 0.2, vol: 0.3, flt: { t: 'lowpass', f: 500, f2: 1600, s: 0.15 } });
       });
     } },
-    death: { v: 0.55, len: 1.8, pri: 3, max: 1, var: 0.1, fn: function (E, d, t, r) {
+    death: { v: 0.55, len: 1.8, pri: 3, max: 1, vary: 0.1, fn: function (E, d, t, r) {
       thump(E, d, t, 90 * r, 22 * r, 0.9, 1);
       tone(E, d, { t: t, f: 110 * r, f2: 30 * r, glide: 1.2, type: 'sawtooth', a: 0.03, dur: 1.1, r: 0.3, vol: 0.4,
         flt: { t: 'lowpass', f: 500, f2: 60, q: 2 } });
@@ -443,7 +443,7 @@
         tone(E, d, { t: t + 0.05, f: f * r, f2: f * r / 3, glide: 1.3, wave: 'organ', a: 0.05, dur: 1.2, r: 0.3, vol: 0.2, flt: { t: 'lowpass', f: 1200, f2: 150 } });
       });
     } },
-    victory: { v: 0.7, len: 1.9, pri: 3, max: 1, var: 0.06, fn: function (E, d, t, r) {
+    victory: { v: 0.7, len: 1.9, pri: 3, max: 1, vary: 0.06, fn: function (E, d, t, r) {
       [[0, 110], [0.18, 165], [0.36, 220], [0.6, 277]].forEach(function (n) {
         tone(E, d, { t: t + n[0], f: n[1] * r, wave: 'brass', dets: [-6, 6], a: 0.04, dur: n[0] > 0.5 ? 0.8 : 0.25, r: 0.35, vol: 0.3,
           flt: { t: 'lowpass', f: 500, f2: 2800, s: 0.2 } });
@@ -469,7 +469,7 @@
     g = E.ctx.createGain();
     g.gain.value = def.v * (vol == null ? 1 : clamp(+vol || 0, 0, 1)) * (0.92 + E.rng() * 0.16);
     g.connect(E.sfxBus);
-    r = 1 + (E.rng() - 0.5) * (def.var == null ? 0.22 : def.var);
+    r = 1 + (E.rng() - 0.5) * (def.vary == null ? 0.22 : def.vary);
     def.fn(E, g, t, r);
     return { g: g, name: name, pri: def.pri || 0, end: t + def.len };
   }
@@ -780,8 +780,8 @@
   }
 
   function switchTrack(name) {                             // fundido cruzado; pistas simultáneas acotadas
-    var now = ctx.currentTime, i;
-    if (cur) { retire(cur, now, FADE_TC, FADE_END); cur = null; }
+    var now = ctx.currentTime, i, tc = name ? TRACKS[name].fade || FADE_TC : FADE_TC;
+    if (cur) { retire(cur, now, tc, Math.max(0.8, tc * 7)); cur = null; }   // la saliente se apaga al ritmo con que entra la nueva
     for (i = 0; i < old.length - (MAX_TRACKS - 1); i++) { fadeOut(old[i], now, 0.01); old[i].dead = Math.min(old[i].dead, now + 0.12); }
     if (name) cur = newInst(E, name, now + 0.06, false);
     ensureTimer();
@@ -806,6 +806,13 @@
     else if (wanted && !cur) switchTrack(wanted);
   }
 
+  function unlock() {                                     // iOS: un búfer mudo dentro del gesto desbloquea la salida
+    try {
+      var src = ctx.createBufferSource();
+      src.buffer = ctx.createBuffer(1, 1, 22050); src.connect(ctx.destination); src.start(0);
+    } catch (e) { /* no hace falta */ }
+  }
+
   function init() {
     try {
       if (dead) return;
@@ -814,6 +821,7 @@
         try { ctx = new AC(); E = createEngine(ctx); } catch (e) { ctx = E = null; dead = true; return; }
         E.tension = tension;
         if (ctx.addEventListener) ctx.addEventListener('statechange', pump);
+        unlock();
       }
       if (ctx.state !== 'running' && ctx.resume) { var p = ctx.resume(); if (p && p.catch) p.catch(function () { /* sin gesto aún */ }); }
       syncMute();

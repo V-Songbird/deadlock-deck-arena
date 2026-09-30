@@ -47,6 +47,50 @@ body {
   }
 }
 
+/* Aviso solo en vertical: el lienzo 16:9 queda pequeño. No bloquea el juego (sin eventos de puntero). */
+#rotate {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 14px 16px;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  text-align: center;
+  color: #c9a24a;
+  background: #17131f;
+  border-bottom: 2px solid #7a5c22;
+  font: 15px/1.4 monospace;
+  pointer-events: none;
+}
+
+@media (orientation: portrait) and (max-width: 900px) {
+  #rotate { display: flex; }
+}
+
+#rotate::before {
+  content: "";
+  flex: none;
+  width: 12px;
+  height: 20px;
+  border: 2px solid #c9a24a;
+  border-radius: 3px;
+  animation: rotate-hint 2.6s ease-in-out infinite;
+}
+
+@keyframes rotate-hint {
+  0%, 25% { transform: rotate(0deg); }
+  60%, 100% { transform: rotate(-90deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #rotate::before { animation: none; transform: rotate(-90deg); }
+}
+
 noscript {
   position: fixed;
   top: 0;

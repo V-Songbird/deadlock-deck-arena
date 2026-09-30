@@ -18,6 +18,7 @@
   var INVULN = 1.5;                            // s sin contacto tras volver de un combate
   var SHIFT_EVERY = 18, SHIFT_FIRST = 13, SHIFT_WARN = 2;
   var FIRE_CAP = 0.18, FIRE_LIFE = [20, 45];   // tope de fuego (fracción del piso) y duración de cada casilla (s)
+  var FIRE_SAFE = 10;                          // el fuego inicial nace a ≥ 10 casillas de CAMINO del inicio: nunca cierra la salida de la sala de partida
   var FIRE_DMG = 4, FIRE_CD = 0.7, FIRE_LEG_HEAT = 6;
   var SPIKE_DMG = 5, SPIKE_CD = 1.2, ACID_DMG = 3, ACID_WEAR = 6, ACID_CD = 1.5, STEAM_HEAT = 18, STEAM_CD = 1.2;
   var TIER_W = [[6, 3, 1], [3, 5, 2], [1, 4, 6]];          // peso de los tarros por tier (1..3) según el piso
@@ -119,10 +120,13 @@
     w.gates.forEach(function (g) { w.noFire[idx(g.x, g.y)] = 1; });
     w.traps.forEach(function (t) { w.noFire[idx(t.x, t.y)] = 1; });
     w.items.forEach(function (t) { w.noFire[idx(t.x, t.y)] = 1; });
+    var open = new Uint8Array(w.tiles);                                        // distancia por camino con todas las compuertas abiertas
+    for (i = 0; i < n; i++) if (open[i] === T.GATE_C) open[i] = T.GATE_O;
+    w.startDist = DD.Tower.dist({ tiles: open }, w.start.x, w.start.y);
     var fl = DD.Run && DD.Run.fireLevel ? DD.Run.fireLevel() : 0;
     var seeds = 4 + w.floor, extra = Math.round(fireCap(w) * fl * 0.5);
-    var near = [], d = DD.Tower.dist(w, w.start.x, w.start.y, 14);          // las dos primeras, a la vista de los primeros pasos
-    for (i = 0; i < n; i++) if (d[i] >= 6 && d[i] <= 14) near.push(i);
+    var near = [];                                                             // las dos primeras, a la vista pero fuera de la sala de partida
+    for (i = 0; i < n; i++) if (w.startDist[i] >= FIRE_SAFE && w.startDist[i] <= FIRE_SAFE + 8) near.push(i);
     DD.shuffle(w.rng, near);
     for (k = 0; k < 2 && k < near.length; k++) igniteAt(w, near[k], true);
     for (k = w.fireList.length; k < seeds + extra; k++) {
@@ -133,9 +137,8 @@
     }
   }
   function fireCap(w) { return Math.floor(w.count * FIRE_CAP); }
-  function farFromStart(w, i) {                  // nunca a menos de 3 casillas del inicio al entrar
-    var x = i % MW, y = (i / MW) | 0;
-    return Math.abs(x - w.start.x) + Math.abs(y - w.start.y) > 4;
+  function farFromStart(w, i) {                  // al entrar, nunca a menos de FIRE_SAFE casillas de camino del inicio
+    return w.startDist[i] < 0 || w.startDist[i] >= FIRE_SAFE;
   }
   function randomFireTile(w) {
     return idx(1 + ((w.rng() * (MW - 2)) | 0), 1 + ((w.rng() * (MH - 2)) | 0));
@@ -587,6 +590,8 @@
       W.enemies = W.enemies.filter(function (e) { return !e.dead; });
       W.items = W.items.filter(function (it) { return !it.taken; });
       W.p.invuln = INVULN; W.ptr = null; W.field = null;
+      W.fireCd = Math.max(W.fireCd, INVULN);      // gracia al volver de un combate: 1.5 s sin daño de fuego ni trampas
+      W.traps.forEach(function (tr) { tr.cd = Math.max(tr.cd, INVULN); });
     } else {
       startFloor();
     }

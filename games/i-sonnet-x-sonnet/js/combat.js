@@ -9,7 +9,7 @@
    * Utilidades compartidas
    * ===================================================================== */
   function sfx(name, vol) { if (DD.Audio && DD.Audio.sfx) DD.Audio.sfx(name, vol); }
-    function rect(ctx, c, x, y, w, h) {
+  function rect(ctx, c, x, y, w, h) {
     if (w <= 0 || h <= 0) return;
     ctx.fillStyle = c;
     ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
@@ -952,8 +952,7 @@
     enter: enter,
     update: update,
     draw: draw,
-    exit: function () { if (S) { S.over = true; S.q = []; } },
-    debug: function () { return S; }                 // solo para verificación externa
+    exit: function () { if (S) { S.over = true; S.q = []; } }
   };
 
   /* =====================================================================
@@ -1179,7 +1178,6 @@
     enter: hEnter,
     update: hUpdate,
     draw: hDraw,
-    exit: function () { if (H) H.mode = 'gone'; },
-    debug: function () { return H; }
+    exit: function () { if (H) H.mode = 'gone'; }
   };
 })();

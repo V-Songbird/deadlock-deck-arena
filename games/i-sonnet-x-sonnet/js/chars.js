@@ -788,7 +788,7 @@
 
 
   /* ====================================================================== */
-  /*  ENEMIGOS GRANDES (≤64×64). Se pintan mirando a la IZQUIERDA.           */
+  /*  ENEMIGOS GRANDES (≤72×66). Se pintan mirando a la IZQUIERDA.           */
   /*  Origen local: centro horizontal y suelo (y=0); hacia arriba y<0.       */
   /* ====================================================================== */
   var TH = { st: '#e6dcc0' };            // hilo claro de las costuras de monstruos
@@ -1298,16 +1298,16 @@
   }
 
   var ENEMY_ART = {
-    sabueso: { w: 64, h: 48, sh: 22, fn: paintSabueso, dead: 'flip' },
+    sabueso: { w: 64, h: 52, sh: 22, fn: paintSabueso, dead: 'flip' },
     ayudante: { w: 64, h: 64, sh: 14, fn: paintAyudante, dead: 'rot' },
     golem: { w: 64, h: 64, sh: 24, fn: paintGolem, dead: 'rot' },
     alquimista: { w: 64, h: 64, sh: 17, fn: paintAlquimista, dead: 'rot' },
-    arana: { w: 64, h: 52, sh: 24, fn: paintArana, dead: 'flip' },
+    arana: { w: 72, h: 52, sh: 24, fn: paintArana, dead: 'flip' },
     cirujano: { w: 64, h: 64, sh: 14, fn: paintCirujano, dead: 'rot' },
-    automata: { w: 64, h: 64, sh: 21, fn: paintAutomata, dead: 'rot' },
-    quimera: { w: 64, h: 60, sh: 24, fn: paintQuimera, dead: 'flip' },
+    automata: { w: 64, h: 66, sh: 21, fn: paintAutomata, dead: 'rot' },
+    quimera: { w: 68, h: 64, sh: 24, fn: paintQuimera, dead: 'flip' },
     relojero: { w: 64, h: 64, sh: 14, fn: paintRelojero, dead: 'rot' },
-    vivisector: { w: 64, h: 64, sh: 22, fn: paintVivisector, dead: 'rot' }
+    vivisector: { w: 68, h: 66, sh: 22, fn: paintVivisector, dead: 'rot' }
   };
   var GENERIC_ART = { w: 40, h: 40, sh: 15, fn: paintGenerico, dead: 'rot' };
   var enemyCache = {}, SW = [0, 1, 0, -1];
@@ -1332,7 +1332,7 @@
     }
     return (enemyCache[key] = o);
   }
-  var FS = mk(64, 64);
+  var FS = mk(72, 72);
   S.drawEnemyBig = function (ctx, id, cx, by, opt) {
     opt = opt || {};
     cx = Math.round(cx); by = Math.round(by);
@@ -1344,7 +1344,7 @@
     if (opt.flip) ctx.scale(-1, 1);
     if (opt.shadow !== false) shadowEll(ctx, 0, 0, E.sh || 14, 3);
     if (opt.flash > 0) {
-      FS.g.clearRect(0, 0, 64, 64); FS.g.drawImage(src, 0, 0); tint(FS.g, E.w, E.h, opt.flash); src = FS.c;
+      FS.g.clearRect(0, 0, 72, 72); FS.g.drawImage(src, 0, 0); tint(FS.g, E.w, E.h, opt.flash); src = FS.c;
     }
     ctx.drawImage(src, -(E.w >> 1), -E.h);
     ctx.restore();
