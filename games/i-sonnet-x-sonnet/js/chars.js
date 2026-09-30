@@ -807,8 +807,8 @@
 
   function paintSabueso(g, s) {
     var F = MAT.fur, L = MAT.furLt, D = ['#3c3128', '#4a3d31', '#241c16'], W = MAT.bone[1], atk = s.atk, b = s.bob, sw = s.sw, i;
-    var dx = atk ? -3 : (s.hurt ? 3 : 0), ln = atk ? 4 : 0, Y = -22 + b + ln;
-    var hx = -16 + dx - (atk ? 2 : 0), hy = -28 + b + ln + (atk ? 3 : 0) - (s.hurt ? 5 : 0) + (s.dead ? 2 : 0);
+    var dx = atk ? -2 : 0, ln = atk ? 4 : 0, Y = -22 + b + ln;
+    var hx = -16 + dx - (atk ? 1 : 0) + (s.hurt ? 2 : 0), hy = -28 + b + ln + (atk ? 3 : 0) - (s.hurt ? 5 : 0) + (s.dead ? 2 : 0);
     // patas lejanas (oscuras)
     limbE(g, D, -2 + dx, Y + 4, -3 + dx - (atk ? 4 : 0) - sw, -2, 4);
     limbE(g, D, 8 + dx, Y + 3, 3 + dx + sw * 2, -10, 5); limbE(g, D, 3 + dx + sw * 2, -10, 5 + dx + sw, -2, 3);
@@ -851,31 +851,33 @@
 
   function paintAyudante(g, s) {
     var z = ['#d8d0b8', '#efe8d2', '#a79f86'], sk = ['#c9b79a', '#e0d0b4', '#9a8a70'], atk = s.atk, b = s.bob, sw = s.sw, i;
-    var dx = atk ? -7 : (s.hurt ? 4 : 0), hx = -9 + dx + (s.hurt ? 3 : 0), hy = -51 + b + (s.hurt ? 2 : 0);
+    var dx = atk ? -2 : (s.hurt ? 3 : 0), hx = -9 + dx + (s.hurt ? 3 : 0), hy = -51 + b + (s.hurt ? 2 : 0);
     var trousers = ['#3a3248', '#4f4560', '#221c2c'];
-    // piernas
-    limbE(g, trousers, 6 + dx, -24, 7 + dx - sw, -12, 5); limbE(g, trousers, 7 + dx - sw, -12, 6 + dx - sw, -3, 4);
+    g.translate(2, 0);
+    // piernas flexionadas
+    limbE(g, trousers, 6 + dx, -20, 7 + dx - sw, -11, 5); limbE(g, trousers, 7 + dx - sw, -11, 6 + dx - sw, -3, 4);
     box(g, MAT.leather, 2 + dx - sw, -4, 9, 4);
-    limbE(g, trousers, 1 + dx, -24, -2 + dx + sw, -13, 5); limbE(g, trousers, -2 + dx + sw, -13, -5 + dx + sw * 2, -3, 4);
+    limbE(g, trousers, 1 + dx, -20, -2 + dx + sw, -11, 5); limbE(g, trousers, -2 + dx + sw, -11, -5 + dx + sw * 2, -3, 4);
     box(g, MAT.leather, -11 + dx + sw * 2, -4, 9, 4); P(g, MAT.leather[1], -11 + dx + sw * 2, -3);
+    g.translate(0, 6);       // el tronco va más bajo: está encorvado
     // bata encorvada
-    poly(g, z[2], [[-2 + dx, -42 + b], [10 + dx, -38 + b], [13 + dx, -10], [4 + dx, -8]]);
-    poly(g, z[0], [[-13 + dx, -42 + b], [3 + dx, -42 + b], [10 + dx, -10], [-9 + dx, -9]]);
-    for (i = 0; i < 5; i++) poly(g, z[0], [[-9 + dx + i * 4, -10], [-7 + dx + i * 4, -6 - (i % 2) * 2], [-5 + dx + i * 4, -10]]);   // dobladillo roto
+    poly(g, z[2], [[-2 + dx, -42 + b], [10 + dx, -38 + b], [13 + dx, -16], [4 + dx, -14]]);
+    poly(g, z[0], [[-13 + dx, -42 + b], [3 + dx, -42 + b], [10 + dx, -16], [-9 + dx, -15]]);
+    for (i = 0; i < 5; i++) poly(g, z[0], [[-9 + dx + i * 4, -16], [-7 + dx + i * 4, -12 - (i % 2) * 2], [-5 + dx + i * 4, -16]]);   // dobladillo roto
     R(g, z[1], -12 + dx, -41 + b, 3, 14);
-    ov(g, '#8fbf3a', -4 + dx, -24, 3, 2.5); ov(g, '#b6ef7a', -5 + dx, -25, 1.2, 1);                 // mancha ácida
-    R(g, C.blood, 2 + dx, -32, 3, 2); R(g, C.blood, 4 + dx, -30, 1, 3); P(g, C.blood, -6 + dx, -16); R(g, '#6a1a20', 0 + dx, -18, 2, 3);
-    R(g, '#7a6a30', -8 + dx, -14, 4, 2);
-    seamV(g, THD, 1 + dx, -40 + b, -12);
-    box(g, MAT.leather, -9 + dx, -27, 16, 2);
-    for (i = 0; i < 3; i++) { R(g, [ '#6fbf3a', '#e0453f', '#7fd6e6' ][i], -7 + dx + i * 5, -25, 3, 5); R(g, '#d8d0b8', -7 + dx + i * 5, -25, 3, 1); }   // viales al cinto
+    ov(g, '#8fbf3a', -4 + dx, -28, 3, 2.5); ov(g, '#b6ef7a', -5 + dx, -29, 1.2, 1);                 // mancha ácida
+    R(g, C.blood, 2 + dx, -34, 3, 2); R(g, C.blood, 4 + dx, -32, 1, 3); P(g, C.blood, -6 + dx, -20); R(g, '#6a1a20', 0 + dx, -23, 2, 3);
+    R(g, '#7a6a30', -8 + dx, -19, 4, 2);
+    seamV(g, THD, 1 + dx, -40 + b, -17);
+    box(g, MAT.leather, -9 + dx, -31, 16, 2);
+    for (i = 0; i < 3; i++) { R(g, ['#6fbf3a', '#e0453f', '#7fd6e6'][i], -7 + dx + i * 5, -29, 3, 5); R(g, '#d8d0b8', -7 + dx + i * 5, -29, 3, 1); }   // viales al cinto
     // brazo trasero con jeringa
     limbE(g, z, 1 + dx, -40 + b, 4 + dx, -31, 4); limbE(g, sk, 4 + dx, -31, -2 + dx, -28 + (atk ? -4 : 0), 3);
-    tline(g, MAT.steel[0], -2 + dx, -28 + (atk ? -4 : 0), -17 + dx, -24 + (atk ? -8 : 0), 2); P(g, '#e0e8f0', -19 + dx, -24 + (atk ? -8 : 0));
-    tline(g, '#6fbf3a', -5 + dx, -27 + (atk ? -4 : 0), -11 + dx, -25 + (atk ? -6 : 0), 1); R(g, MAT.steel[2], 0 + dx, -30 + (atk ? -4 : 0), 1, 4);
+    tline(g, MAT.steel[0], -2 + dx, -28 + (atk ? -4 : 0), -15 + dx, -24 + (atk ? -8 : 0), 2); P(g, '#e0e8f0', -17 + dx, -24 + (atk ? -8 : 0));
+    tline(g, '#6fbf3a', -5 + dx, -27 + (atk ? -4 : 0), -10 + dx, -25 + (atk ? -6 : 0), 1); R(g, MAT.steel[2], 0 + dx, -30 + (atk ? -4 : 0), 1, 4);
     // cabeza
     var hair = '#b8b8c4';
-    for (i = 0; i < 7; i++) poly(g, i % 2 ? '#8a8a96' : hair, [[hx - 7 + i * 2.5, hy - 4], [hx - 10 + i * 3.2 - (i > 3 ? 0 : 1), hy - 14 - (i % 3) * 2], [hx - 4 + i * 2.5, hy - 5]]);
+    for (i = 0; i < 7; i++) poly(g, i % 2 ? '#8a8a96' : hair, [[hx - 7 + i * 2.5, hy - 4], [hx - 10 + i * 3.2 - (i > 3 ? 0 : 1), hy - 12 - (i % 3) * 2], [hx - 4 + i * 2.5, hy - 5]]);
     ov(g, sk[0], hx, hy, 7, 7.5); ov(g, sk[1], hx - 2, hy - 2, 3, 3);
     R(g, sk[2], hx + 2, hy - 3, 4, 7);
     ov(g, MAT.brass[2], hx - 4, hy - 2, 4.3, 4.3); ov(g, MAT.brass[0], hx - 4, hy - 2, 3.6, 3.6); ov(g, s.dead ? '#2a2030' : '#8fe06a', hx - 4, hy - 2, 2.6, 2.6);
@@ -888,7 +890,7 @@
     P(g, sk[2], hx - 8, hy + 1); seam(g, THD, [[hx + 3, hy + 1], [hx + 6, hy + 4]]);
     R(g, sk[0], hx - 1, hy + 6, 4, 4);
     // brazo delantero con matraz
-    var hx2 = atk ? -25 : -21, hy2 = atk ? -36 : -45 + b;
+    var hx2 = atk ? -22 : -21, hy2 = atk ? -36 : -45 + b;
     limbE(g, z, -10 + dx, -40 + b, -16 + dx, -35 + (atk ? 2 : 0), 4); limbE(g, z, -16 + dx, -35 + (atk ? 2 : 0), hx2 + dx, hy2 + 2, 4);
     ov(g, sk[0], hx2 + dx, hy2 + 1, 2.5, 2.5);
     ov(g, MAT.brass[2], hx2 + dx - 2, hy2 - 6, 6.4, 6.4); ov(g, '#1c3a24', hx2 + dx - 2, hy2 - 6, 5.6, 5.6); ov(g, '#5fbf3a', hx2 + dx - 2, hy2 - 5, 5, 4.6);
@@ -899,7 +901,7 @@
 
   function paintGolem(g, s) {
     var st = MAT.stone, ir = MAT.iron, fl = FLESH, atk = s.atk, b = s.bob, i;
-    var dx = atk ? -1 : (s.hurt ? 2 : 0), ty = -51 + b;
+    var dx = atk ? -1 : 0, hd = s.hurt ? 3 : 0, ty = -50 + b;
     // piernas
     box(g, st, 2 + dx, -24, 12, 24); box(g, ir, 1 + dx, -16, 14, 3); box(g, st, 1 + dx, -6, 15, 6);
     box(g, st, -14 + dx, -24, 12, 24); box(g, ir, -15 + dx, -16, 14, 3); box(g, st, -16 + dx, -6, 15, 6);
@@ -919,24 +921,25 @@
     tline(g, C.fire2, -4 + dx, ty + 20, -8 + dx, ty + 14, 1); tline(g, C.fire2, 4 + dx, ty + 26, 9 + dx, ty + 30, 1);
     for (i = 0; i < 11; i++) { var cx = -17 + dx + i * 3, cy = ty + 4 + i * 2.3; R(g, ir[1], cx, Math.round(cy), 2, 2); R(g, ir[2], cx + 1, Math.round(cy) + 1, 1, 1); }   // bandolera de cadena
     // cabeza
-    box(g, st, -9 + dx, ty - 12, 18, 14); R(g, st[2], -9 + dx, ty - 1, 18, 1);
-    R(g, ir[0], -10 + dx, ty - 8, 20, 2); P(g, ir[1], -9 + dx, ty - 8);
-    eyeE(g, s, -7 + dx, ty - 5, '#ffb02e', '#fff0b0', 5); eyeE(g, s, 2 + dx, ty - 4, '#ffb02e', '#fff0b0', 3);
-    R(g, '#1c1117', -5 + dx, ty - 1, 10, 2); for (i = 0; i < 5; i++) { P(g, MAT.bone[1], -5 + dx + i * 2, ty - 1); P(g, TH.st, -4 + dx + i * 2, ty); }
-    box(g, ir, -12 + dx, ty - 7, 3, 3); box(g, ir, 9 + dx, ty - 7, 3, 3);
-    P(g, st[2], -2 + dx, ty - 11); P(g, st[2], 4 + dx, ty - 10);
+    var hh = dx + hd;
+    box(g, st, -9 + hh, ty - 12, 18, 14); R(g, st[2], -9 + hh, ty - 1, 18, 1);
+    R(g, ir[0], -10 + hh, ty - 8, 20, 2); P(g, ir[1], -9 + hh, ty - 8);
+    eyeE(g, s, -7 + hh, ty - 5, '#ffb02e', '#fff0b0', 5); eyeE(g, s, 2 + hh, ty - 4, '#ffb02e', '#fff0b0', 3);
+    R(g, '#1c1117', -5 + hh, ty - 1, 10, 2); for (i = 0; i < 5; i++) { P(g, MAT.bone[1], -5 + hh + i * 2, ty - 1); P(g, TH.st, -4 + hh + i * 2, ty); }
+    box(g, ir, -12 + hh, ty - 7, 3, 3); box(g, ir, 9 + hh, ty - 7, 3, 3);
+    P(g, st[2], -2 + hh, ty - 11); P(g, st[2], 4 + hh, ty - 10);
     // brazos
     var ay = ty + 2;
-    box(g, st, 20 + dx, ay, 11, 20); box(g, st, 19 + dx, ay + 18, 13, 14); box(g, ir, 18 + dx, ay + 17, 15, 3);
+    box(g, st, 20 + dx, ay, 10, 20); box(g, st, 19 + dx, ay + 18, 12, 14); box(g, ir, 18 + dx, ay + 17, 13, 3);
     R(g, st[2], 24 + dx, ay + 22, 1, 7); R(g, st[1], 20 + dx, ay + 1, 10, 1);
     if (atk) {
-      box(g, st, -29 + dx, ay - 12, 11, 34); box(g, ir, -30 + dx, ay + 7, 13, 3);
-      box(g, st, -31 + dx, ay - 25, 15, 14); R(g, st[2], -27 + dx, ay - 19, 1, 6); R(g, st[2], -22 + dx, ay - 19, 1, 6);
+      box(g, st, -28 + dx, ay - 12, 10, 34); box(g, ir, -29 + dx, ay + 7, 12, 3);
+      box(g, st, -30 + dx, ay - 25, 14, 14); R(g, st[2], -26 + dx, ay - 19, 1, 6); R(g, st[2], -21 + dx, ay - 19, 1, 6);
       seam(g, THD, [[-28 + dx, ay + 12], [-20 + dx, ay + 13]]); box(g, fl, -28 + dx, ay - 8, 6, 6);
     } else {
-      box(g, st, -30 + dx, ay, 11, 18); box(g, ir, -31 + dx, ay + 17, 13, 3);
-      box(g, st, -32 + dx, ay + 20, 14, 15 - (s.hurt ? 2 : 0));
-      R(g, st[2], -28 + dx, ay + 26, 1, 8); R(g, st[2], -23 + dx, ay + 26, 1, 8); R(g, st[1], -31 + dx, ay + 21, 12, 1);
+      box(g, st, -29 + dx, ay, 10, 18); box(g, ir, -30 + dx, ay + 17, 12, 3);
+      box(g, st, -31 + dx, ay + 20, 13, 15 - (s.hurt ? 2 : 0));
+      R(g, st[2], -27 + dx, ay + 26, 1, 8); R(g, st[2], -22 + dx, ay + 26, 1, 8); R(g, st[1], -30 + dx, ay + 21, 11, 1);
       seam(g, THD, [[-30 + dx, ay + 8], [-21 + dx, ay + 9]]);
       box(g, fl, -30 + dx, ay + 2, 6, 6);
     }
@@ -944,7 +947,8 @@
 
   function paintAlquimista(g, s) {
     var Rb = ['#4a2f66', '#6a4690', '#2a1a3c'], B = MAT.brass, GL = ['#2a5a58', '#6fb7b7', '#16302c'], atk = s.atk, b = s.bob, sw = s.sw, fr = s.fr, i;
-    var dx = atk ? -3 : (s.hurt ? 3 : 0), ty = -46 + b;
+    var dx = atk ? -1 : (s.hurt ? 3 : 0), ty = -46 + b;
+    g.translate(2, 0);
     // zapatos puntiagudos bajo la túnica
     box(g, MAT.leather, -15 + dx, -3, 10, 3); box(g, MAT.leather, 2 + dx, -3, 10, 3);
     // mochila-depósito con líquido burbujeante
@@ -975,20 +979,20 @@
     }
     tline(g, MAT.rubber[0], -9 + dx, ty + 6, -5 + dx, ty + 12, 2); tline(g, MAT.rubber[0], -5 + dx, ty + 12, 9 + dx, ty + 12, 2); tline(g, MAT.rubber[1], -5 + dx, ty + 11, 8 + dx, ty + 11, 1);
     // brazo delantero con retorta
-    var fx = atk ? -25 : -21, fy = atk ? -36 : -45 + b;
+    var fx = atk ? -20 : -21, fy = atk ? -36 : -45 + b;
     limbE(g, Rb, -8 + dx, ty + 5, -15 + dx, ty + 12 + (atk ? 2 : 0), 5); limbE(g, Rb, -15 + dx, ty + 12 + (atk ? 2 : 0), fx + dx, fy + 3, 5);
     R(g, B[0], fx + dx - 3, fy + 3, 6, 2); ov(g, '#2f6a2f', fx + dx, fy + 1, 2.6, 2.6);
     ov(g, B[2], fx + dx - 1, fy - 7, 6.2, 6.2); ov(g, GL[2], fx + dx - 1, fy - 7, 5.4, 5.4); ov(g, '#5fe040', fx + dx - 1, fy - 6, 4.8, 4.4);
     R(g, '#b6ef7a', fx + dx - 5, fy - 9, 2, 1); P(g, '#fff', fx + dx - 5, fy - 10); P(g, '#e8ffd0', fx + dx + (fr & 1), fy - 8 - (fr >> 1));
     box(g, GL, fx + dx - 3, fy - 16, 4, 6); R(g, MAT.leather[0], fx + dx - 4, fy - 17, 6, 2);
-    if (atk) { for (i = 0; i < 5; i++) P(g, '#7dff5a', fx + dx - 7 - i * 2, fy - 8 + i * 2 - (i & 1)); }
+    if (atk) { for (i = 0; i < 3; i++) P(g, '#7dff5a', fx + dx - 7 - i * 2, fy - 8 + i * 2 - (i & 1)); }
     // corrupción: venas verdes
     if (!s.dead) { tline(g, '#7dff5a', 4 + dx, ty + 14, 7 + dx, ty + 22, 1); tline(g, '#4fbf3a', 7 + dx, ty + 22, 5 + dx, ty + 28, 1); }
   }
 
   function paintArana(g, s) {
     var B = MAT.brass, Cu = MAT.copper, St = MAT.steel, atk = s.atk, b = s.bob, sw = s.sw, fr = s.fr, i;
-    var dx = atk ? -3 : (s.hurt ? 3 : 0), Y = -21 + b + (atk ? 2 : 0) + (s.hurt ? 1 : 0), up = atk ? 1 : 0;
+    var dx = atk ? -1 : (s.hurt ? 2 : 0), Y = -21 + b + (atk ? 2 : 0) + (s.hurt ? 1 : 0), up = atk ? 1 : 0;
     var LN = ['#5d6c7d', '#8d9db0', '#2f3742'], LF = ['#323a46', '#46505e', '#1c2129'];
     function leg(hx, kx, ky, fx, fy, m) {
       limbE(g, m, hx + dx, Y + 2, kx + dx, ky, 3); limbE(g, m, kx + dx, ky, fx + dx, fy, 3);
@@ -997,8 +1001,8 @@
     }
     // patas lejanas (oscuras) y cercanas (claras), bien separadas
     leg(-3, -12, -41, -15 + sw * 2, 0, LF); leg(5, 13, -41, 16 - sw * 2, 0, LF);
-    leg(-8, -25, -37 - up * 3, -33 + sw * 2 + up * 3, up ? -27 : 0, LN); leg(-4, -13, -44, -21 - sw * 2, 0, LN);
-    leg(6, 15, -44, 22 + sw * 2, 0, LN); leg(10, 26, -38, 32 - sw * 2, 0, LN);
+    leg(-8, -23, -37 - up * 3, -29 + sw * 2 + up * 3, up ? -27 : 0, LN); leg(-4, -13, -44, -21 - sw * 2, 0, LN);
+    leg(6, 15, -44, 22 + sw * 2, 0, LN); leg(10, 23, -38, 27 - sw * 2, 0, LN);
     // abdomen con engranaje
     ov(g, Cu[2], 10 + dx, Y + 1, 13, 11); ov(g, B[0], 10 + dx, Y, 12.5, 10.5); ov(g, B[1], 6 + dx, Y - 5, 6, 3);
     ov(g, B[2], 10 + dx, Y - 1, 7.5, 7.5); ov(g, Cu[0], 10 + dx, Y - 1, 6.6, 6.6); ov(g, '#2a1a10', 10 + dx, Y - 1, 2.4, 2.4);
@@ -1019,7 +1023,8 @@
 
   function paintCirujano(g, s) {
     var T = ['#3f8f8a', '#62b5ae', '#2a5f66'], AP = ['#5a4630', '#7a6045', '#3a2c1e'], GLV = ['#d8c060', '#f0dc88', '#9a8638'], atk = s.atk, b = s.bob, sw = s.sw, i;
-    var dx = atk ? -5 : (s.hurt ? 3 : 0), ty = -47 + b, hd = atk ? -3 : (s.hurt ? 2 : -1);
+    var dx = atk ? -3 : (s.hurt ? 3 : 0), ty = -46 + b, hd = atk ? -3 : (s.hurt ? 2 : -1);
+    g.translate(5, 0);
     // botas y piernas
     limbE(g, T, 2 + dx, -26, 4 + dx - sw, -12, 5); limbE(g, T, 4 + dx - sw, -12, 4 + dx - sw, -3, 4); box(g, MAT.rubber, 0 + dx - sw, -5, 10, 5);
     limbE(g, T, -2 + dx, -26, -5 + dx + sw, -12, 5); limbE(g, T, -5 + dx + sw, -12, -6 + dx + sw * 2, -3, 4); box(g, MAT.rubber, -12 + dx + sw * 2, -5, 10, 5);
@@ -1049,23 +1054,24 @@
     R(g, MAT.iron[0], -9 + dx + hd, ty - 10, 13, 2);                                              // cinta del espejo
     ov(g, MAT.steel[1], -5 + dx + hd, ty - 12, 3.6, 3.6); ov(g, '#e8f4ff', -5 + dx + hd, ty - 12, 2.6, 2.6); ov(g, '#2a3038', -5 + dx + hd, ty - 12, 1, 1); P(g, '#ffffff', -7 + dx + hd, ty - 14);
     // brazo delantero con sierra
-    var ax = atk ? -14 : -12, ay = atk ? ty + 12 : ty + 18;
+    var ax = atk ? -12 : -12, ay = atk ? ty + 12 : ty + 18;
     limbE(g, T, -8 + dx, ty + 4, -12 + dx, ty + 11, 4); limbE(g, T, -12 + dx, ty + 11, ax + dx, ay, 4);
     ov(g, GLV[0], ax + dx, ay, 3, 3); P(g, GLV[1], ax + dx - 1, ay - 1); R(g, C.blood, ax + dx - 1, ay, 2, 2);
     if (atk) {
-      poly(g, MAT.steel[0], [[ax + dx + 1, ay - 3], [ax + dx - 25, ay + 9], [ax + dx - 25, ay + 15], [ax + dx + 1, ay + 3]]);
-      for (i = 0; i < 9; i++) P(g, MAT.steel[1], ax + dx - 2 - i * 3, ay + 4 + i + 1 - (i & 1)); tline(g, MAT.steel[1], ax + dx, ay - 2, ax + dx - 24, ay + 9, 1);
+      poly(g, MAT.steel[0], [[ax + dx + 1, ay - 3], [ax + dx - 18, ay + 8], [ax + dx - 18, ay + 14], [ax + dx + 1, ay + 3]]);
+      for (i = 0; i < 6; i++) P(g, MAT.steel[1], ax + dx - 2 - i * 3, ay + 4 + i + 1 - (i & 1)); tline(g, MAT.steel[1], ax + dx, ay - 2, ax + dx - 17, ay + 8, 1);
     } else {
-      poly(g, MAT.steel[0], [[ax + dx - 1, ay - 2], [ax + dx - 22, ay - 6], [ax + dx - 22, ay + 2], [ax + dx - 1, ay + 3]]);
-      for (i = 0; i < 8; i++) { P(g, MAT.steel[2], ax + dx - 3 - i * 3, ay + 3 + (i & 1)); }
-      tline(g, MAT.steel[1], ax + dx - 1, ay - 2, ax + dx - 21, ay - 5, 1); P(g, C.blood, ax + dx - 9, ay); P(g, C.blood, ax + dx - 15, ay - 2);
+      poly(g, MAT.steel[0], [[ax + dx - 1, ay - 2], [ax + dx - 16, ay - 6], [ax + dx - 16, ay + 2], [ax + dx - 1, ay + 3]]);
+      for (i = 0; i < 5; i++) { P(g, MAT.steel[2], ax + dx - 3 - i * 3, ay + 3 + (i & 1)); }
+      tline(g, MAT.steel[1], ax + dx - 1, ay - 2, ax + dx - 15, ay - 5, 1); P(g, C.blood, ax + dx - 7, ay); P(g, C.blood, ax + dx - 12, ay - 2);
     }
     box(g, MAT.brass, ax + dx - 1, ay - 3, 4, 7);
   }
 
   function paintAutomata(g, s) {
     var B = MAT.brass, St = MAT.steel, I = MAT.iron, atk = s.atk, b = s.bob, sw = s.sw, fr = s.fr, i;
-    var dx = atk ? -3 : (s.hurt ? 2 : 0), ty = -50 + b;
+    var dx = atk ? -1 : 0, ty = -48 + b;
+    g.translate(2, 0);
     // llave de cuerda en la espalda
     R(g, St[2], 16 + dx, ty + 14, 6, 3); box(g, B, 21 + dx, ty + 8 + (fr & 1), 5, 6); box(g, B, 21 + dx, ty + 17 - (fr & 1), 5, 6);
     // piernas de pistón
@@ -1096,7 +1102,7 @@
     R(g, '#140e12', -8 + dx, ty - 6, 16, 4); R(g, s.dead ? '#3a2a10' : (s.hurt ? '#7a4a10' : '#ffb02e'), -7 + dx, ty - 5, 14, 2);
     if (!s.dead && !s.hurt) R(g, '#fff0b0', -7 + dx + ((fr * 4) % 11), ty - 5, 3, 1);
     R(g, I[2], -5 + dx, ty, 10, 2); for (i = -4; i < 5; i += 2) P(g, B[1], i + dx, ty);
-    R(g, St[2], 0 + dx, ty - 13, 1, 3); ov(g, s.hurt ? C.warn : C.blood, 0.5 + dx, ty - 14, 1.6, 1.6);
+    R(g, St[2], 0 + dx, ty - 12, 1, 3); ov(g, s.hurt ? C.warn : C.blood, 0.5 + dx, ty - 13.5, 1.4, 1.4);
     P(g, B[1], -8 + dx, ty - 9); P(g, B[2], 7 + dx, ty - 3);
     // brazo trasero
     box(g, B, 19 + dx, ty + 11, 8, 13); R(g, B[2], 19 + dx, ty + 17, 8, 1); box(g, I, 20 + dx, ty + 24, 6, 7); box(g, St, 19 + dx, ty + 31, 9, 8);
@@ -1104,8 +1110,8 @@
     box(g, B, -25 + dx, ty + 8, 8, 12); R(g, B[2], -25 + dx, ty + 13, 8, 1);
     if (atk) {
       ov(g, I[0], -21 + dx, ty + 21, 4, 4);
-      box(g, I, -29 + dx, ty + 19, 9, 5); R(g, St[1], -33 + dx, ty + 20, 6, 3);
-      box(g, St, -36 + dx, ty + 15, 11, 12); R(g, St[2], -34 + dx, ty + 17, 1, 8); R(g, St[2], -31 + dx, ty + 17, 1, 8); R(g, St[2], -28 + dx, ty + 17, 1, 8);
+      box(g, I, -25 + dx, ty + 19, 7, 5); R(g, St[1], -28 + dx, ty + 20, 4, 3);
+      box(g, St, -31 + dx, ty + 15, 11, 12); R(g, St[2], -29 + dx, ty + 17, 1, 8); R(g, St[2], -26 + dx, ty + 17, 1, 8); R(g, St[2], -23 + dx, ty + 17, 1, 8);
     } else {
       box(g, I, -24 + dx, ty + 20, 6, 10); R(g, St[1], -23 + dx, ty + 30, 4, 4 + (fr & 1));
       box(g, St, -27 + dx, ty + 33 + (fr & 1), 11, 11); R(g, St[2], -25 + dx, ty + 36 + (fr & 1), 1, 7); R(g, St[2], -22 + dx, ty + 36 + (fr & 1), 1, 7); R(g, St[2], -19 + dx, ty + 36 + (fr & 1), 1, 7);
@@ -1115,13 +1121,14 @@
 
   function paintQuimera(g, s) {
     var Fz = MAT.scale, Dk = ['#7c2412', '#9a3018', '#4a1208'], Mz = ['#e8a060', '#ffd09a', '#b06a3a'], atk = s.atk, b = s.bob, sw = s.sw, fr = s.fr, i;
-    var dx = atk ? -2 : (s.hurt ? 3 : 0), ln = atk ? 3 : 0, Y = -27 + b + ln;
+    g.translate(1, 0);
+    var dx = atk ? -2 : (s.hurt ? 1 : 0), ln = atk ? 3 : 0, Y = -27 + b + ln;
     var hx = -14 + dx - (atk ? 1 : 0), hy = -33 + b + ln - (s.hurt ? 5 : 0);
     // patas lejanas
     limbE(g, Dk, -3 + dx, Y + 5, -4 + dx - (atk ? 3 : 0) - sw, -2, 5); limbE(g, Dk, 7 + dx, Y + 4, 6 + dx + sw * 2, -2, 6);
     box(g, Dk, -8 + dx - sw, -3, 8, 3); box(g, Dk, 2 + dx + sw * 2, -3, 8, 3);
     // serpiente-cola
-    var tx = 20 + dx;
+    var tx = 19 + dx;
     tline(g, '#2f7a34', tx, Y, tx + 7, Y - 5, 4); tline(g, '#3f9a44', tx + 7, Y - 5, tx + 8, Y - 14, 4); tline(g, '#2f7a34', tx + 8, Y - 14, tx + 3, Y - 19 - (fr & 1), 4);
     for (i = 0; i < 4; i++) P(g, '#8fdc6a', tx + 7 + (i & 1), Y - 6 - i * 2);
     ov(g, '#3f9a44', tx + 1, Y - 21 - (fr & 1), 4.2, 3.4); P(g, '#ffd15a', tx - 1, Y - 22 - (fr & 1)); R(g, '#ff3a30', tx - 6, Y - 20 - (fr & 1), 4, 1); P(g, '#ff3a30', tx - 7, Y - 21 - (fr & 1));
@@ -1154,7 +1161,7 @@
     R(g, '#3a1410', hx - 10, hy - 3, 3, 4); P(g, '#7a5a5a', hx - 10, hy - 3);
     if (atk) {
       R(g, '#2b1016', hx - 7, hy + 3, 12, 6); R(g, C.fire2, hx - 6, hy + 5, 10, 3);
-      poly(g, C.fire1, [[hx - 8, hy + 3], [hx - 18, hy - 1], [hx - 18, hy + 12], [hx - 8, hy + 9]]); poly(g, C.fire2, [[hx - 8, hy + 4], [hx - 16, hy + 2], [hx - 16, hy + 10], [hx - 8, hy + 8]]); poly(g, C.fire3, [[hx - 8, hy + 5], [hx - 13, hy + 5], [hx - 8, hy + 7]]);
+      poly(g, C.fire1, [[hx - 8, hy + 3], [hx - 14, hy - 1], [hx - 14, hy + 12], [hx - 8, hy + 9]]); poly(g, C.fire2, [[hx - 8, hy + 4], [hx - 13, hy + 2], [hx - 13, hy + 10], [hx - 8, hy + 8]]); poly(g, C.fire3, [[hx - 8, hy + 5], [hx - 11, hy + 5], [hx - 8, hy + 7]]);
     } else { R(g, '#2b1016', hx - 7, hy + 3, 11, 1); box(g, Fz, hx - 6, hy + 4, 9, 3); }
     for (i = 0; i < 3; i++) R(g, MAT.bone[1], hx - 8 + i * 4, hy + 3, 1, atk ? 3 : 2);
     eyeE(g, s, hx - 2, hy - 5, '#ffd15a', '#fff6b0', 3); if (!s.dead && !s.hurt) { P(g, OL, hx - 1, hy - 5); P(g, OL, hx - 1, hy - 4); }
@@ -1164,7 +1171,8 @@
 
   function paintRelojero(g, s) {
     var CT = ['#2f2538', '#473a54', '#1c1524'], B = MAT.brass, sk = ['#d8c8b0', '#eee0c8', '#a89880'], atk = s.atk, b = s.bob, sw = s.sw, fr = s.fr, i;
-    var dx = atk ? -4 : (s.hurt ? 3 : 0), ty = -40 + b, hd = atk ? -2 : (s.hurt ? 2 : 0);
+    var dx = atk ? -2 : (s.hurt ? 3 : 0), ty = -39 + b, hd = atk ? -2 : (s.hurt ? 2 : 0);
+    g.translate(3, 0);
     var tr = ['#3a3046', '#574a66', '#221a2c'];
     // piernas y botas
     limbE(g, tr, 3 + dx, -22, 4 + dx - sw, -12, 4); limbE(g, tr, 4 + dx - sw, -12, 3 + dx - sw, -3, 4); box(g, MAT.rubber, 0 + dx - sw, -4, 10, 4); R(g, B[0], -2 + dx - sw, -3, 3, 3);
@@ -1207,7 +1215,7 @@
     limbE(g, B, -14 + dx, ty + 12, ax + dx + 1, ay - 4, 4); ov(g, B[2], -14 + dx, ty + 12, 2.5, 2.5); ov(g, B[0], -14 + dx, ty + 12, 1.6, 1.6);
     ov(g, sk[0], ax + dx, ay + 3, 2.5, 2.5);
     if (atk) {
-      tline(g, B[0], ax + dx, ay + 2, ax + dx - 14, ay - 4, 2); ov(g, B[2], ax + dx - 16, ay - 5, 4.4, 4.4); ov(g, B[0], ax + dx - 16, ay - 5, 3.6, 3.6); ov(g, '#2a1a10', ax + dx - 16, ay - 5, 1.2, 1.2);
+      tline(g, B[0], ax + dx, ay + 2, ax + dx - 9, ay - 4, 2); ov(g, B[2], ax + dx - 11, ay - 5, 4.4, 4.4); ov(g, B[0], ax + dx - 11, ay - 5, 3.6, 3.6); ov(g, '#2a1a10', ax + dx - 11, ay - 5, 1.2, 1.2);
     } else {
       tline(g, B[0], ax + dx, ay + 3, ax + dx - 3, ty - 14, 2); ov(g, B[2], ax + dx - 3, ty - 16, 4.4, 4.4); ov(g, B[0], ax + dx - 3, ty - 16, 3.6, 3.6); ov(g, '#2a1a10', ax + dx - 3, ty - 16, 1.2, 1.2);
       var px = ax + dx - 4 + (fr === 0 ? -3 : fr === 2 ? 3 : 0);
@@ -1220,16 +1228,17 @@
 
   function paintVivisector(g, s) {
     var LE = ['#46322a', '#6a4c3a', '#241911'], AP = ['#5e4330', '#85604a', '#33231a'], St = MAT.steel, atk = s.atk, b = s.bob, sw = s.sw, fr = s.fr, i;
-    var dx = atk ? -3 : (s.hurt ? 3 : 0), ty = -46 + b, sk = ['#c79a8a', '#e0b8a8', '#8a5f52'];
+    var dx = atk ? -3 : (s.hurt ? 2 : 0), ty = -46 + b, sk = ['#c79a8a', '#e0b8a8', '#8a5f52'];
+    g.translate(2, 0);
     // brazos mecánicos traseros (detrás del cuerpo)
-    var up = atk ? -3 : (s.hurt ? 4 : 0) + ((fr & 1) ? -1 : 0);
-    tline(g, St[2], 8 + dx, ty + 6, 16 + dx, ty - 4, 3); tline(g, St[0], 16 + dx, ty - 4, 20 + dx, ty - 14 + up, 2);
-    tline(g, St[2], 20 + dx, ty - 14 + up, 15 + dx, ty - 15 + up + (atk ? 8 : 0), 2);
-    ov(g, MAT.brass[0], 16 + dx, ty - 4, 2.4, 2.4); ov(g, MAT.brass[0], 20 + dx, ty - 14 + up, 2, 2);
-    poly(g, St[1], [[15 + dx, ty - 15 + up + (atk ? 8 : 0)], [13 + dx, ty - 21 + up + (atk ? 10 : 0)], [16 + dx, ty - 16 + up + (atk ? 8 : 0)]]); P(g, C.blood, 13 + dx, ty - 21 + up + (atk ? 10 : 0));
-    tline(g, St[2], 10 + dx, ty + 10, 22 + dx, ty + 6, 3); tline(g, St[0], 22 + dx, ty + 6, 27 + dx, ty - 4 + up, 2);
-    ov(g, MAT.brass[0], 22 + dx, ty + 6, 2.4, 2.4);
-    tline(g, St[1], 27 + dx, ty - 4 + up, 28 + dx, ty - 14 + up, 1); tline(g, St[1], 27 + dx, ty - 4 + up, 31 + dx, ty - 13 + up, 1);
+    var up = atk ? -3 : (s.hurt ? 3 : 0) + ((fr & 1) ? -1 : 0);
+    tline(g, St[2], 8 + dx, ty + 6, 15 + dx, ty - 2, 3); tline(g, St[0], 15 + dx, ty - 2, 19 + dx, ty - 10 + up, 2);
+    tline(g, St[2], 19 + dx, ty - 10 + up, 14 + dx, ty - 11 + up + (atk ? 8 : 0), 2);
+    ov(g, MAT.brass[0], 15 + dx, ty - 2, 2.4, 2.4); ov(g, MAT.brass[0], 19 + dx, ty - 10 + up, 2, 2);
+    poly(g, St[1], [[14 + dx, ty - 11 + up + (atk ? 8 : 0)], [12 + dx, ty - 17 + up + (atk ? 10 : 0)], [15 + dx, ty - 12 + up + (atk ? 8 : 0)]]); P(g, C.blood, 12 + dx, ty - 17 + up + (atk ? 10 : 0));
+    tline(g, St[2], 10 + dx, ty + 10, 20 + dx, ty + 6, 3); tline(g, St[0], 20 + dx, ty + 6, 24 + dx, ty - 2 + up, 2);
+    ov(g, MAT.brass[0], 20 + dx, ty + 6, 2.4, 2.4);
+    tline(g, St[1], 24 + dx, ty - 2 + up, 25 + dx, ty - 10 + up, 1); tline(g, St[1], 24 + dx, ty - 2 + up, 28 + dx, ty - 9 + up, 1);
     // piernas
     limbE(g, LE, 5 + dx, -24, 7 + dx - sw, -12, 8); limbE(g, LE, 7 + dx - sw, -12, 6 + dx - sw, -4, 6); box(g, MAT.rubber, 0 + dx - sw, -6, 14, 6); R(g, St[0], -1 + dx - sw, -3, 4, 3);
     limbE(g, LE, -6 + dx, -24, -8 + dx + sw, -12, 8); limbE(g, LE, -8 + dx + sw, -12, -10 + dx + sw * 2, -4, 6); box(g, MAT.rubber, -19 + dx + sw * 2, -6, 14, 6); R(g, St[0], -20 + dx + sw * 2, -3, 4, 3);
@@ -1267,8 +1276,8 @@
     ov(g, sk[0], ax + dx, ay + 3, 3.5, 3.2); R(g, sk[2], ax + dx - 2, ay + 4, 4, 1);
     if (atk) {
       box(g, MAT.leather, ax + dx - 2, ay - 8, 4, 9);
-      poly(g, St[0], [[ax + dx - 16, ay - 12], [ax + dx + 4, ay - 14], [ax + dx + 4, ay - 8], [ax + dx - 14, ay - 4]]);
-      tline(g, St[1], ax + dx - 14, ay - 11, ax + dx + 3, ay - 13, 1); R(g, St[2], ax + dx - 14, ay - 5, 18, 1); P(g, C.blood, ax + dx - 14, ay - 4); P(g, C.blood, ax + dx - 8, ay - 7);
+      poly(g, St[0], [[ax + dx - 10, ay - 12], [ax + dx + 4, ay - 14], [ax + dx + 4, ay - 8], [ax + dx - 9, ay - 4]]);
+      tline(g, St[1], ax + dx - 9, ay - 11, ax + dx + 3, ay - 13, 1); R(g, St[2], ax + dx - 9, ay - 5, 13, 1); P(g, C.blood, ax + dx - 9, ay - 4); P(g, C.blood, ax + dx - 5, ay - 7);
     } else {
       box(g, MAT.leather, ax + dx - 2, ay + 4, 4, 9);
       poly(g, St[0], [[ax + dx - 7, ay - 4], [ax + dx + 6, ay - 4], [ax + dx + 6, ay - 26], [ax + dx - 3, ay - 26], [ax + dx - 7, ay - 20]]);
@@ -1286,23 +1295,24 @@
   }
 
   var ENEMY_ART = {
-    sabueso: { w: 64, h: 44, fn: paintSabueso, dead: 'flip' },
-    ayudante: { w: 60, h: 62, fn: paintAyudante, dead: 'rot' },
-    golem: { w: 64, h: 64, fn: paintGolem, dead: 'rot' },
-    alquimista: { w: 56, h: 64, fn: paintAlquimista, dead: 'rot' },
-    arana: { w: 64, h: 46, fn: paintArana, dead: 'flip' },
-    cirujano: { w: 60, h: 64, fn: paintCirujano, dead: 'rot' },
-    automata: { w: 64, h: 64, fn: paintAutomata, dead: 'rot' },
-    quimera: { w: 64, h: 56, fn: paintQuimera, dead: 'flip' },
-    relojero: { w: 56, h: 64, fn: paintRelojero, dead: 'rot' },
-    vivisector: { w: 64, h: 64, fn: paintVivisector, dead: 'rot' }
+    sabueso: { w: 64, h: 48, sh: 22, fn: paintSabueso, dead: 'flip' },
+    ayudante: { w: 64, h: 64, sh: 14, fn: paintAyudante, dead: 'rot' },
+    golem: { w: 64, h: 64, sh: 24, fn: paintGolem, dead: 'rot' },
+    alquimista: { w: 64, h: 64, sh: 17, fn: paintAlquimista, dead: 'rot' },
+    arana: { w: 64, h: 52, sh: 24, fn: paintArana, dead: 'flip' },
+    cirujano: { w: 64, h: 64, sh: 14, fn: paintCirujano, dead: 'rot' },
+    automata: { w: 64, h: 64, sh: 21, fn: paintAutomata, dead: 'rot' },
+    quimera: { w: 64, h: 60, sh: 24, fn: paintQuimera, dead: 'flip' },
+    relojero: { w: 64, h: 64, sh: 14, fn: paintRelojero, dead: 'rot' },
+    vivisector: { w: 64, h: 64, sh: 22, fn: paintVivisector, dead: 'rot' }
   };
-  var GENERIC_ART = { w: 40, h: 40, fn: paintGenerico, dead: 'rot' };
+  var GENERIC_ART = { w: 40, h: 40, sh: 15, fn: paintGenerico, dead: 'rot' };
   var enemyCache = {}, SW = [0, 1, 0, -1];
   function enemySprite(id, pose, fr) {
     var key = id + '|' + pose + '|' + fr, E = enemyCache[key];
     if (E) return E;
     var art = ENEMY_ART[id] || GENERIC_ART, o = mk(art.w, art.h), g = o.g;
+    o.sh = art.sh;
     var st = { pose: pose, fr: fr, atk: pose === 'attack', hurt: pose === 'hurt', dead: pose === 'dead', bob: BOB[fr], sw: SW[fr] };
     g.translate(art.w >> 1, art.h - 1);
     try { art.fn(g, st); } catch (e) { /* un pintor roto no debe romper el bucle */ }
@@ -1315,7 +1325,7 @@
       } else {
         d = mk(h, w); d.g.transform(0, 1, -1, 0, h, 0); d.g.drawImage(o.c, 0, 0);
       }
-      o = d;
+      d.sh = Math.min(28, Math.round(d.w * 0.4)); o = d;
     }
     return (enemyCache[key] = o);
   }
@@ -1328,7 +1338,7 @@
     if (opt.alpha != null) ctx.globalAlpha *= opt.alpha;
     ctx.translate(cx, by);
     if (opt.flip) ctx.scale(-1, 1);
-    if (opt.shadow !== false) shadowEll(ctx, 0, 0, Math.max(10, Math.min(E.w, 64) * 0.36), 3);
+    if (opt.shadow !== false) shadowEll(ctx, 0, 0, E.sh || 14, 3);
     if (opt.flash > 0) {
       FS.g.clearRect(0, 0, 64, 64); FS.g.drawImage(src, 0, 0); tint(FS.g, E.w, E.h, opt.flash); src = FS.c;
     }

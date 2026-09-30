@@ -224,48 +224,49 @@
 
   /* ---------- Efectos (§9). fn(E, destino, t, r): r = variación de tono aleatoria ~0.89..1.11 ---------- */
   var SFX = {
-    step: { v: 0.55, len: 0.2, gap: 0.07, max: 2, fn: function (E, d, t, r) {
+    step: { v: 0.5, len: 0.2, gap: 0.07, max: 2, fn: function (E, d, t, r) {
       thump(E, d, t, 105 * r, 46 * r, 0.15, 0.9);
       nb(E, d, t, 'lowpass', 0.1, 480 * r, 130, 0.8, 0.9);
       if (E.rng() < 0.5) nb(E, d, t + 0.015, 'bandpass', 0.04, 1500 * r, 900, 2.5, 0.25);
     } },
-    hit: { v: 0.8, len: 0.3, max: 3, fn: function (E, d, t, r) {
+    hit: { v: 0.68, len: 0.3, max: 3, fn: function (E, d, t, r) {
       thump(E, d, t, 150 * r, 52 * r, 0.22, 1);
       nb(E, d, t, 'lowpass', 0.16, 900 * r, 200, 0.8, 0.8);
       nb(E, d, t, 'bandpass', 0.03, 1600 * r, 900, 2, 0.4);
     } },
-    hitHeavy: { v: 0.85, len: 0.7, pri: 1, max: 2, fn: function (E, d, t, r) {
+    hitHeavy: { v: 0.65, len: 0.7, pri: 1, max: 2, fn: function (E, d, t, r) {
       thump(E, d, t, 110 * r, 30 * r, 0.5, 1);
       tone(E, d, { t: t, f: 62 * r, f2: 26 * r, glide: 0.4, d: 0.6, vol: 0.7, dist: true });
       nb(E, d, t, 'lowpass', 0.3, 1200 * r, 140, 0.7, 1);
       nb(E, d, t, 'bandpass', 0.05, 2200 * r, 1000, 1.5, 0.45);
     } },
-    block: { v: 0.7, len: 0.45, max: 3, fn: function (E, d, t, r) {
-      clang(E, d, t, 420 * r, 0.35, 0.6);
-      thump(E, d, t, 120 * r, 70 * r, 0.12, 0.8);
+    block: { v: 0.52, len: 0.45, max: 3, fn: function (E, d, t, r) {
+      clang(E, d, t, 420 * r, 0.35, 0.45);
+      thump(E, d, t, 120 * r, 60 * r, 0.16, 1.1);
       nb(E, d, t, 'highpass', 0.03, 3000, 3000, 0.7, 0.25);
     } },
-    card: { v: 0.6, len: 0.2, gap: 0.04, max: 3, fn: function (E, d, t, r) {
+    card: { v: 0.68, len: 0.2, gap: 0.04, max: 3, fn: function (E, d, t, r) {
       nb(E, d, t, 'bandpass', 0.12, 1400 * r, 3800 * r, 1.2, 0.5, 0.02);
       thump(E, d, t + 0.06, 220 * r, 120 * r, 0.07, 0.6);
     } },
-    cardHot: { v: 0.65, len: 0.5, max: 3, fn: function (E, d, t, r) {
+    cardHot: { v: 0.62, len: 0.5, max: 3, fn: function (E, d, t, r) {
       SFX.card.fn(E, d, t, r);
       nb(E, d, t + 0.02, 'highpass', 0.35, 4500, 2500, 0.7, 0.3, 0.05);
       tone(E, d, { t: t + 0.02, f: 110 * r, f2: 190 * r, glide: 0.3, d: 0.35, a: 0.02, type: 'sawtooth', vol: 0.3,
         flt: { t: 'lowpass', f: 500, f2: 1600, q: 3 }, dist: true });
     } },
-    overheat: { v: 0.75, len: 1.5, pri: 2, max: 1, fn: function (E, d, t, r) {
+    overheat: { v: 0.7, len: 1.5, pri: 2, max: 1, fn: function (E, d, t, r) {
       nb(E, d, t, 'highpass', 1.3, 3000, 5500, 0.7, 0.55, 0.25);
       nb(E, d, t + 0.05, 'bandpass', 1.0, 1200 * r, 400, 4, 0.7, 0.1);
       tone(E, d, { t: t, f: 210 * r, f2: 150 * r, glide: 1, type: 'sawtooth', a: 0.05, dur: 0.9, r: 0.3, vol: 0.35,
         fm: [23, 30], flt: { t: 'bandpass', f: 900, f2: 600, q: 8 }, dist: true });
       tone(E, d, { t: t + 0.1, f: 333 * r, f2: 280 * r, glide: 0.9, type: 'square', a: 0.1, dur: 0.7, r: 0.3, vol: 0.2,
         fm: [31, 40], flt: { t: 'bandpass', f: 1500, f2: 1100, q: 10 } });
-      thump(E, d, t, 90 * r, 40 * r, 0.35, 0.9);
+      thump(E, d, t, 90 * r, 40 * r, 0.4, 1.2);
+      nb(E, d, t, 'lowpass', 0.5, 300, 100, 0.8, 0.8, 0.02);
       crackle(E, d, t + 0.2, 0.8, 8, 0.5, 2400);
     } },
-    break: { v: 0.8, len: 0.8, pri: 2, max: 2, fn: function (E, d, t, r) {
+    break: { v: 0.7, len: 0.8, pri: 2, max: 2, fn: function (E, d, t, r) {
       nb(E, d, t, 'bandpass', 0.04, 2600 * r, 1800, 1.5, 0.9, 0.001);
       crackle(E, d, t + 0.02, 0.3, 6, 0.7, 1800);
       thump(E, d, t + 0.03, 130 * r, 45 * r, 0.35, 1);
@@ -295,6 +296,7 @@
     pickup: { v: 0.6, len: 0.3, gap: 0.03, max: 3, fn: function (E, d, t, r) {
       tone(E, d, { t: t, f: 196 * r, f2: 294 * r, glide: 0.08, type: 'triangle', d: 0.2, a: 0.004, vol: 0.7, flt: { t: 'lowpass', f: 1800 } });
       tone(E, d, { t: t + 0.06, f: 392 * r, d: 0.22, vol: 0.3 });
+      thump(E, d, t, 120 * r, 70 * r, 0.12, 0.6);
       nb(E, d, t, 'bandpass', 0.04, 2200, 2200, 1.5, 0.25);
     } },
     vial: { v: 0.7, len: 0.6, max: 2, fn: function (E, d, t, r) {
@@ -308,11 +310,13 @@
       bubbles(E, d, t + 0.05, 3, 340 * r, 0.08, 0.5, -1);
       thump(E, d, t + 0.02, 120 * r, 60 * r, 0.25, 0.8);
     } },
-    suture: { v: 0.6, len: 0.4, max: 2, fn: function (E, d, t, r) {
+    suture: { v: 0.72, len: 0.4, max: 2, fn: function (E, d, t, r) {
       nb(E, d, t, 'bandpass', 0.14, 3000 * r, 1200, 2, 0.6, 0.01);
       nb(E, d, t + 0.15, 'bandpass', 0.05, 500 * r, 300, 3, 0.7);
       nb(E, d, t + 0.24, 'bandpass', 0.05, 420 * r, 260, 3, 0.7);
       tone(E, d, { t: t, f: 1500 * r, f2: 2600 * r, glide: 0.12, d: 0.14, vol: 0.06 });
+      nb(E, d, t + 0.14, 'lowpass', 0.16, 320, 120, 0.8, 0.8);
+      thump(E, d, t + 0.15, 100 * r, 60 * r, 0.12, 0.7);
     } },
     ether: { v: 0.65, len: 0.8, max: 3, fn: function (E, d, t, r) {
       var f = 440 * r * [1, 1.2, 1.5, 1.8][Math.floor(E.rng() * 4)];
@@ -326,7 +330,7 @@
       bubbles(E, d, t + 0.1, 4, 240 * r, 0.1, 0.4, 1);
       tone(E, d, { t: t, f: 82 * r, d: 0.6, a: 0.05, vol: 0.45 });
     } },
-    trap: { v: 0.8, len: 0.45, max: 3, fn: function (E, d, t, r) {
+    trap: { v: 0.7, len: 0.45, max: 3, fn: function (E, d, t, r) {
       nb(E, d, t, 'highpass', 0.05, 4000, 4000, 0.7, 0.6, 0.001);
       clang(E, d, t, 900 * r, 0.2, 0.3);
       thump(E, d, t, 130 * r, 55 * r, 0.25, 0.9);
@@ -339,7 +343,7 @@
       crackle(E, d, t, 0.5, 10, 0.5, 3000);
       tone(E, d, { t: t, f: 70 * r, f2: 50 * r, glide: 0.4, type: 'sawtooth', d: 0.45, vol: 0.3, flt: { t: 'lowpass', f: 200 }, dist: true });
     } },
-    gate: { v: 0.8, len: 1.0, max: 2, fn: function (E, d, t, r) {
+    gate: { v: 0.55, len: 1.0, max: 2, fn: function (E, d, t, r) {
       tone(E, d, { t: t, f: 70 * r, f2: 55 * r, glide: 0.5, type: 'sawtooth', a: 0.04, dur: 0.45, r: 0.1, vol: 0.5,
         fm: [18, 6], flt: { t: 'lowpass', f: 300, q: 2 }, dist: true });
       nb(E, d, t, 'bandpass', 0.45, 500 * r, 1500, 6, 0.6, 0.05);
@@ -350,6 +354,8 @@
       tone(E, d, { t: t, f: 330 * r, type: 'square', d: 0.1, vol: 0.4, flt: { t: 'lowpass', f: 900 } });
       tone(E, d, { t: t + 0.14, f: 277 * r, type: 'square', d: 0.12, vol: 0.4, flt: { t: 'lowpass', f: 800 } });
       clang(E, d, t, 600 * r, 0.12, 0.2);
+      thump(E, d, t, 110 * r, 60 * r, 0.14, 0.7);
+      thump(E, d, t + 0.14, 100 * r, 55 * r, 0.14, 0.6);
     } },
     stairs: { v: 0.7, len: 1.1, max: 1, fn: function (E, d, t, r) {
       for (var i = 0, tt; i < 4; i++) {
@@ -361,25 +367,25 @@
         tone(E, d, { t: t + 0.3, f: f * r, wave: 'organ', a: 0.25, dur: 0.5, r: 0.3, vol: 0.22, flt: { t: 'lowpass', f: 1600 } });
       });
     } },
-    enemyAttack: { v: 0.75, len: 0.55, max: 2, fn: function (E, d, t, r) {
+    enemyAttack: { v: 0.55, len: 0.55, max: 2, fn: function (E, d, t, r) {
       growl(E, d, t, 110 * r, 70 * r, 0.4, 0.6);
       nb(E, d, t + 0.1, 'bandpass', 0.2, 600, 2500, 1.2, 0.5, 0.06);
       thump(E, d, t + 0.25, 100 * r, 50 * r, 0.15, 0.5);
     } },
-    enemyDie: { v: 0.8, len: 1.5, pri: 1, max: 2, fn: function (E, d, t, r) {
+    enemyDie: { v: 0.6, len: 1.5, pri: 1, max: 2, fn: function (E, d, t, r) {
       growl(E, d, t, 120 * r, 45 * r, 1.0, 0.6);
       bubbles(E, d, t + 0.1, 7, 320 * r, 0.12, 0.5, -1);
       nb(E, d, t, 'lowpass', 1.0, 600, 120, 0.8, 0.9, 0.1);
       thump(E, d, t + 0.85, 70 * r, 35 * r, 0.3, 0.8);
     } },
-    heal: { v: 0.6, len: 0.8, max: 2, fn: function (E, d, t, r) {
+    heal: { v: 0.45, len: 0.8, max: 2, fn: function (E, d, t, r) {
       [110, 165].forEach(function (f) {
         tone(E, d, { t: t, f: f * r, type: 'triangle', a: 0.15, dur: 0.4, r: 0.3, vol: 0.35, flt: { t: 'lowpass', f: 900 } });
       });
       bubbles(E, d, t + 0.05, 3, 300 * r, 0.09, 0.3, 1);
       nb(E, d, t + 0.1, 'highpass', 0.3, 4000, 4000, 0.7, 0.12, 0.1);
     } },
-    burn: { v: 0.65, len: 0.8, max: 2, fn: function (E, d, t, r) {
+    burn: { v: 0.78, len: 0.8, max: 2, fn: function (E, d, t, r) {
       crackle(E, d, t, 0.6, 14, 0.7, 3500);
       nb(E, d, t, 'bandpass', 0.5, 2000, 700, 0.8, 0.45, 0.05);
       tone(E, d, { t: t, f: 80 * r, f2: 60 * r, glide: 0.5, type: 'sawtooth', d: 0.5, vol: 0.3, flt: { t: 'lowpass', f: 220 } });
@@ -411,42 +417,42 @@
       tone(E, d, { t: t, f: 360 * r, f2: 240 * r, glide: 0.06, d: 0.09, vol: 0.6 });
       nb(E, d, t, 'bandpass', 0.02, 1500, 1500, 2, 0.25, 0.001);
     } },
-    error: { v: 0.5, len: 0.35, gap: 0.1, max: 2, fn: function (E, d, t, r) {
+    error: { v: 0.6, len: 0.35, gap: 0.1, max: 2, fn: function (E, d, t, r) {
       tone(E, d, { t: t, f: 150 * r, type: 'square', d: 0.09, vol: 0.4, flt: { t: 'lowpass', f: 900 }, dist: true });
       tone(E, d, { t: t + 0.11, f: 212 * r, type: 'square', d: 0.12, vol: 0.4, flt: { t: 'lowpass', f: 900 }, dist: true });
     } },
     tick: { v: 0.6, len: 0.15, gap: 0.05, max: 3, fn: function (E, d, t, r) {
       clockTick(E, d, t, 1, E.rng() < 0.5, 0);
     } },
-    timeWarn: { v: 0.8, len: 1.6, pri: 2, max: 1, fn: function (E, d, t, r) {
+    timeWarn: { v: 0.64, len: 1.6, pri: 2, max: 1, fn: function (E, d, t, r) {
       clang(E, d, t, 147 * r, 1.4, 0.5, BELL, BELL_A);
       [110, 82].forEach(function (f, i) {
         tone(E, d, { t: t + i * 0.2, f: f * r, wave: 'brass', a: 0.03, dur: 0.3, r: 0.2, vol: 0.3, flt: { t: 'lowpass', f: 500, f2: 1600, s: 0.15 } });
       });
     } },
-    death: { v: 0.85, len: 2.2, pri: 3, max: 1, var: 0.1, fn: function (E, d, t, r) {
-      thump(E, d, t, 90 * r, 22 * r, 1.2, 1);
-      tone(E, d, { t: t, f: 110 * r, f2: 30 * r, glide: 1.6, type: 'sawtooth', a: 0.03, dur: 1.5, r: 0.4, vol: 0.4,
+    death: { v: 0.7, len: 1.8, pri: 3, max: 1, var: 0.1, fn: function (E, d, t, r) {
+      thump(E, d, t, 90 * r, 22 * r, 0.9, 1);
+      tone(E, d, { t: t, f: 110 * r, f2: 30 * r, glide: 1.2, type: 'sawtooth', a: 0.03, dur: 1.1, r: 0.3, vol: 0.4,
         flt: { t: 'lowpass', f: 500, f2: 60, q: 2 } });
-      growl(E, d, t, 100 * r, 35 * r, 1.4, 0.5);
-      bubbles(E, d, t + 0.3, 6, 280 * r, 0.14, 0.4, -1);
-      nb(E, d, t, 'lowpass', 1.6, 800, 60, 0.8, 0.9, 0.05);
+      growl(E, d, t, 100 * r, 35 * r, 1.0, 0.5);
+      bubbles(E, d, t + 0.3, 6, 280 * r, 0.11, 0.4, -1);
+      nb(E, d, t, 'lowpass', 1.2, 800, 60, 0.8, 0.9, 0.05);
       [147, 175, 220].forEach(function (f) {
-        tone(E, d, { t: t + 0.05, f: f * r, f2: f * r / 3, glide: 1.8, wave: 'organ', a: 0.05, dur: 1.6, r: 0.3, vol: 0.2, flt: { t: 'lowpass', f: 1200, f2: 150 } });
+        tone(E, d, { t: t + 0.05, f: f * r, f2: f * r / 3, glide: 1.3, wave: 'organ', a: 0.05, dur: 1.2, r: 0.3, vol: 0.2, flt: { t: 'lowpass', f: 1200, f2: 150 } });
       });
     } },
-    victory: { v: 0.8, len: 2.4, pri: 3, max: 1, var: 0.06, fn: function (E, d, t, r) {
-      [[0, 110], [0.22, 165], [0.44, 220], [0.8, 277]].forEach(function (n) {
-        tone(E, d, { t: t + n[0], f: n[1] * r, wave: 'brass', dets: [-6, 6], a: 0.04, dur: n[0] > 0.7 ? 1.0 : 0.3, r: 0.4, vol: 0.3,
+    victory: { v: 0.7, len: 1.9, pri: 3, max: 1, var: 0.06, fn: function (E, d, t, r) {
+      [[0, 110], [0.18, 165], [0.36, 220], [0.6, 277]].forEach(function (n) {
+        tone(E, d, { t: t + n[0], f: n[1] * r, wave: 'brass', dets: [-6, 6], a: 0.04, dur: n[0] > 0.5 ? 0.8 : 0.25, r: 0.35, vol: 0.3,
           flt: { t: 'lowpass', f: 500, f2: 2800, s: 0.2 } });
       });
       [110, 165, 220, 277].forEach(function (f) {
-        tone(E, d, { t: t + 0.8, f: f * r, wave: 'organ', a: 0.08, dur: 1.2, r: 0.5, vol: 0.2, flt: { t: 'lowpass', f: 2200 } });
+        tone(E, d, { t: t + 0.6, f: f * r, wave: 'organ', a: 0.08, dur: 0.9, r: 0.4, vol: 0.2, flt: { t: 'lowpass', f: 2200 } });
       });
-      clang(E, d, t + 0.8, 440 * r, 1.2, 0.25, BELL, BELL_A);
-      nb(E, d, t + 0.8, 'highpass', 1.0, 5000, 5000, 0.7, 0.15, 0.05);
+      clang(E, d, t + 0.6, 440 * r, 1.0, 0.25, BELL, BELL_A);
+      nb(E, d, t + 0.6, 'highpass', 0.8, 5000, 5000, 0.7, 0.15, 0.05);
     } },
-    explosion: { v: 0.85, len: 1.8, pri: 2, max: 1, fn: function (E, d, t, r) {
+    explosion: { v: 0.64, len: 1.8, pri: 2, max: 1, fn: function (E, d, t, r) {
       nb(E, d, t, 'lowpass', 1.3, 3000, 80, 0.7, 1, 0.005);
       thump(E, d, t, 80 * r, 22 * r, 1.0, 1);
       nb(E, d, t, 'highpass', 0.08, 3500, 3500, 0.7, 0.6, 0.001);
