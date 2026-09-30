@@ -33,6 +33,7 @@
   };
 
   /* ---------- Primitivas de dibujo ---------- */
+  function own(o, k) { return typeof k === 'string' && Object.prototype.hasOwnProperty.call(o, k) ? o[k] : null; }   // ids raros como 'constructor' no deben colarse
   function mk(w, h) {
     var c = document.createElement('canvas');
     c.width = w; c.height = h;
@@ -702,7 +703,7 @@
     return (limbCache[key] = L);
   }
   function glowOf(L) {
-    if (!L.gO) { L.gO = silh(L.c, '#ff5a1f'); L.gY = silh(L.c, '#ffe08a'); L.hal = dilate(L.c, '#ff7a2a', 2); }
+    if (!L.gO) { L.gO = silh(L.c, '#ff3a1c'); L.gY = silh(L.c, '#ffd27a'); L.hal = dilate(L.c, '#ff5a22', 2); }
     return L;
   }
 
@@ -714,8 +715,9 @@
   function artOf(body, slot) {
     var s = body && body.slots && body.slots[slot], id = s && s.id, type = DD.SLOT_TYPE[slot];
     if (s && id === null) return 'stump_' + type;
-    if (id && LIMB_ART[id] && LIMB_ART[id][0] === type) return id;
-    return s && id === null ? 'stump_' + type : DEFAULT_LIMB[slot];
+    var art = own(LIMB_ART, id);
+    if (art && art[0] === type) return id;
+    return DEFAULT_LIMB[slot];
   }
   function poseOffsets(pose, fr) {
     var b = BOB[fr], hb = BOB[(fr + 3) & 3], ab = BOB[(fr + 2) & 3];
@@ -739,7 +741,7 @@
     if (h > 0.05) {
       g.globalCompositeOperation = 'lighter';
       g.globalAlpha = 0.1 + 0.5 * h; g.drawImage(L.gO, -L.px, -L.py);
-      if (h > 0.75) { g.globalAlpha = Math.min(0.6, (h - 0.75) * 2.4); g.drawImage(L.gY, -L.px, -L.py); }
+      if (h > 0.85) { g.globalAlpha = Math.min(0.45, (h - 0.85) * 3.6); g.drawImage(L.gY, -L.px, -L.py); }
       g.globalAlpha = 1; g.globalCompositeOperation = 'source-over';
     }
     g.restore();
@@ -755,6 +757,7 @@
 
   S.drawPlayerBig = function (ctx, body, cx, by, opt) {
     opt = opt || {};
+    cx = Math.round(cx); by = Math.round(by);
     var pose = opt.pose || 'idle', fr = (opt.frame | 0) & 3, cos = cosmetics(opt.equip), t = DD.time || 0, g = SC.g;
     var state = pose === 'attack' || pose === 'hurt' || pose === 'dead' ? pose : 'open';
     var o = poseOffsets(pose, fr), heat = pose === 'dead' ? null : opt.heat, slots = DD.SLOTS, i, h, slot, hs = {};
@@ -933,9 +936,9 @@
     box(g, st, 20 + dx, ay, 10, 20); box(g, st, 19 + dx, ay + 18, 12, 14); box(g, ir, 18 + dx, ay + 17, 13, 3);
     R(g, st[2], 24 + dx, ay + 22, 1, 7); R(g, st[1], 20 + dx, ay + 1, 10, 1);
     if (atk) {
-      box(g, st, -28 + dx, ay - 12, 10, 34); box(g, ir, -29 + dx, ay + 7, 12, 3);
-      box(g, st, -30 + dx, ay - 25, 14, 14); R(g, st[2], -26 + dx, ay - 19, 1, 6); R(g, st[2], -21 + dx, ay - 19, 1, 6);
-      seam(g, THD, [[-28 + dx, ay + 12], [-20 + dx, ay + 13]]); box(g, fl, -28 + dx, ay - 8, 6, 6);
+      box(g, st, -28 + dx, ay - 2, 10, 28); box(g, ir, -29 + dx, ay + 9, 12, 3);
+      box(g, st, -30 + dx, ay - 14, 14, 13); R(g, st[2], -26 + dx, ay - 9, 1, 6); R(g, st[2], -21 + dx, ay - 9, 1, 6);
+      seam(g, THD, [[-28 + dx, ay + 15], [-20 + dx, ay + 16]]); box(g, fl, -28 + dx, ay + 1, 6, 6);
     } else {
       box(g, st, -29 + dx, ay, 10, 18); box(g, ir, -30 + dx, ay + 17, 12, 3);
       box(g, st, -31 + dx, ay + 20, 13, 15 - (s.hurt ? 2 : 0));
@@ -946,7 +949,7 @@
   }
 
   function paintAlquimista(g, s) {
-    var Rb = ['#4a2f66', '#6a4690', '#2a1a3c'], B = MAT.brass, GL = ['#2a5a58', '#6fb7b7', '#16302c'], atk = s.atk, b = s.bob, sw = s.sw, fr = s.fr, i;
+    var Rb = ['#4a2f66', '#6a4690', '#2a1a3c'], B = MAT.brass, GL = ['#2a5a58', '#6fb7b7', '#16302c'], atk = s.atk, b = s.bob, fr = s.fr, i;
     var dx = atk ? -1 : (s.hurt ? 3 : 0), ty = -46 + b;
     g.translate(2, 0);
     // zapatos puntiagudos bajo la túnica
@@ -1171,7 +1174,7 @@
 
   function paintRelojero(g, s) {
     var CT = ['#2f2538', '#473a54', '#1c1524'], B = MAT.brass, sk = ['#d8c8b0', '#eee0c8', '#a89880'], atk = s.atk, b = s.bob, sw = s.sw, fr = s.fr, i;
-    var dx = atk ? -2 : (s.hurt ? 3 : 0), ty = -39 + b, hd = atk ? -2 : (s.hurt ? 2 : 0);
+    var dx = atk ? -2 : (s.hurt ? 3 : 0), ty = -41 + b, hd = atk ? -2 : (s.hurt ? 2 : 0);
     g.translate(3, 0);
     var tr = ['#3a3046', '#574a66', '#221a2c'];
     // piernas y botas
@@ -1191,10 +1194,10 @@
     tline(g, B[1], 4 + dx, ty + 6, 9 + dx, ty + 16, 1);                          // cadena del reloj
     seam(g, TH, [[-6 + dx, ty + 16], [-6 + dx, ty + 26]]);
     // cabeza: cara delgada, lupa y sombrero de copa con esfera
-    var hx = -3 + dx + hd, hy = ty - 10;
+    var hx = -3 + dx + hd, hy = ty - 7;
     for (i = 0; i < 3; i++) { R(g, '#c8c8d0', hx - 8, hy - 1 + i * 2, 3 - (i & 1), 1); R(g, '#c8c8d0', hx + 5, hy - 1 + i * 2, 3 - (i & 1), 1); }
     ov(g, sk[0], hx, hy, 6.5, 7.5); R(g, sk[2], hx + 2, hy - 2, 4, 8); ov(g, sk[1], hx - 2, hy - 2, 3, 3);
-    R(g, sk[0], hx - 2, hy + 6, 5, 9); R(g, sk[2], hx + 2, hy + 6, 1, 9); R(g, '#efe6cc', hx - 3, hy + 12, 7, 3); R(g, C.blood, hx - 1, hy + 13, 3, 2);
+    R(g, sk[0], hx - 2, hy + 6, 5, 6); R(g, sk[2], hx + 2, hy + 6, 1, 6); R(g, '#efe6cc', hx - 3, hy + 9, 7, 3); R(g, C.blood, hx - 1, hy + 10, 3, 2);
     tline(g, sk[2], hx - 7, hy + 1, hx - 9, hy + 3, 2);
     ov(g, B[2], hx - 3.5, hy - 1, 5, 5); ov(g, B[0], hx - 3.5, hy - 1, 4.2, 4.2); ov(g, '#a8e8f4', hx - 3.5, hy - 1, 3.2, 3.2);
     if (s.dead) { R(g, OL, hx - 5, hy - 2, 1, 1); R(g, OL, hx - 3, hy - 2, 1, 1); R(g, OL, hx - 4, hy - 1, 1, 1); R(g, OL, hx - 5, hy, 1, 1); R(g, OL, hx - 3, hy, 1, 1); }
@@ -1311,11 +1314,11 @@
   function enemySprite(id, pose, fr) {
     var key = id + '|' + pose + '|' + fr, E = enemyCache[key];
     if (E) return E;
-    var art = ENEMY_ART[id] || GENERIC_ART, o = mk(art.w, art.h), g = o.g;
+    var art = own(ENEMY_ART, id) || GENERIC_ART, o = mk(art.w, art.h), g = o.g;
     o.sh = art.sh;
     var st = { pose: pose, fr: fr, atk: pose === 'attack', hurt: pose === 'hurt', dead: pose === 'dead', bob: BOB[fr], sw: SW[fr] };
     g.translate(art.w >> 1, art.h - 1);
-    try { art.fn(g, st); } catch (e) { /* un pintor roto no debe romper el bucle */ }
+    try { art.fn(g, st); } catch (err) { st.failed = err; }       // un pintor roto deja un sprite vacío, no rompe el bucle
     g.setTransform(1, 0, 0, 1, 0, 0);
     outline(o, OL);
     if (st.dead) {
@@ -1332,6 +1335,7 @@
   var FS = mk(64, 64);
   S.drawEnemyBig = function (ctx, id, cx, by, opt) {
     opt = opt || {};
+    cx = Math.round(cx); by = Math.round(by);
     var pose = opt.pose === 'attack' || opt.pose === 'hurt' || opt.pose === 'dead' ? opt.pose : 'idle';
     var E = enemySprite(id, pose, (opt.frame | 0) & 3), src = E.c;
     ctx.save();
@@ -1404,7 +1408,6 @@
   }
   function smArm(g, id, k, b, side, swing) {      // side: 0 izquierdo (x 1..3), 1 derecho (x 12..14)
     var x = side ? 12 : 1, y = 7 + b + swing, sm = k.sm, o = side ? 1 : 0;
-    function X(dx, w) { return side ? 15 - dx - w : dx; }       // espeja posiciones relativas al borde izquierdo de la caja 1..3
     if (id === 'bra_sierra') {
       R(g, sm[0], x + 1 - o, y, 2, 2); R(g, MAT.brass[0], x + 1 - o, y + 2, 2, 2); R(g, MAT.steel[1], x + 1 - o, y + 4, 2, 4); P(g, MAT.steel[0], x + (side ? 3 : 0), y + 5); P(g, MAT.steel[0], x + (side ? 3 : 0), y + 7);
     } else if (id === 'bra_golem') {
@@ -1588,8 +1591,8 @@
   var SMALL_ART = { sabueso: smSabueso, ayudante: smAyudante, golem: smGolem, alquimista: smAlquimista, arana: smArana, cirujano: smCirujano, automata: smAutomata, quimera: smQuimera, relojero: smRelojero, vivisector: smVivisector };
   S.drawEnemy = function (ctx, id, x, y, opt) {
     opt = opt || {};
-    var fr = (opt.frame | 0) & 3, fn = SMALL_ART[id] || smGenerico;
-    var o = smallSprite('E|' + (SMALL_ART[id] ? id : '?') + '|' + fr, function (g) { fn(g, fr); });
+    var fr = (opt.frame | 0) & 3, fn = own(SMALL_ART, id) || smGenerico;
+    var o = smallSprite('E|' + (own(SMALL_ART, id) ? id : '?') + '|' + fr, function (g) { fn(g, fr); });
     blit16(ctx, o.c, x, y, opt.flip, opt.flash, opt.alpha);
   };
 
@@ -1781,7 +1784,7 @@
   var QMARK = ['.xxx.', 'x...x', '....x', '...x.', '..x..', '.....', '..x..'];
   var iconCache = {};
   function iconOf(id, silhouette) {
-    var fn = ICON_ART[id], key = (fn ? id : '?') + (silhouette || !fn ? '|s' : ''), o = iconCache[key];
+    var fn = own(ICON_ART, id), key = (fn ? id : '?') + (silhouette || !fn ? '|s' : ''), o = iconCache[key];
     if (o) return o;
     o = mk(16, 16);
     if (fn && !silhouette) { fn(o.g); outline(o, OL); }
@@ -1803,5 +1806,4 @@
     ctx.drawImage(o.c, Math.round(x), Math.round(y));
   };
 
-  //@@END
 })();

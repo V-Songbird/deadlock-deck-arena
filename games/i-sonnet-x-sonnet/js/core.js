@@ -26,8 +26,14 @@
 
   /* =====================================================================
    * 1. Fuente de píxeles 5x7 (celda 6x8). Filas de 5 caracteres, '#' = píxel.
-   *    Las minúsculas con cola (g j p q y , ;) usan la 8.ª fila.
-   *    Las mayúsculas acentuadas llevan el cuerpo en 5 filas bajo la marca.
+   *    Las minúsculas con cola (g j p q y , ;) usan la 8.ª fila de la celda.
+   *    MAYÚSCULAS ACENTUADAS (Á É Í Ó Ú Ñ Ü): el cuerpo es idéntico al de la mayúscula
+   *    sin tilde (7 filas) y la marca se dibuja POR ENCIMA de la celda, en las filas
+   *    -2 y -1 (Ü: solo la -1); a tamaño n son 2n y n píxeles sobre la celda. Usa el hueco
+   *    entre líneas (paso 9·n): no choca con la línea de arriba salvo que justo encima haya
+   *    la cola de una g j p q y. Un texto en y<2·n pierde lo que cae fuera del canvas (se
+   *    recorta sin error). textWidth, wrap y la celda no cambian. En un glifo, lo que va
+   *    antes de « / » son las filas de marca sobre la celda.
    * ===================================================================== */
   var GLYPHS = {
     'A': '.###. #...# #...# ##### #...# #...# #...#',
@@ -99,13 +105,13 @@
     'ú': '...#. ..#.. #...# #...# #...# #..## .##.#',   // ú
     'ü': '.#.#. ..... #...# #...# #...# #..## .##.#',   // ü
     'ñ': '.##.# #.##. ..... #.##. ##..# #...# #...#',   // ñ
-    'Á': '...#. ..... .###. #...# ##### #...# #...#',   // Á
-    'É': '...#. ..... ##### #.... ####. #.... #####',   // É
-    'Í': '...#. ..... .###. ..#.. ..#.. ..#.. .###.',   // Í
-    'Ó': '...#. ..... .###. #...# #...# #...# .###.',   // Ó
-    'Ú': '...#. ..... #...# #...# #...# #...# .###.',   // Ú
-    'Ü': '.#.#. ..... #...# #...# #...# #...# .###.',   // Ü
-    'Ñ': '.##.# #.##. #...# ##..# #.#.# #..## #...#',   // Ñ
+    'Á': '...#. ..#.. / .###. #...# #...# ##### #...# #...# #...#',   // Á
+    'É': '...#. ..#.. / ##### #.... #.... ####. #.... #.... #####',   // É
+    'Í': '...#. ..#.. / .###. ..#.. ..#.. ..#.. ..#.. ..#.. .###.',   // Í
+    'Ó': '...#. ..#.. / .###. #...# #...# #...# #...# #...# .###.',   // Ó
+    'Ú': '...#. ..#.. / #...# #...# #...# #...# #...# #...# .###.',   // Ú
+    'Ü': '.#.#. / #...# #...# #...# #...# #...# #...# .###.',   // Ü
+    'Ñ': '.##.# #.##. / #...# ##..# #.#.# #..## #...# #...# #...#',   // Ñ
     '¡': '..#.. ..... ..#.. ..#.. ..#.. ..#.. ..#..',   // ¡
     '¿': '..#.. ..... ..#.. .#... #.... #...# .###.',   // ¿
     '.': '..... ..... ..... ..... ..... .##.. .##..',
@@ -146,20 +152,23 @@
     '“': '"', '”': '"', '„': '"', '«': '"', '»': '"', '•': '·', ' ': ' ', '\t': ' '
   };
 
-  var CW = 6, CH = 8, LH = 9, COLS = 16;
-  DD.FONT = { W: CW, H: CH, LINE: LH };   // celda y paso de línea a tamaño 1
+  var CW = 6, CH = 8, LH = 9, COLS = 16, ABOVE = 2;   // ABOVE: filas sobre la celda que usan las marcas de las mayúsculas
+  var CHA = CH + ABOVE;                                // alto de una celda en el atlas
+  DD.FONT = { W: CW, H: CH, LINE: LH, ABOVE: ABOVE };  // celda, paso de línea y filas de marca sobre la celda (tamaño 1)
 
   var ORDER = [null].concat(Object.keys(GLYPHS));   // 0 = recuadro
   var INDEX = {};
   var atlas = document.createElement('canvas');
   (function buildAtlas() {
     atlas.width = COLS * CW;
-    atlas.height = Math.ceil(ORDER.length / COLS) * CH;
+    atlas.height = Math.ceil(ORDER.length / COLS) * CHA;
     var g = atlas.getContext('2d');
     g.fillStyle = '#fff';
     for (var i = 0; i < ORDER.length; i++) {
-      var rows = (i === 0 ? BOX : GLYPHS[ORDER[i]]).split(' ');
-      var ox = (i % COLS) * CW, oy = Math.floor(i / COLS) * CH;
+      var parts = (i === 0 ? BOX : GLYPHS[ORDER[i]]).split(' / ');      // [marca sobre la celda / ] cuerpo
+      var above = parts.length > 1 ? parts[0].split(' ') : [];
+      var rows = above.concat(parts[parts.length - 1].split(' '));
+      var ox = (i % COLS) * CW, oy = Math.floor(i / COLS) * CHA + ABOVE - above.length;
       if (i) INDEX[ORDER[i]] = i;
       for (var r = 0; r < rows.length; r++) {
         for (var c = 0; c < 5; c++) if (rows[r].charAt(c) === '#') g.fillRect(ox + c, oy + r, 1, 1);
@@ -195,8 +204,8 @@
       var ch = line.charAt(i);
       if (ch === ' ') continue;
       var idx = glyphIndex(ch);
-      ctx.drawImage(img, (idx % COLS) * CW, Math.floor(idx / COLS) * CH, CW, CH,
-        px + i * CW * size, py, CW * size, CH * size);
+      ctx.drawImage(img, (idx % COLS) * CW, Math.floor(idx / COLS) * CHA, CW, CHA,
+        px + i * CW * size, py - ABOVE * size, CW * size, CHA * size);
     }
   }
 
